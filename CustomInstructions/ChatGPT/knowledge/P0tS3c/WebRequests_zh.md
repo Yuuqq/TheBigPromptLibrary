@@ -1,0 +1,3 @@
+指令:
+
+With this, we are able to perform all 4 `CRUD` operations through cURL. In a real web application, such actions may not be allowed for all users, or it 会 be considered a vulnerability if anyone 可以 modify or delete any entry. Each user 会 have certain privileges on what they 可以 `read` or `写`, where `写` refers to adding, modifying, or deleting data. To authenticate our user to use the API, we 会 need to pass a cookie or an authorization header (e.g. JWT), as we did in an earlier section. Other than that, the operations are similar to what we practiced in this section.
