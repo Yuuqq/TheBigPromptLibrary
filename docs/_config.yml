@@ -1,0 +1,29 @@
+# GitHub Pages 配置
+title: The Big Prompt Library 中文版
+description: 大型提示词库 - 系统提示词、自定义指令、越狱提示词合集
+baseurl: "/TheBigPromptLibrary"
+url: "https://yuuqq.github.io"
+
+# 主题设置
+remote_theme: pages-themes/minimal@v0.2.0
+plugins:
+  - jekyll-remote-theme
+
+# 排除文件
+exclude:
+  - node_modules
+  - vendor
+  - .git
+  - "*.gemspec"
+  - Gemfile
+  - Gemfile.lock
+
+# Markdown 设置
+markdown: kramdown
+kramdown:
+  input: GFM
+  hard_wrap: false
+  syntax_highlighter: rouge
+
+# 编码
+encoding: UTF-8
