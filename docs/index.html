@@ -867,6 +867,7 @@
                     </div>
                 </div>
                 <div class="prompt-actions">
+                    <button class="btn" id="langToggle" onclick="toggleLanguage()" style="display: none;">🇺🇸 English</button>
                     <button class="btn" onclick="copyPrompt()">📋 复制</button>
                     <a class="btn btn-primary" id="githubLink" href="#" target="_blank">🔗 在 GitHub 查看</a>
                 </div>
@@ -882,7 +883,7 @@
             本仓库是 <a href="https://github.com/0xeb/TheBigPromptLibrary" target="_blank">0xeb/TheBigPromptLibrary</a> 的中文翻译版本
         </p>
         <p style="margin-top: 0.5rem;">
-            <a href="https://github.com/Yuuqq/TheBigPromptLibrary" target="_blank">GitHub</a> ·
+            <a href="https://github.com/whoisqcm/TheBigPromptLibrary" target="_blank">GitHub</a> ·
             仅供教育和研究目的
         </p>
     </footer>
@@ -890,14 +891,16 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script>
         // GitHub API 配置
-        const GITHUB_API = 'https://api.github.com/repos/Yuuqq/TheBigPromptLibrary/contents';
-        const GITHUB_RAW = 'https://raw.githubusercontent.com/Yuuqq/TheBigPromptLibrary/main';
-        const GITHUB_URL = 'https://github.com/Yuuqq/TheBigPromptLibrary/blob/main';
+        const GITHUB_API = 'https://api.github.com/repos/whoisqcm/TheBigPromptLibrary/contents';
+        const GITHUB_RAW = 'https://raw.githubusercontent.com/whoisqcm/TheBigPromptLibrary/main';
+        const GITHUB_URL = 'https://github.com/whoisqcm/TheBigPromptLibrary/blob/main';
 
         // 状态管理
         let currentSection = 'home';
         let currentPath = '';
         let searchIndex = [];
+        let currentViewPath = ''; // 当前查看的文件路径
+        let hasChineseVersion = false; // 当前文件是否有中文版本
 
         // 系统提示词数据
         const systemPromptsData = {
@@ -1075,36 +1078,69 @@
             `).join('');
         }
 
-        // 查看文件 - 优先加载中文版本
-        async function viewFile(path) {
+        // 查看文件 - 优先加载中文版本，支持语言切换
+        async function viewFile(path, forceLanguage = null) {
             document.getElementById('browser-section').classList.remove('active');
             document.getElementById('viewer-section').classList.add('active');
 
+            currentViewPath = path; // 保存原始路径
             const fileName = path.split('/').pop().replace('.md', '').replace('_zh', '');
             document.getElementById('currentFile').textContent = fileName;
             document.getElementById('promptTitle').textContent = fileName.replace(/_/g, ' ');
 
-            // 尝试加载中文版本
+            // 检查中文版本是否存在
+            let zhPath = path.replace('.md', '_zh.md');
+            let zhExists = false;
             let actualPath = path;
             let isChineseVersion = false;
 
-            // 如果不是已经是中文版本，尝试查找中文版本
-            if (!path.endsWith('_zh.md')) {
-                const zhPath = path.replace('.md', '_zh.md');
+            // 如果原路径已经是中文版本
+            if (path.endsWith('_zh.md')) {
+                zhPath = path;
+                zhExists = true;
+                isChineseVersion = true;
+                currentViewPath = path.replace('_zh.md', '.md');
+            } else {
+                // 检查中文版本是否存在
                 try {
                     const zhResponse = await fetch(`${GITHUB_RAW}/${zhPath}`, { method: 'HEAD' });
-                    if (zhResponse.ok) {
-                        actualPath = zhPath;
-                        isChineseVersion = true;
-                    }
+                    zhExists = zhResponse.ok;
                 } catch (e) {
-                    // 中文版本不存在，使用原版
+                    zhExists = false;
                 }
-            } else {
+            }
+
+            hasChineseVersion = zhExists;
+
+            // 根据 forceLanguage 或默认优先中文
+            if (forceLanguage === 'en') {
+                actualPath = currentViewPath;
+                isChineseVersion = false;
+            } else if (forceLanguage === 'zh' && zhExists) {
+                actualPath = zhPath;
+                isChineseVersion = true;
+            } else if (zhExists && forceLanguage !== 'en') {
+                // 默认优先中文
+                actualPath = zhPath;
                 isChineseVersion = true;
             }
 
             document.getElementById('githubLink').href = `${GITHUB_URL}/${actualPath}`;
+
+            // 显示/隐藏语言切换按钮
+            const langToggle = document.getElementById('langToggle');
+            if (zhExists) {
+                langToggle.style.display = 'inline-flex';
+                if (isChineseVersion) {
+                    langToggle.innerHTML = '🇺🇸 English';
+                    langToggle.dataset.currentLang = 'zh';
+                } else {
+                    langToggle.innerHTML = '🇨🇳 中文';
+                    langToggle.dataset.currentLang = 'en';
+                }
+            } else {
+                langToggle.style.display = 'none';
+            }
 
             const date = extractDate(fileName);
             const category = path.split('/')[0];
@@ -1130,6 +1166,17 @@
                 document.getElementById('promptContent').dataset.raw = content;
             } catch (error) {
                 document.getElementById('promptContent').textContent = '加载失败，请稍后重试';
+            }
+        }
+
+        // 切换语言
+        function toggleLanguage() {
+            const langToggle = document.getElementById('langToggle');
+            const currentLang = langToggle.dataset.currentLang;
+            if (currentLang === 'zh') {
+                viewFile(currentViewPath, 'en');
+            } else {
+                viewFile(currentViewPath, 'zh');
             }
         }
 
