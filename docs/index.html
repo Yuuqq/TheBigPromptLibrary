@@ -1019,7 +1019,7 @@
             }
         }
 
-        // 加载目录
+        // 加载目录 - 过滤中文版本文件，自动加载时会优先选择中文
         async function loadDirectory(path) {
             const fileList = document.getElementById('fileList');
             fileList.innerHTML = '<div class="loading"><div class="spinner"></div>加载中...</div>';
@@ -1029,13 +1029,23 @@
                 const data = await response.json();
 
                 if (Array.isArray(data)) {
+                    // 收集所有中文版本文件名
+                    const zhFiles = new Set(data
+                        .filter(item => item.name.endsWith('_zh.md'))
+                        .map(item => item.name.replace('_zh.md', '.md')));
+
                     const items = data
-                        .filter(item => item.name !== 'README.md' && !item.name.startsWith('.'))
+                        .filter(item =>
+                            item.name !== 'README.md' &&
+                            !item.name.startsWith('.') &&
+                            !item.name.endsWith('_zh.md') // 不显示中文版本文件，会自动加载
+                        )
                         .map(item => ({
                             name: item.name.replace('.md', '').replace(/_/g, ' '),
                             path: item.path,
                             type: item.type,
-                            date: extractDate(item.name)
+                            date: extractDate(item.name),
+                            hasZh: zhFiles.has(item.name) // 标记是否有中文版本
                         }))
                         .sort((a, b) => b.date.localeCompare(a.date));
 
@@ -1046,7 +1056,7 @@
             }
         }
 
-        // 渲染文件列表
+        // 渲染文件列表 - 显示中文版本标记
         function renderFileList(items) {
             const fileList = document.getElementById('fileList');
 
@@ -1059,30 +1069,53 @@
                 <a class="file-item" onclick="${item.type === 'dir' ? `loadDirectory('${item.path}')` : `viewFile('${item.path}')`}">
                     <span class="file-icon">${item.type === 'dir' ? '📁' : '📄'}</span>
                     <span class="file-name">${item.name}</span>
+                    ${item.hasZh ? '<span class="prompt-tag" style="background: var(--accent-green); color: white; font-size: 0.75rem; padding: 0.15rem 0.5rem;">🇨🇳 中文</span>' : ''}
                     ${item.date ? `<span class="file-date">${item.date}</span>` : ''}
                 </a>
             `).join('');
         }
 
-        // 查看文件
+        // 查看文件 - 优先加载中文版本
         async function viewFile(path) {
             document.getElementById('browser-section').classList.remove('active');
             document.getElementById('viewer-section').classList.add('active');
 
-            const fileName = path.split('/').pop().replace('.md', '');
+            const fileName = path.split('/').pop().replace('.md', '').replace('_zh', '');
             document.getElementById('currentFile').textContent = fileName;
             document.getElementById('promptTitle').textContent = fileName.replace(/_/g, ' ');
-            document.getElementById('githubLink').href = `${GITHUB_URL}/${path}`;
+
+            // 尝试加载中文版本
+            let actualPath = path;
+            let isChineseVersion = false;
+
+            // 如果不是已经是中文版本，尝试查找中文版本
+            if (!path.endsWith('_zh.md')) {
+                const zhPath = path.replace('.md', '_zh.md');
+                try {
+                    const zhResponse = await fetch(`${GITHUB_RAW}/${zhPath}`, { method: 'HEAD' });
+                    if (zhResponse.ok) {
+                        actualPath = zhPath;
+                        isChineseVersion = true;
+                    }
+                } catch (e) {
+                    // 中文版本不存在，使用原版
+                }
+            } else {
+                isChineseVersion = true;
+            }
+
+            document.getElementById('githubLink').href = `${GITHUB_URL}/${actualPath}`;
 
             const date = extractDate(fileName);
             const category = path.split('/')[0];
             document.getElementById('promptMeta').innerHTML = `
                 ${date ? `<span class="prompt-tag">📅 ${date}</span>` : ''}
                 <span class="prompt-tag">🏷️ ${category}</span>
+                ${isChineseVersion ? '<span class="prompt-tag" style="background: var(--accent-green); color: white;">🇨🇳 中文</span>' : '<span class="prompt-tag" style="background: var(--accent-orange); color: white;">🇺🇸 English</span>'}
             `;
 
             try {
-                const response = await fetch(`${GITHUB_RAW}/${path}`);
+                const response = await fetch(`${GITHUB_RAW}/${actualPath}`);
                 const content = await response.text();
 
                 // 使用 marked 渲染 Markdown
