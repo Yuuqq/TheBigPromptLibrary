@@ -15,6 +15,20 @@ import argparse
 import requests
 from collections import namedtuple
 
+
+def configure_console_streams():
+    """Avoid Windows console crashes on metadata outside the active code page."""
+    for stream_name in ('stdout', 'stderr'):
+        stream = getattr(sys, stream_name, None)
+        if hasattr(stream, 'reconfigure'):
+            try:
+                stream.reconfigure(errors='backslashreplace')
+            except ValueError:
+                pass
+
+
+configure_console_streams()
+
 # Named tuple for generate_template return value
 GenerateTemplateResult = namedtuple('GenerateTemplateResult', 
     ['template', 'short_url', 'gpt_id', 'parser'])
@@ -384,6 +398,8 @@ def process_gpt_input(input_str):
     Returns:
         tuple: (full_url, gpt_id)
     """
+    input_str = input_str.strip()
+
     # Check if it's a full URL
     if input_str.startswith('https://') or input_str.startswith('http://'):
         gpt_id = parse_gpt_id(input_str)

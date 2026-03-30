@@ -113,6 +113,10 @@ weak_motives = [
 #Functions
 def initialize_game_state():
     global game_state
+    available_strong_motives = strong_motives.copy()
+    available_weak_motives = weak_motives.copy()
+    available_inc_clues = inc_clues.copy()
+    available_ex_clues = ex_clues.copy()
 
     # Create a temporary copy of characters dictionary
     temp_characters = characters.copy()
@@ -149,28 +153,32 @@ def initialize_game_state():
     character_motives = {}
 
     # Assign strong motive to the murderer
-    character_motives[murderer_key] = random.choice(strong_motives)
-    strong_motives.remove(character_motives[murderer_key])
+    character_motives[murderer_key] = random.choice(available_strong_motives)
+    available_strong_motives.remove(character_motives[murderer_key])
 
     # Assign strong and weak motives for true alibi characters
-    character_motives[true_alibi_keys[0]] = random.choice(strong_motives)
-    strong_motives.remove(character_motives[true_alibi_keys[0]])
+    character_motives[true_alibi_keys[0]] = random.choice(available_strong_motives)
+    available_strong_motives.remove(character_motives[true_alibi_keys[0]])
 
-    character_motives[true_alibi_keys[1]] = random.choice(weak_motives)
-    weak_motives.remove(character_motives[true_alibi_keys[1]])
+    character_motives[true_alibi_keys[1]] = random.choice(available_weak_motives)
+    available_weak_motives.remove(character_motives[true_alibi_keys[1]])
 
     # Assign strong and weak motives for fake alibi/no alibi characters
     remaining_characters = list(set(all_characters) - set(true_alibi_keys) - {murderer_key})
     random.shuffle(remaining_characters)
 
-    character_motives[remaining_characters[0]] = random.choice(strong_motives)
-    strong_motives.remove(character_motives[remaining_characters[0]])
+    character_motives[remaining_characters[0]] = random.choice(available_strong_motives)
+    available_strong_motives.remove(character_motives[remaining_characters[0]])
 
-    character_motives[remaining_characters[1]] = random.choice(weak_motives)
-    weak_motives.remove(character_motives[remaining_characters[1]])
+    character_motives[remaining_characters[1]] = random.choice(available_weak_motives)
+    available_weak_motives.remove(character_motives[remaining_characters[1]])
 
     # Create a list of characters with no alibi or fake alibi and strong motives
-    fake_alibi_no_alibi_strong_motive_keys = [key for key, motive in character_motives.items() if motive in strong_motives and key != murderer_key]
+    strong_motive_keys = {murderer_key, true_alibi_keys[0], remaining_characters[0]}
+    fake_alibi_no_alibi_strong_motive_keys = [
+        key for key in no_alibi_keys
+        if key in strong_motive_keys and key != murderer_key
+    ]
 
     motive_knowledge = {}
 
@@ -208,24 +216,24 @@ def initialize_game_state():
     character_clues = {}
 
     for char_key in inc_clue_keys:
-        selected_clue_key = random.choice(list(inc_clues.keys()))
-        character_clues[char_key] = {selected_clue_key: inc_clues[selected_clue_key]}
-        del inc_clues[selected_clue_key]
+        selected_clue_key = random.choice(list(available_inc_clues.keys()))
+        character_clues[char_key] = {selected_clue_key: available_inc_clues[selected_clue_key]}
+        del available_inc_clues[selected_clue_key]
 
     for char_key in ex_clue_keys:
-        selected_clue_key = random.choice(list(ex_clues.keys()))
-        character_clues[char_key] = {selected_clue_key: ex_clues[selected_clue_key]}
-        del ex_clues[selected_clue_key]
+        selected_clue_key = random.choice(list(available_ex_clues.keys()))
+        character_clues[char_key] = {selected_clue_key: available_ex_clues[selected_clue_key]}
+        del available_ex_clues[selected_clue_key]
 
     for char_key in remaining_keys:
         if random.choice([True, False]):
-            selected_clue_key = random.choice(list(inc_clues.keys()))
-            character_clues[char_key] = {selected_clue_key: inc_clues[selected_clue_key]}
-            del inc_clues[selected_clue_key]
+            selected_clue_key = random.choice(list(available_inc_clues.keys()))
+            character_clues[char_key] = {selected_clue_key: available_inc_clues[selected_clue_key]}
+            del available_inc_clues[selected_clue_key]
         else:
-            selected_clue_key = random.choice(list(ex_clues.keys()))
-            character_clues[char_key] = {selected_clue_key: ex_clues[selected_clue_key]}
-            del ex_clues[selected_clue_key]
+            selected_clue_key = random.choice(list(available_ex_clues.keys()))
+            character_clues[char_key] = {selected_clue_key: available_ex_clues[selected_clue_key]}
+            del available_ex_clues[selected_clue_key]
 
     # Assign clue knowledge
     clue_knowledge = {char: {} for char in all_characters}
@@ -247,10 +255,7 @@ def initialize_game_state():
     game_state["clue_knowledge"] = clue_knowledge
 
     # Randomly select a location from locations
-    location_dict = random.choice(list(locations.values()))
-
-    # Look up the corresponding key in locations
-    location = list(locations.keys())[list(locations.values()).index(location_dict)]
+    location = random.choice(list(locations.keys()))
 
     game_state = {
         "murderer": murderer_key,
@@ -284,6 +289,8 @@ def show_characters():
         axes[0, 0].set_title("The Detective", color='white')
         axes[0, 0].axis('off')
 
+        guest_names = list(game_state["all_guests"])
+
         # Loop through the remaining subplots
         for i in range(2):
             for j in range(3):
@@ -292,7 +299,8 @@ def show_characters():
                     continue
 
                 # Get the character name from the "all_guests" list
-                character_name = game_state["all_guests"].pop(0)
+                character_index = (i * 3 + j) - 1
+                character_name = guest_names[character_index]
 
                 # Create the image path for the character
                 character_image_path = f"{character_name}.jpg"

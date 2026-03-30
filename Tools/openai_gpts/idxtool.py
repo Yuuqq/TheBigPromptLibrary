@@ -11,12 +11,33 @@ import sys, os, argparse
 from typing import Tuple
 from urllib.parse import quote
 
-import gptparser
-from gptparser import enum_gpts, parse_gpturl, enum_gpt_files, get_prompts_path
-import gen_gpt_templ
+if __package__ in (None, ""):
+    sys.path.insert(0, os.path.dirname(__file__))
+
+try:
+    import gptparser
+    from gptparser import enum_gpts, parse_gpturl, enum_gpt_files, get_prompts_path
+    import gen_gpt_templ
+except ModuleNotFoundError:
+    from . import gptparser, gen_gpt_templ
+    from .gptparser import enum_gpts, parse_gpturl, enum_gpt_files, get_prompts_path
 
 TOC_FILENAME = os.path.abspath(os.path.join(get_prompts_path(), '..', 'README.md'))
 TOC_GPT_MARKER_LINE = '## ChatGPT GPT instructions'
+
+
+def configure_console_streams():
+    """Avoid Windows console crashes on filenames and titles outside the active code page."""
+    for stream_name in ('stdout', 'stderr'):
+        stream = getattr(sys, stream_name, None)
+        if hasattr(stream, 'reconfigure'):
+            try:
+                stream.reconfigure(errors='backslashreplace')
+            except ValueError:
+                pass
+
+
+configure_console_streams()
 
 def rename_gpts():
     effective_rename = nb_ok = nb_total = 0
@@ -107,7 +128,11 @@ def rebuild_toc(toc_out: str = '') -> Tuple[bool, str]:
         return (False, f"Failed to open '{toc_out}' for writing.")
 
     # Count GPTs
-    enumerated_gpts = list(enum_gpts())
+    enumerated_gpts = [
+        (ok, gpt)
+        for ok, gpt in enum_gpts()
+        if not ok or not os.path.basename(gpt.filename).endswith('_zh.md')
+    ]
     nb_ok = sum(1 for ok, gpt in enumerated_gpts if ok and gpt.id())    
 
     # Write the marker line and each GPT entry

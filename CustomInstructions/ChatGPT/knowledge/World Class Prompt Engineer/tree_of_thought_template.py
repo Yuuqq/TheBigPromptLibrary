@@ -46,8 +46,8 @@ class TreeOfThought:
         solution_path = self.search_algorithm(evaluated_thoughts)
         return solution_path
 
-# Example usage
-problem_input = "Define your problem input here"
-tree_of_thought = TreeOfThought(problem_input)
-solution = tree_of_thought.solve_problem()
-print("Solution Path:", solution)
+if __name__ == "__main__":
+    problem_input = "Define your problem input here"
+    tree_of_thought = TreeOfThought(problem_input)
+    solution = tree_of_thought.solve_problem()
+    print("Solution Path:", solution)

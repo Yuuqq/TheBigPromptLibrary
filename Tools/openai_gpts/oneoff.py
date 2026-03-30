@@ -5,9 +5,17 @@
 
 """
 
-from gptparser import GptMarkdownFile
 from typing import Tuple
 import os
+import sys
+
+if __package__ in (None, ""):
+    sys.path.insert(0, os.path.dirname(__file__))
+
+try:
+    from gptparser import GptMarkdownFile
+except ModuleNotFoundError:
+    from .gptparser import GptMarkdownFile
 
 def reformat_gpt_files(src_path: str, dst_path: str) -> Tuple[bool, str]:
     """

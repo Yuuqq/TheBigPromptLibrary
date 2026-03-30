@@ -4,7 +4,7 @@ GPT parsing module.
 The GPT markdown files have to adhere to a very specific format described in the README.md file in the root of the CSP project.
 """
 
-import os, re
+import os, re, unicodedata
 from collections import namedtuple
 from typing import Union, Tuple, Generator, Iterator
 
@@ -41,12 +41,127 @@ Dictionary of the fields supported by GPT markdown files:
 - The GPT markdown file will have the form: {FIELD_PREFIX} {key}: {value}
 """
 
+FIELD_ALIASES = {
+    'url': {
+        'url',
+        'link',
+        '链接',
+    },
+    'title': {
+        'title',
+        '标题',
+    },
+    'description': {
+        'description',
+        '描述',
+    },
+    'logo': {
+        'logo',
+        '图标',
+    },
+    'verif_status': {
+        'verification status',
+        'verificationstatus',
+        'verification',
+        'verif_status',
+    },
+    'instructions': {
+        'instruction',
+        'instructions',
+        '指令',
+        'instructions english',
+        'instructions in english',
+        'instructions (english)',
+        'instructions (unverified)',
+        '指令（英文版）',
+        '指令（英文）',
+    },
+    'actions': {
+        'action',
+        'actions',
+        'actions list',
+        'actions endpoint',
+        'tools',
+        'tools/actions',
+        '动作',
+        '工具/actions',
+        'endpoints',
+    },
+    'kb_files_list': {
+        'kb',
+        'kb files',
+        'kb files list',
+        'knowledge files',
+        '知识库文件',
+        '知识库文件列表',
+    },
+    'extras': {
+        'extra',
+        'extras',
+        'comments',
+        'details',
+        'functional summary details',
+        'maker',
+        'for organized crime historical exploration custom instructions',
+    },
+    'protected': {
+        'protected',
+        '受保护',
+    },
+}
+
+
+def normalize_field_label(label: str) -> str:
+    """Normalize field labels to a punctuation-insensitive lookup key."""
+    return ''.join(
+        ch.casefold()
+        for ch in label
+        if not unicodedata.category(ch).startswith(('P', 'Z'))
+    )
+
+
+FIELD_LABEL_LOOKUP = {}
+for key, info in SUPPORTED_FIELDS.items():
+    FIELD_LABEL_LOOKUP[normalize_field_label(key)] = key
+    FIELD_LABEL_LOOKUP[normalize_field_label(info.display)] = key
+    for alias in FIELD_ALIASES.get(key, ()):
+        FIELD_LABEL_LOOKUP[normalize_field_label(alias)] = key
+
+
+def resolve_field_label(label: str) -> Union[str, None]:
+    """Resolve a markdown field label to a supported GPT field key."""
+    normalized = normalize_field_label(label)
+    if not normalized:
+        return None
+
+    if normalized in FIELD_LABEL_LOOKUP:
+        return FIELD_LABEL_LOOKUP[normalized]
+
+    if normalized.startswith('instructions') or '指令' in normalized:
+        return 'instructions'
+    if normalized.startswith('kbfiles') or normalized.startswith('知识库文件'):
+        return 'kb_files_list'
+    if normalized in {'kb', '知识库文件'}:
+        return 'kb_files_list'
+    if normalized.startswith('actions') or normalized.startswith('toolsactions') or normalized.startswith('工具actions'):
+        return 'actions'
+    if normalized in {'tools', 'endpoints', '动作'}:
+        return 'actions'
+    if normalized.startswith('verification') or normalized.startswith('verif'):
+        return 'verif_status'
+    if normalized.startswith('protected') or normalized == '受保护':
+        return 'protected'
+    if normalized.startswith('extra') or normalized in {'comments', 'details', 'maker', 'functionalsummarydetails'}:
+        return 'extras'
+
+    return None
+
 class GptMarkdownFile:
     """
     A class to represent a GPT markdown file.
     """
-    def __init__(self, fields={}, filename: str = '') -> None:
-        self.fields = fields
+    def __init__(self, fields=None, filename: str = '') -> None:
+        self.fields = fields or {}
         self.filename = filename
 
     def get(self, key: str, strip: bool = True) -> Union[str, None]:
@@ -68,7 +183,13 @@ class GptMarkdownFile:
         Return the GPT identifier.
         :return: GptIdentifier object.
         """
-        return parse_gpturl(self.fields.get('url'))
+        if gpt_identifier := parse_gpturl(self.fields.get('url')):
+            return gpt_identifier
+
+        basename = os.path.basename(self.filename)
+        if m := GPT_FILE_ID_RE.match(basename):
+            return GptIdentifier(m.group(1), '')
+        return None
             
     def __str__(self) -> str:
         sorted_fields = sorted(self.fields.items(), key=lambda x: SUPPORTED_FIELDS[x[0]].order)
@@ -94,12 +215,17 @@ class GptMarkdownFile:
 
         with open(file_path, 'r', encoding='utf-8') as file:
             fields = {key.lower(): [] for key in SUPPORTED_FIELDS.keys()}
-            field_re = re.compile(f"^\s*{FIELD_PREFIX}\s+({'|'.join(fields.keys())}):", re.IGNORECASE)
+            field_re = re.compile(rf"^\s*{re.escape(FIELD_PREFIX)}\s+(.+?)\s*[:：]\s*", re.IGNORECASE)
             current_field = None
             for line in file:
                 if m := field_re.match(line):
-                    current_field = m.group(1).lower()
-                    line = line[len(m.group(0)):].strip()
+                    label = m.group(1).strip()
+                    current_field = resolve_field_label(label)
+                    line = line[m.end():].lstrip().rstrip('\r\n')
+
+                    if current_field is None:
+                        current_field = 'extras'
+                        line = f"{label}: {line}\n" if line else f"{label}:\n"
 
                 if current_field:
                     if current_field not in SUPPORTED_FIELDS:
@@ -127,12 +253,13 @@ class GptMarkdownFile:
 def parse_gpturl(url: str) -> Union[GptIdentifier, None]:
     for GPT_BASE_URL, GPT_BASE_URL_L in zip(GPT_BASE_URLS, GPT_BASE_URLS_L):
         if url and url.startswith(GPT_BASE_URL):
-            id = url[GPT_BASE_URL_L:].split('\n')[0]
+            id = url[GPT_BASE_URL_L:].split('\n')[0].split('/')[0]
             i = id.find('-')
             if i != -1:
                 return GptIdentifier(id[:i], id[i+1:])
             else:
                 return GptIdentifier(id, '')
+    return None
 
 
 def get_prompts_path() -> str:

@@ -29,7 +29,9 @@ class TreeofThoughts:
         self.history = []  # added line initalize history
 
     def save_tree_to_json(self, file_name):
-        os.makedirs(os.path.dirname(file_name), exist_ok=True)
+        directory = os.path.dirname(file_name)
+        if directory:
+            os.makedirs(directory, exist_ok=True)
         with open(file_name, "w") as json_file:
             json.dump(self.tree, json_file, indent=4)
 
@@ -57,6 +59,25 @@ class TreeofThoughts:
             return np.mean(values) if values else 0
         else:
             return max(np.mean(values[-window_size:]), 0.1)
+
+    def _flatten_state(self, state, thought):
+        return (state, thought) if isinstance(state, str) else (*state, thought)
+
+    def _evaluate_state(self, state, initial_prompt):
+        result = self.model.evaluate_states({state: 0}, initial_prompt)
+        if isinstance(result, dict):
+            return result.get(state, float("-inf"))
+        return result
+
+    def _evaluate_thoughts(self, thoughts, initial_prompt):
+        return {
+            thought: value
+            for thought in thoughts
+            if isinstance(
+                (value := self._evaluate_state(thought, initial_prompt)),
+                (int, float),
+            )
+        }
 
 
 ######################
@@ -86,8 +107,8 @@ class TreeofThoughtsBFS(TreeofThoughts):
                         )
                         futures = [
                             executor.submit(
-                                self.model.evaluate_states,
-                                {thought: 0},
+                                self._evaluate_state,
+                                thought,
                                 initial_prompt,
                             )
                             for thought in thoughts
@@ -109,23 +130,24 @@ class TreeofThoughtsBFS(TreeofThoughts):
                             )
 
                         for thought, value in evaluated_thoughts.items():
-                            flattened_state = (
-                                (state, thought)
-                                if isinstance(state, str)
-                                else (*state, thought)
-                            )
+                            flattened_state = self._flatten_state(state, thought)
                             selected_states.append((flattened_state, value))
+                    selected_states.sort(key=lambda x: x[1], reverse=True)
+                    selected_states = selected_states[
+                        :max_states
+                    ]  # Select only the top states
 
-                        selected_states.sort(key=lambda x: x[1], reverse=True)
-                        selected_states = selected_states[
-                            :max_states
-                        ]  # Select only the top states
+                    current_states = []
+                    active_threshold = max(dynamic_pruning_threshold, value_threshold)
+                    for state, value in selected_states:
+                        if value >= active_threshold:
+                            state_values[state] = value
+                            current_states.append(state)
+                            self.logNewState(state, value)
+                            logger.debug(f"State Values: {state_values}")
 
-                        for state, value in selected_states:
-                            if value >= dynamic_pruning_threshold:
-                                state_values[state] = value
-                                self.logNewState(state, value)
-                                logger.debug(f"State Values: {state_values}")
+                    if not current_states:
+                        break
 
             # if state_values:
             #     highest_rated_solution = max(state_values.items(), key=lambda x: x[1])
@@ -180,40 +202,32 @@ class TreeofThoughtsDFS(TreeofThoughts):
         def dfs(state, step):
             nonlocal output
             if step > max_steps:
-                thought = self.model.generate_thoughts(state, 1, initial_prompt)
-                value = self.model.evaluate_states({state}, initial_prompt)[
-                    state
-                ]
-                output.append((thought, value))
+                value = self._evaluate_state(state, initial_prompt)
+                output.append((state, value))
                 return
 
             thoughts = self.model.generate_thoughts(
-                state, self.num_thoughts, initial_prompt
+                state, num_thoughts, initial_prompt
             )
-            evaluated_thoughts = self.model.evaluate_states(
-                {thought: 0 for thought in thoughts}, initial_prompt
-            )
+            evaluated_thoughts = self._evaluate_thoughts(thoughts, initial_prompt)
             filtered_thoughts = [
                 thought
                 for thought in thoughts
-                if evaluated_thoughts[thought] >= self.pruning_threshold
+                if evaluated_thoughts.get(thought, float("-inf")) >= pruning_threshold
             ]
 
             for next_state in filtered_thoughts:
-                state_value = self.model.evaluate_states(
-                    {next_state: 0}, initial_prompt
-                )[next_state]
+                state_value = evaluated_thoughts[next_state]
 
-                if state_value > self.value_threshold:
-                    child = (
-                        (state, next_state)
-                        if isinstance(state, str)
-                        else (*state, next_state)
-                    )
+                if state_value >= value_threshold:
+                    child = self._flatten_state(state, next_state)
+                    self.logNewState(child, state_value)
                     dfs(child, step + 1)
 
         try:
             dfs(initial_prompt, 1)
+            if not output:
+                return None
             best_state, _ = max(output, key=lambda x: x[1])
             solution = self.model.generate_solution(initial_prompt, best_state)
             return solution if solution else best_state
@@ -224,13 +238,14 @@ class TreeofThoughtsDFS(TreeofThoughts):
 
 # v2 => best first search => explores state space of the quality of the states
 # priority que or greedy BFS
-class TreeofThoughtsBEST:
+class TreeofThoughtsBEST(TreeofThoughts):
     def __init__(self, model):
-        self.model = model
-        self.tree = {"nodes": {}}
+        super().__init__(model)
 
     def save_tree_to_json(self, file_name):
-        os.makdirs(os.path.dirname(file_name), exist_ok=True)
+        directory = os.path.dirname(file_name)
+        if directory:
+            os.makedirs(directory, exist_ok=True)
         with open(file_name, "w") as json_file:
             json.dump(self.tree, json_file, indent=4)
 
@@ -239,13 +254,15 @@ class TreeofThoughtsBEST:
         if state_key in self.tree["nodes"]:
             self.tree["nodes"][state_key]["thoughts"].append(evaluation)
         else:
-            self.tree["nodes"]["state_key"] = {"thoughts": [evaluation]}
+            self.tree["nodes"][state_key] = {"thoughts": [evaluation]}
 
     def solve(self, initial_prompt, num_thoughts, max_steps, pruning_threshold):
         visited_states = set()
         state_queue = PriorityQueue()
 
         state_queue.put((0, initial_prompt))
+        best_state = initial_prompt
+        best_value = self._evaluate_state(initial_prompt, initial_prompt)
 
         for _ in range(max_steps):
             if state_queue.empty():
@@ -261,33 +278,26 @@ class TreeofThoughtsBEST:
             thoughts = self.model.generate_thoughts(
                 state, num_thoughts, initial_prompt
             )
-            evaluated_thoughts = {
-                thought: self.model.evaluate_states(
-                    {thought: 0}, initial_prompt
-                )[thought]
-                for thought in thoughts
-            }
+            evaluated_thoughts = self._evaluate_thoughts(thoughts, initial_prompt)
 
             for thought, value in evaluated_thoughts.items():
                 if value >= pruning_threshold:
-                    new_state = (
-                        (state, thought)
-                        if isinstance(state, str)
-                        else (*state, thought)
-                    )
-                    state_queue.put((value, new_state))
+                    new_state = self._flatten_state(state, thought)
+                    state_queue.put((-value, new_state))
                     self.log_new_state(new_state, value)
+                    if value > best_value:
+                        best_state = new_state
+                        best_value = value
 
-        best_state = max(visited_states, key=self.model.evaluate_states)
         solution = self.model.generate_solution(initial_prompt, best_state)
         print(f"Highest_rated solution: {best_state}  Solution: {solution}")
         return solution if solution else best_state
 
 
 # A* search algorithm
-class TreeofThoughtsASearch:
+class TreeofThoughtsASearch(TreeofThoughts):
     def __init__(self, model):
-        self.model = model
+        super().__init__(model)
 
     def solve(
         self,
@@ -319,6 +329,7 @@ class TreeofThoughtsASearch:
                 break
 
             _, _, current_state = open_set.get()
+            visited_states.add(current_state)
 
             if self.is_goal(current_state, f_scores[current_state]):
                 return self.reconstruct_path(
@@ -328,27 +339,23 @@ class TreeofThoughtsASearch:
             thoughts = self.model.generate_thoughts(
                 current_state, num_thoughts, initial_prompt
             )
-            evaluated_thoughts = {
-                thought: self.model.evaluate_states(
-                    {thought: 0}, initial_prompt
-                )[thought]
-                for thought in thoughts
-            }
+            evaluated_thoughts = self._evaluate_thoughts(thoughts, initial_prompt)
 
             for thought, value in evaluated_thoughts.items():
-                if value < pruning_threshold or thought in visited_states:
+                child_state = self._flatten_state(current_state, thought)
+                if value < pruning_threshold or child_state in visited_states:
                     continue
 
-                tentative_g_score = g_scores[current_state] + 1 / value
+                tentative_g_score = g_scores[current_state] + 1 / max(value, 1e-9)
                 if (
-                    thought not in g_scores
-                    or tentative_g_score < g_scores[thought]
+                    child_state not in g_scores
+                    or tentative_g_score < g_scores[child_state]
                 ):
-                    came_from[thought] = current_state
-                    g_scores[thought] = tentative_g_score
-                    f_scores[thought] = tentative_g_score + value
+                    came_from[child_state] = current_state
+                    g_scores[child_state] = tentative_g_score
+                    f_scores[child_state] = tentative_g_score + value
                     open_set.put(
-                        (-f_scores[thought], g_scores[thought], thought)
+                        (-f_scores[child_state], g_scores[child_state], child_state)
                     )
 
         return self.reconstruct_path(came_from, current_state, initial_prompt)
@@ -364,7 +371,6 @@ class TreeofThoughtsASearch:
             path.append(current_state)
         path.reverse()
 
-        path = self.reconstruct_path(came_from, current_state, initial_prompt)
         solution = self.model.generate_solution(initial_prompt, path)
         print(f"Path: {path} solution: {solution}")
         return solution if solution else path
@@ -389,7 +395,7 @@ class MonteCarloTreeofThoughts(TreeofThoughts):
             num_thoughts += 1
             max_steps += 1
             max_states += 1
-        elif self.objective == "balanace":
+        elif self.objective == "balance":
             if self.solution_found:
                 num_thoughts = max(1, num_thoughts - 1)
                 max_steps = max(1, max_steps - 1)
@@ -442,58 +448,48 @@ class MonteCarloTreeofThoughts(TreeofThoughts):
 
             for state in current_states:
                 if state in transposition_table:
-                    transposition_table[state]
+                    evaluated_thoughts = transposition_table[state]
                 else:
                     time.sleep(1)
                     thoughts = self.model.generate_thoughts(
                         state, num_thoughts, initial_prompt
                     )
                     time.sleep(1)
-                    evaluated_thoughts = self.model.evaluate_states(
+                    evaluated_thoughts = self._evaluate_thoughts(
                         thoughts, initial_prompt
                     )
-
-                    for thought, value in evaluated_thoughts.items():
-                        flattened_state = (
-                            (state, thought)
-                            if isinstance(state, str)
-                            else (*state, thought)
-                        )
-                        transposition_table[flattened_state] = value
+                    transposition_table[state] = evaluated_thoughts
 
                 for thought, value in evaluated_thoughts.items():
-                    flattened_state = (
-                        (state, thought)
-                        if isinstance(state, str)
-                        else (*state, thought)
-                    )
+                    flattened_state = self._flatten_state(state, thought)
 
                     if flattened_state not in visit_counts:
                         visit_counts[flattened_state] = 0
 
-                    if (
-                        visit_counts[state] > visit_counts[flattened_state]
-                        and visit_counts[flattened_state] > 0
-                    ):
+                    if visit_counts[flattened_state] > 0 and visit_counts[state] > 0:
                         ucb1_value = value + np.sqrt(
                             2
                             * np.log(visit_counts[state])
                             / visit_counts[flattened_state]
                         )
+                    else:
+                        ucb1_value = value
 
-                        if ucb1_value >= pruning_threshold:
-                            selected_states.append(flattened_state)
-                            state_values[flattened_state] = value
+                    if ucb1_value >= pruning_threshold:
+                        selected_states.append(flattened_state)
+                        state_values[flattened_state] = value
+                        self.logNewState(flattened_state, value)
 
-                            # Update the best state if the current state value is greater than the best value
-                            if value > best_value:
-                                best_state = flattened_state
-                                best_value = value
+                        # Update the best state if the current state value is greater than the best value
+                        if value > best_value:
+                            best_state = flattened_state
+                            best_value = value
 
                 visit_counts[state] += 1
 
-            if len(selected_states) > max_states:
-                current_states = selected_states[:max_states]
+            current_states = selected_states[:max_states]
+            if not current_states:
+                break
             self.save_tree_to_json(self.file_name)
 
         # if best_state is not None:
@@ -503,5 +499,8 @@ class MonteCarloTreeofThoughts(TreeofThoughts):
         #     solution = None
 
         # return None
+        if best_state is None and state_values:
+            best_state = max(state_values.items(), key=lambda item: item[1])[0]
+
         solution = self.model.generate_solution(initial_prompt, best_state)
         return solution if solution else best_state

@@ -106,6 +106,7 @@ class AutoDev:
                 > **Key**: complete text of value
             """
         )
+        return instruction
 
 
     @staticmethod

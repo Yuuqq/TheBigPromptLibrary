@@ -1,19 +1,27 @@
 import json
 import os
+from pathlib import Path
+
+
+SESSION_DATA_FILE = Path(__file__).with_name("session_data.json")
 
 class InitializationCheck:
     def __init__(self, session_data_file):
-        self.session_data_file = session_data_file
+        self.session_data_file = Path(session_data_file)
         self.default_mode = "Standard"
         self.trusted_mode_token = "Omicron-Omicron-Alpha-Yellow-Francis-3-7"
 
     def read_last_session_mode(self):
-        if os.path.exists(self.session_data_file):
-            with open(self.session_data_file, "r") as file:
-                session_data = json.load(file)
-                return session_data.get("last_mode", self.default_mode)
-        else:
+        if not self.session_data_file.exists():
             return self.default_mode
+
+        try:
+            with self.session_data_file.open("r", encoding="utf-8") as file:
+                session_data = json.load(file)
+        except (OSError, json.JSONDecodeError):
+            return self.default_mode
+
+        return session_data.get("last_mode", self.default_mode)
 
     def check_for_trusted_mode_continuation(self, last_mode):
         if last_mode == "Trusted":
@@ -34,7 +42,10 @@ class InitializationCheck:
         print(f"Initialization Check: Setting mode to {initial_mode}")
         return initial_mode
 
-# Usage
-session_data_file = "session_data.json"  # Path to a file storing session data
-init_check = InitializationCheck(session_data_file)
-initial_mode = init_check.set_initial_mode()
+def main():
+    init_check = InitializationCheck(SESSION_DATA_FILE)
+    return init_check.set_initial_mode()
+
+
+if __name__ == "__main__":
+    main()
