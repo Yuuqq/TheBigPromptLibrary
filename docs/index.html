@@ -212,7 +212,8 @@
             color: inherit;
         }
 
-        .search-result-item:hover { background: var(--bg-tertiary); }
+        .search-result-item:hover,
+        .search-result-item.active { background: var(--bg-tertiary); outline: 2px solid var(--accent-blue); outline-offset: -2px; }
         .search-result-item:last-child { border-bottom: none; }
 
         .search-result-icon {
@@ -1243,12 +1244,14 @@
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
 <script>
     // ===== CONFIG =====
     const GITHUB_API  = 'https://api.github.com/repos/Yuuqq/TheBigPromptLibrary/contents';
     const GITHUB_RAW  = 'https://raw.githubusercontent.com/Yuuqq/TheBigPromptLibrary/main';
     const GITHUB_URL  = 'https://github.com/Yuuqq/TheBigPromptLibrary/blob/main';
     const INDEX_URL   = `${GITHUB_RAW}/prompts_index.json`;
+    const DIR_CACHE_TTL = 30 * 60 * 1000; // 30 min
 
     // ===== STATE =====
     let currentSection  = 'home';
@@ -1257,7 +1260,9 @@
     let hasChineseVersion = false;
     let promptsIndex    = [];
     let indexLoaded     = false;
+    let indexLoadingPromise = null;
     let currentPromptId = '';  // for favorites
+    let activeSearchIdx = -1;  // for keyboard nav
 
     // ===== PROVIDERS CONFIG =====
     const PROVIDERS = [
@@ -1293,15 +1298,28 @@
     }
 
     async function loadPromptsIndex() {
-        try {
-            const res = await fetch(INDEX_URL);
-            promptsIndex = await res.json();
-            indexLoaded = true;
-            document.getElementById('statTotal').textContent = promptsIndex.length.toLocaleString() + '+';
-            renderRecentPrompts();
-        } catch (e) {
-            console.warn('Index load failed:', e);
-        }
+        if (indexLoadingPromise) return indexLoadingPromise;
+        indexLoadingPromise = (async () => {
+            try {
+                const res = await fetch(INDEX_URL);
+                promptsIndex = await res.json();
+                indexLoaded = true;
+                document.getElementById('statTotal').textContent = promptsIndex.length.toLocaleString() + '+';
+                renderRecentPrompts();
+                // If user is currently looking at a directory, refresh now that we have data
+                if (currentSection !== 'home' && currentSection !== 'favorites') {
+                    const browser = document.getElementById('browser-section');
+                    if (browser && browser.classList.contains('active')) {
+                        loadDirectory(currentPath);
+                    }
+                }
+                // If pending hash route, dispatch now
+                handleHashRoute();
+            } catch (e) {
+                console.warn('Index load failed:', e);
+            }
+        })();
+        return indexLoadingPromise;
     }
 
     function renderRecentPrompts() {
@@ -1318,22 +1336,31 @@
 
         const sectionIcons = { SystemPrompts:'🤖', CustomInstructions:'✨', Articles:'📰', Jailbreak:'🔓', Security:'🛡️' };
 
-        grid.innerHTML = sorted.map(p => {
+        grid.innerHTML = '';
+        for (const p of sorted) {
             const section = p.category.split('/')[0];
             const provider = p.category.split('/')[1] || '';
             const icon = sectionIcons[section] || '📄';
             const hasZh = p.path_zh && p.path_zh.trim();
-            return `
-                <div class="recent-card" onclick="viewFromIndex('${escAttr(p.path_en || p.path_zh)}', '${escAttr(p.id)}')">
-                    <div class="recent-card-icon">${icon}</div>
-                    <div class="recent-card-body">
-                        <div class="recent-card-title">${escHtml(p.title || p.id.split('/').pop())}</div>
-                        <div class="recent-card-meta">${provider || section} · ${p.updatedAt || ''}</div>
-                    </div>
-                    ${hasZh ? '<span class="zh-badge">中文</span>' : ''}
+            const path = p.path_en || p.path_zh;
+
+            const card = document.createElement('div');
+            card.className = 'recent-card';
+            card.tabIndex = 0;
+            card.setAttribute('role', 'button');
+            card.innerHTML = `
+                <div class="recent-card-icon">${icon}</div>
+                <div class="recent-card-body">
+                    <div class="recent-card-title">${escHtml(p.title || p.id.split('/').pop())}</div>
+                    <div class="recent-card-meta">${escHtml(provider || section)} · ${escHtml(p.updatedAt || '')}</div>
                 </div>
+                ${hasZh ? '<span class="zh-badge">中文</span>' : ''}
             `;
-        }).join('');
+            const open = () => viewFromIndex(path, p.id);
+            card.addEventListener('click', open);
+            card.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
+            grid.appendChild(card);
+        }
     }
 
     // ===== NAVIGATION =====
@@ -1344,6 +1371,7 @@
         show('home-section');
         currentSection = 'home';
         updateNav('home');
+        updateHashSilently(' ');
         updateMobileNav('home');
     }
 
@@ -1425,24 +1453,129 @@
     }
 
     // ===== DIRECTORY LOADING =====
+    // Prefer prompts_index.json (no rate limit, instant). Fall back to GitHub API only when needed.
     async function loadDirectory(path) {
+        const fileList = document.getElementById('fileList');
+
+        // Try index-based browsing first
+        if (indexLoaded) {
+            const result = browseFromIndex(path);
+            if (result && (result.files.length > 0 || result.subdirs.length > 0)) {
+                renderIndexBrowse(path, result);
+                return;
+            }
+        } else {
+            fileList.innerHTML = '<div class="loading"><div class="spinner"></div>正在加载提示词索引...</div>';
+            await loadPromptsIndex();
+            const result = browseFromIndex(path);
+            if (result && (result.files.length > 0 || result.subdirs.length > 0)) {
+                renderIndexBrowse(path, result);
+                return;
+            }
+        }
+
+        // Fallback: GitHub API with sessionStorage cache
+        await loadDirectoryFromAPI(path);
+    }
+
+    function browseFromIndex(path) {
+        if (!indexLoaded || !path) return null;
+        const subdirCount = new Map();
+        const files = [];
+        const seenIds = new Set();
+        for (const p of promptsIndex) {
+            if (p.category === path) {
+                const id = p.id;
+                if (seenIds.has(id)) continue;
+                seenIds.add(id);
+                files.push({
+                    name: p.title || p.id.split('/').pop(),
+                    path: p.path_zh || p.path_en,
+                    id: p.id,
+                    date: p.updatedAt || extractDate((p.path_en || p.path_zh).split('/').pop()),
+                    hasZh: !!(p.path_zh && p.path_zh.trim()),
+                });
+            } else if (p.category && p.category.startsWith(path + '/')) {
+                const next = p.category.slice(path.length + 1).split('/')[0];
+                subdirCount.set(next, (subdirCount.get(next) || 0) + 1);
+            }
+        }
+        const subdirs = Array.from(subdirCount.entries())
+            .map(([name, count]) => ({ name, count, path: `${path}/${name}` }))
+            .sort((a, b) => b.count - a.count);
+        files.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+        return { files, subdirs };
+    }
+
+    function renderIndexBrowse(path, { files, subdirs }) {
+        const fileList = document.getElementById('fileList');
+        if (files.length === 0 && subdirs.length === 0) {
+            fileList.innerHTML = '<div class="loading">暂无内容</div>';
+            return;
+        }
+        fileList.innerHTML = '';
+        // Subdirs first
+        for (const dir of subdirs) {
+            const a = document.createElement('a');
+            a.className = 'file-item';
+            a.style.cursor = 'pointer';
+            a.tabIndex = 0;
+            a.innerHTML = `
+                <span class="file-icon">📁</span>
+                <span class="file-name">${escHtml(dir.name)}</span>
+                <span class="zh-badge" style="background:rgba(88,166,255,0.15);color:var(--accent-blue);">${dir.count} 项</span>
+            `;
+            a.addEventListener('click', () => loadDirectory(dir.path));
+            a.addEventListener('keydown', e => { if (e.key === 'Enter') loadDirectory(dir.path); });
+            fileList.appendChild(a);
+        }
+        // Files
+        for (const f of files) {
+            const a = document.createElement('a');
+            a.className = 'file-item';
+            a.style.cursor = 'pointer';
+            a.tabIndex = 0;
+            a.innerHTML = `
+                <span class="file-icon">📄</span>
+                <span class="file-name">${escHtml(f.name)}</span>
+                ${f.hasZh ? '<span class="zh-badge">中文</span>' : ''}
+                ${f.date ? `<span class="file-date">${escHtml(f.date)}</span>` : ''}
+            `;
+            a.addEventListener('click', () => viewFromIndex(f.path, f.id));
+            a.addEventListener('keydown', e => { if (e.key === 'Enter') viewFromIndex(f.path, f.id); });
+            fileList.appendChild(a);
+        }
+    }
+
+    async function loadDirectoryFromAPI(path) {
         const fileList = document.getElementById('fileList');
         fileList.innerHTML = '<div class="loading"><div class="spinner"></div>加载中...</div>';
 
+        // Check sessionStorage cache
+        const cacheKey = `dir:${path}`;
+        try {
+            const cached = sessionStorage.getItem(cacheKey);
+            if (cached) {
+                const obj = JSON.parse(cached);
+                if (Date.now() - obj.t < DIR_CACHE_TTL) {
+                    renderApiList(obj.items);
+                    return;
+                }
+            }
+        } catch (e) {}
+
         try {
             const res = await fetch(`${GITHUB_API}/${path}`);
+            if (res.status === 403) {
+                fileList.innerHTML = '<div class="loading">已达到 GitHub API 调用限额，请稍后重试，或直接<a href="' + GITHUB_URL + '/' + escHtml(path) + '" target="_blank" style="color:var(--accent-blue);margin-left:.5rem;">在 GitHub 查看</a></div>';
+                return;
+            }
             const data = await res.json();
-
             if (!Array.isArray(data)) {
                 fileList.innerHTML = '<div class="loading">加载失败，请稍后重试</div>';
                 return;
             }
-
-            const zhFiles = new Set(
-                data.filter(i => i.name.endsWith('_zh.md'))
-                    .map(i => i.name.replace('_zh.md', '.md'))
-            );
-
+            const zhFiles = new Set(data.filter(i => i.name.endsWith('_zh.md')).map(i => i.name.replace('_zh.md', '.md')));
             const items = data
                 .filter(i => i.name !== 'README.md' && i.name !== 'README_zh.md' &&
                              !i.name.startsWith('.') && !i.name.endsWith('_zh.md'))
@@ -1455,32 +1588,34 @@
                 }))
                 .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
 
-            renderFileList(items);
+            try { sessionStorage.setItem(cacheKey, JSON.stringify({ t: Date.now(), items })); } catch(e) {}
+            renderApiList(items);
         } catch (e) {
             fileList.innerHTML = '<div class="loading">加载失败，请检查网络连接</div>';
         }
     }
 
-    function renderFileList(items) {
+    function renderApiList(items) {
         const fileList = document.getElementById('fileList');
-        if (items.length === 0) {
-            fileList.innerHTML = '<div class="loading">暂无内容</div>';
-            return;
-        }
-        fileList.innerHTML = items.map(item => {
-            const onclick = item.type === 'dir'
-                ? `loadDirectory('${escAttr(item.path)}')`
-                : `viewFile('${escAttr(item.path)}')`;
+        if (items.length === 0) { fileList.innerHTML = '<div class="loading">暂无内容</div>'; return; }
+        fileList.innerHTML = '';
+        for (const item of items) {
+            const a = document.createElement('a');
+            a.className = 'file-item';
+            a.style.cursor = 'pointer';
+            a.tabIndex = 0;
             const icon = item.type === 'dir' ? '📁' : '📄';
-            return `
-                <a class="file-item" onclick="${onclick}">
-                    <span class="file-icon">${icon}</span>
-                    <span class="file-name">${escHtml(item.name)}</span>
-                    ${item.hasZh ? '<span class="zh-badge">中文</span>' : ''}
-                    ${item.date ? `<span class="file-date">${item.date}</span>` : ''}
-                </a>
+            a.innerHTML = `
+                <span class="file-icon">${icon}</span>
+                <span class="file-name">${escHtml(item.name)}</span>
+                ${item.hasZh ? '<span class="zh-badge">中文</span>' : ''}
+                ${item.date ? `<span class="file-date">${escHtml(item.date)}</span>` : ''}
             `;
-        }).join('');
+            const handler = () => item.type === 'dir' ? loadDirectory(item.path) : viewFile(item.path);
+            a.addEventListener('click', handler);
+            a.addEventListener('keydown', e => { if (e.key === 'Enter') handler(); });
+            fileList.appendChild(a);
+        }
     }
 
     // ===== FILE VIEWER =====
@@ -1562,7 +1697,15 @@
 
             const el = document.getElementById('promptContent');
             if (typeof marked !== 'undefined') {
-                el.innerHTML = marked.parse(content);
+                const html = marked.parse(content);
+                if (typeof DOMPurify !== 'undefined') {
+                    el.innerHTML = DOMPurify.sanitize(html, {
+                        FORBID_TAGS: ['style','script','iframe','form','input','button','object','embed'],
+                        FORBID_ATTR: ['onerror','onload','onclick','onmouseover','onfocus','onblur','onchange','onsubmit','style'],
+                    });
+                } else {
+                    el.innerHTML = html;
+                }
                 el.parentElement.classList.add('markdown-body');
             } else {
                 el.textContent = content;
@@ -1573,6 +1716,9 @@
             if (category === 'SystemPrompts') {
                 show('quickUseBar');
             }
+
+            // Update URL hash for shareable deep link (without triggering hashchange)
+            updateHashSilently('#/p/' + encodeURIComponent(currentViewPath));
         } catch (e) {
             document.getElementById('promptContent').textContent = '加载失败，请检查网络连接或直接在 GitHub 查看。';
         }
@@ -1583,6 +1729,41 @@
         viewFile(path, null, id);
     }
 
+    // Update URL hash without re-triggering router
+    let suppressHashChange = false;
+    function updateHashSilently(newHash) {
+        // Use pathname+search to clear hash without leaving a stray "#"
+        if (!newHash || newHash === ' ' || newHash === '#') {
+            if (!location.hash) return;
+            suppressHashChange = true;
+            history.replaceState(null, '', location.pathname + location.search);
+            setTimeout(() => { suppressHashChange = false; }, 0);
+            return;
+        }
+        if (location.hash === newHash) return;
+        suppressHashChange = true;
+        history.replaceState(null, '', newHash);
+        setTimeout(() => { suppressHashChange = false; }, 0);
+    }
+
+    function handleHashRoute() {
+        if (suppressHashChange) return;
+        const h = location.hash;
+        if (!h || h === '#') return;
+        // #/p/<encoded path> → open prompt
+        const m = h.match(/^#\/p\/(.+)$/);
+        if (m) {
+            const path = decodeURIComponent(m[1]);
+            // Find ID from index if available
+            let id = path;
+            if (indexLoaded) {
+                const found = promptsIndex.find(p => p.path_en === path || p.path_zh === path);
+                if (found) id = found.id;
+            }
+            viewFile(path, null, id);
+        }
+    }
+
     function toggleLanguage() {
         const btn = document.getElementById('langToggle');
         const lang = btn.dataset.currentLang;
@@ -1590,7 +1771,9 @@
     }
 
     function goBack() {
-        if (currentSection && currentSection !== 'home') {
+        if (currentSection === 'favorites') {
+            showFavorites();
+        } else if (currentSection && currentSection !== 'home' && currentSection !== 'viewer') {
             showSection(currentSection);
         } else {
             showHome();
@@ -1694,17 +1877,30 @@
             `;
             return;
         }
-        container.innerHTML = `
-            <div class="file-list">
-                ${favs.reverse().map(f => `
-                    <div class="file-item" onclick="viewFile('${escAttr(f.path)}', null, '${escAttr(f.id)}')">
-                        <span class="file-icon">❤️</span>
-                        <span class="file-name">${escHtml(f.title)}</span>
-                        <button style="background:none;border:none;color:var(--text-muted);cursor:pointer;padding:0.25rem 0.5rem;font-size:0.8rem;" onclick="event.stopPropagation();removeFav('${escAttr(f.id)}')">移除</button>
-                    </div>
-                `).join('')}
-            </div>
-        `;
+        container.innerHTML = '<div class="file-list" id="favList"></div>';
+        const list = document.getElementById('favList');
+        for (const f of favs.slice().reverse()) {
+            const row = document.createElement('div');
+            row.className = 'file-item';
+            row.style.cursor = 'pointer';
+            row.tabIndex = 0;
+            row.innerHTML = `
+                <span class="file-icon">❤️</span>
+                <span class="file-name">${escHtml(f.title)}</span>
+                <button class="fav-remove-btn" style="background:none;border:none;color:var(--text-muted);cursor:pointer;padding:0.25rem 0.5rem;font-size:0.8rem;">移除</button>
+            `;
+            const open = () => viewFile(f.path, null, f.id);
+            row.addEventListener('click', e => {
+                if (e.target.classList.contains('fav-remove-btn')) return;
+                open();
+            });
+            row.addEventListener('keydown', e => { if (e.key === 'Enter') open(); });
+            row.querySelector('.fav-remove-btn').addEventListener('click', e => {
+                e.stopPropagation();
+                removeFav(f.id);
+            });
+            list.appendChild(row);
+        }
     }
 
     function removeFav(id) {
@@ -1737,59 +1933,103 @@
     }
 
     function handleSearchKey(e) {
-        if (e.key === 'Escape') clearSearch();
+        const dropdown = document.getElementById('searchDropdown');
+        const items = dropdown.querySelectorAll('.search-result-item');
+        if (e.key === 'Escape') { clearSearch(); return; }
+        if (!items.length) return;
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            activeSearchIdx = Math.min(items.length - 1, activeSearchIdx + 1);
+            highlightActiveResult(items);
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            activeSearchIdx = Math.max(0, activeSearchIdx - 1);
+            highlightActiveResult(items);
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            const target = items[activeSearchIdx >= 0 ? activeSearchIdx : 0];
+            if (target) target.click();
+        }
+    }
+
+    function highlightActiveResult(items) {
+        items.forEach((it, i) => {
+            it.classList.toggle('active', i === activeSearchIdx);
+            if (i === activeSearchIdx) it.scrollIntoView({ block: 'nearest' });
+        });
     }
 
     function performSearch(query) {
         const dropdown = document.getElementById('searchDropdown');
         const q = query.toLowerCase().trim();
+        activeSearchIdx = -1;
 
-        let results = [];
-
-        if (indexLoaded && promptsIndex.length > 0) {
-            results = promptsIndex.filter(p => {
-                const title = (p.title || '').toLowerCase();
-                const id = (p.id || '').toLowerCase();
-                const cat = (p.category || '').toLowerCase();
-                const summary = (p.summary || '').toLowerCase();
-                return title.includes(q) || id.includes(q) || cat.includes(q) || summary.includes(q);
-            }).slice(0, 12);
+        // Index not yet loaded → show loading state instead of misleading "未找到"
+        if (!indexLoaded) {
+            dropdown.innerHTML = '<div class="search-no-results"><div class="spinner" style="display:inline-block;margin-right:.5rem;"></div>正在加载提示词索引，请稍候...</div>';
+            dropdown.classList.add('active');
+            // Trigger load and re-search when ready
+            loadPromptsIndex().then(() => {
+                if (document.getElementById('headerSearch').value === query) {
+                    performSearch(query);
+                }
+            });
+            return;
         }
 
+        const results = promptsIndex.filter(p => {
+            const title = (p.title || '').toLowerCase();
+            const id = (p.id || '').toLowerCase();
+            const cat = (p.category || '').toLowerCase();
+            const summary = (p.summary || '').toLowerCase();
+            return title.includes(q) || id.includes(q) || cat.includes(q) || summary.includes(q);
+        }).slice(0, 12);
+
         if (results.length === 0) {
-            dropdown.innerHTML = `<div class="search-no-results">未找到包含"${escHtml(query)}"的提示词</div>`;
+            dropdown.innerHTML = `<div class="search-no-results">未找到包含"${escHtml(query)}"的提示词<br><span style="color:var(--text-muted);font-size:0.8rem;">试试 OpenAI、Claude、GPT、ChatGPT 等关键词</span></div>`;
             dropdown.classList.add('active');
             return;
         }
 
         const sectionIcons = { SystemPrompts:'🤖', CustomInstructions:'✨', Articles:'📰', Jailbreak:'🔓', Security:'🛡️' };
 
-        dropdown.innerHTML = `
-            <div class="search-dropdown-header">找到 ${results.length} 条结果（共搜索 ${promptsIndex.length} 条）</div>
-            ${results.map(p => {
-                const section = p.category.split('/')[0];
-                const provider = p.category.split('/')[1] || section;
-                const icon = sectionIcons[section] || '📄';
-                const title = p.title || p.id.split('/').pop();
-                const highlighted = highlightMatch(title, query);
-                const path = p.path_zh || p.path_en || '';
-                const hasZh = !!(p.path_zh && p.path_zh.trim());
-                return `
-                    <a class="search-result-item" onclick="closeSearchDropdown(); viewFromIndex('${escAttr(path)}', '${escAttr(p.id)}')">
-                        <div class="search-result-icon">${icon}</div>
-                        <div class="search-result-body">
-                            <div class="search-result-title">${highlighted}</div>
-                            <div class="search-result-meta">${provider} ${hasZh ? '· 有中文' : ''}</div>
-                        </div>
-                    </a>
-                `;
-            }).join('')}
-        `;
+        dropdown.innerHTML = '';
+        const header = document.createElement('div');
+        header.className = 'search-dropdown-header';
+        header.textContent = `找到 ${results.length} 条结果（共搜索 ${promptsIndex.length} 条）`;
+        dropdown.appendChild(header);
+
+        for (const p of results) {
+            const section = p.category.split('/')[0];
+            const provider = p.category.split('/')[1] || section;
+            const icon = sectionIcons[section] || '📄';
+            const title = p.title || p.id.split('/').pop();
+            const path = p.path_zh || p.path_en || '';
+            const hasZh = !!(p.path_zh && p.path_zh.trim());
+
+            const item = document.createElement('a');
+            item.className = 'search-result-item';
+            item.style.cursor = 'pointer';
+            item.tabIndex = -1;
+            item.innerHTML = `
+                <div class="search-result-icon">${icon}</div>
+                <div class="search-result-body">
+                    <div class="search-result-title">${highlightMatch(title, query)}</div>
+                    <div class="search-result-meta">${escHtml(provider)} ${hasZh ? '· 有中文' : ''}</div>
+                </div>
+            `;
+            item.addEventListener('click', () => {
+                closeSearchDropdown();
+                viewFromIndex(path, p.id);
+            });
+            dropdown.appendChild(item);
+        }
         dropdown.classList.add('active');
     }
 
     function closeSearchDropdown() {
         document.getElementById('searchDropdown').classList.remove('active');
+        activeSearchIdx = -1;
     }
 
     function highlightMatch(text, query) {
@@ -1864,11 +2104,21 @@
     }
 
     function escAttr(str) {
-        return String(str).replace(/'/g,"\\'").replace(/"/g,'&quot;');
+        // Safer for inline-attribute JS string contexts: escape backslash, quotes, newlines, then HTML-encode
+        return String(str)
+            .replace(/\\/g, '\\\\')
+            .replace(/'/g, "\\'")
+            .replace(/\n/g, '\\n')
+            .replace(/\r/g, '\\r')
+            .replace(/"/g, '&quot;')
+            .replace(/</g, '&lt;');
     }
 
     // ===== INIT =====
+    window.addEventListener('hashchange', handleHashRoute);
     showHome();
+    // If user landed with #/p/... before index loads, handleHashRoute will be retried after index loads
+    handleHashRoute();
 </script>
 </body>
 </html>
