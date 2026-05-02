@@ -1111,8 +1111,8 @@
                     <div class="stat-label">提示词条目</div>
                 </div>
                 <div class="stat">
-                    <div class="stat-value">190+</div>
-                    <div class="stat-label">系统提示词</div>
+                    <div class="stat-value" id="statZhCoverage">—</div>
+                    <div class="stat-label">中文翻译覆盖率 <span id="statZhDetail" style="opacity:0.7;font-size:0.75rem;"></span></div>
                 </div>
                 <div class="stat">
                     <div class="stat-value">25+</div>
@@ -1302,7 +1302,8 @@
     const GITHUB_API  = 'https://api.github.com/repos/Yuuqq/TheBigPromptLibrary/contents';
     const GITHUB_RAW  = 'https://raw.githubusercontent.com/Yuuqq/TheBigPromptLibrary/main';
     const GITHUB_URL  = 'https://github.com/Yuuqq/TheBigPromptLibrary/blob/main';
-    const INDEX_URL   = `${GITHUB_RAW}/prompts_index.json`;
+    const INDEX_URL    = `${GITHUB_RAW}/prompts_index.json`;
+    const COVERAGE_URL = `${GITHUB_RAW}/stats/coverage.json`;
     const DIR_CACHE_TTL = 30 * 60 * 1000; // 30 min
 
     // ===== STATE =====
@@ -1335,6 +1336,37 @@
     // ===== INIT =====
     renderProviders();
     loadPromptsIndex();
+    loadCoverage();
+
+    async function loadCoverage() {
+        // Try the freshest snapshot from the daily auto-translate workflow.
+        // Fallback: derive from prompts_index.json once it loads.
+        try {
+            const res = await fetch(COVERAGE_URL + '?t=' + Date.now());
+            if (!res.ok) throw new Error('coverage.json not yet generated');
+            const c = await res.json();
+            renderCoverage(c.with_zh, c.total);
+        } catch (e) {
+            // Fallback after index loads
+            const tryFromIndex = () => {
+                if (!promptsIndex.length) return;
+                const total = promptsIndex.length;
+                const withZh = promptsIndex.filter(p => p.path_zh).length;
+                renderCoverage(withZh, total);
+            };
+            if (indexLoaded) tryFromIndex();
+            else setTimeout(tryFromIndex, 1500);
+        }
+    }
+
+    function renderCoverage(withZh, total) {
+        if (!total) return;
+        const pct = (withZh / total * 100).toFixed(0);
+        const el = document.getElementById('statZhCoverage');
+        const detail = document.getElementById('statZhDetail');
+        if (el) el.textContent = pct + '%';
+        if (detail) detail.textContent = `(${withZh.toLocaleString()}/${total.toLocaleString()})`;
+    }
 
     function renderProviders() {
         const grid = document.getElementById('providersGrid');
@@ -1356,7 +1388,7 @@
                 const res = await fetch(INDEX_URL);
                 promptsIndex = await res.json();
                 indexLoaded = true;
-                document.getElementById('statTotal').textContent = promptsIndex.length.toLocaleString() + '+';
+                document.getElementById('statTotal').textContent = promptsIndex.length.toLocaleString();
                 renderRecentPrompts();
                 // If user is currently looking at a directory, refresh now that we have data
                 if (currentSection !== 'home' && currentSection !== 'favorites') {
