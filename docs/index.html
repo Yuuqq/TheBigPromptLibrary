@@ -1,6 +1,16 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
+    <script>
+        // Theme: load early to avoid flash of wrong theme
+        (function() {
+            try {
+                var saved = localStorage.getItem('prompt_theme');
+                var theme = saved || (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+                if (theme === 'light') document.documentElement.setAttribute('data-theme', 'light');
+            } catch(e) {}
+        })();
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Big Prompt Library 中文版 - AI 提示词大全</title>
@@ -36,7 +46,33 @@
             --accent-pink: #db61a2;
             --card-shadow: 0 8px 24px rgba(0,0,0,0.4);
             --transition: all 0.2s ease;
+            --hero-tint: rgba(88,166,255,0.08);
+            --code-bg: #0d1117;
         }
+
+        [data-theme="light"] {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f6f8fa;
+            --bg-tertiary: #eaeef2;
+            --text-primary: #1f2328;
+            --text-secondary: #59636e;
+            --text-muted: #818b98;
+            --border-color: #d1d9e0;
+            --accent-blue: #0969da;
+            --accent-green: #1a7f37;
+            --accent-purple: #8250df;
+            --accent-orange: #9a6700;
+            --accent-red: #cf222e;
+            --accent-pink: #bf3989;
+            --card-shadow: 0 8px 24px rgba(140,149,159,0.2);
+            --hero-tint: rgba(9,105,218,0.05);
+            --code-bg: #f6f8fa;
+        }
+        [data-theme="light"] .recent-card,
+        [data-theme="light"] .stats-bar,
+        [data-theme="light"] .step-card,
+        [data-theme="light"] .category-card { background: var(--bg-secondary) !important; }
+        [data-theme="light"] body { background: #ffffff; }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -172,6 +208,18 @@
             background: var(--bg-tertiary);
         }
 
+        .theme-toggle {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            border-radius: 8px;
+            color: var(--text-secondary);
+        }
+        .theme-toggle:hover { color: var(--accent-blue); }
+
         /* ===== SEARCH DROPDOWN ===== */
         .search-dropdown {
             display: none;
@@ -276,9 +324,9 @@
         }
 
         .toast {
-            background: #1a2030;
-            border: 1px solid #2d3748;
-            color: #f0f6fc;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
             padding: 0.75rem 1.25rem;
             border-radius: 8px;
             font-size: 0.875rem;
@@ -1032,6 +1080,10 @@
             <a href="#" onclick="showSection('custom-instructions')" id="nav-custom">自定义指令</a>
             <a href="#" onclick="showFavorites()" id="nav-favs">❤ 收藏</a>
             <a href="https://github.com/Yuuqq/TheBigPromptLibrary" target="_blank">GitHub ↗</a>
+            <button id="themeToggle" class="theme-toggle" onclick="toggleTheme()" title="切换浅色/深色模式" aria-label="切换主题">
+                <svg id="themeIconDark" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                <svg id="themeIconLight" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            </button>
         </nav>
     </div>
 </header>
@@ -2113,6 +2165,31 @@
             .replace(/"/g, '&quot;')
             .replace(/</g, '&lt;');
     }
+
+    // ===== THEME =====
+    function applyThemeIcon() {
+        const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+        const dark = document.getElementById('themeIconDark');
+        const light = document.getElementById('themeIconLight');
+        if (dark && light) {
+            dark.style.display = isLight ? 'none' : '';
+            light.style.display = isLight ? '' : 'none';
+        }
+    }
+    function toggleTheme() {
+        const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+        if (isLight) {
+            document.documentElement.removeAttribute('data-theme');
+            try { localStorage.setItem('prompt_theme', 'dark'); } catch(e) {}
+            showToast('🌙 已切换到深色模式');
+        } else {
+            document.documentElement.setAttribute('data-theme', 'light');
+            try { localStorage.setItem('prompt_theme', 'light'); } catch(e) {}
+            showToast('☀️ 已切换到浅色模式');
+        }
+        applyThemeIcon();
+    }
+    applyThemeIcon();
 
     // ===== INIT =====
     window.addEventListener('hashchange', handleHashRoute);
