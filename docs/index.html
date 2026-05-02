@@ -248,6 +248,58 @@
             background: var(--bg-tertiary);
         }
 
+        /* ===== SEARCH FILTERS ===== */
+        .search-filters {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--bg-tertiary);
+            flex-wrap: wrap;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+        .search-filters select {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 0.3rem 0.5rem;
+            font-size: 0.75rem;
+            font-family: inherit;
+            cursor: pointer;
+            outline: none;
+            transition: var(--transition);
+        }
+        .search-filters select:hover,
+        .search-filters select:focus { border-color: var(--accent-blue); }
+        .search-filters select.active { border-color: var(--accent-blue); color: var(--accent-blue); }
+        .search-filters .filter-reset {
+            margin-left: auto;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            cursor: pointer;
+            padding: 0.3rem 0.5rem;
+        }
+        .search-filters .filter-reset:hover { color: var(--accent-blue); }
+
+        .qs-badge {
+            display: inline-block;
+            font-size: 0.7rem;
+            padding: 0.1rem 0.4rem;
+            border-radius: 8px;
+            margin-left: 0.4rem;
+            vertical-align: middle;
+            font-weight: 500;
+        }
+        .qs-badge.qs-excellent { background: rgba(63,185,80,0.18);  color: #3fb950; }
+        .qs-badge.qs-good      { background: rgba(88,166,255,0.18); color: #58a6ff; }
+        .qs-badge.qs-poor      { background: rgba(245,158,11,0.18); color: #f59e0b; }
+        .qs-badge.qs-bad       { background: rgba(248,113,113,0.18); color: #f87171; }
+
         .search-result-item {
             display: flex;
             align-items: center;
@@ -2067,12 +2119,56 @@
         clearBtn.classList.toggle('visible', query.length > 0);
 
         if (!query || query.length < 1) {
-            closeSearchDropdown();
+            // Empty query but filters active → keep dropdown open showing filter bar + browse hint
+            if (filtersActive()) {
+                showFilterBrowse();
+            } else {
+                closeSearchDropdown();
+            }
             return;
         }
 
         clearTimeout(searchTimer);
         searchTimer = setTimeout(() => performSearch(query), 200);
+    }
+
+    function showFilterBrowse() {
+        // Show dropdown with just filter bar + filtered results count (no query) so users
+        // can browse with filters alone (e.g. "all 待改进 translations").
+        if (!indexLoaded) return;
+        const dropdown = document.getElementById('searchDropdown');
+        dropdown.innerHTML = '';
+        dropdown.appendChild(buildFilterBar());
+        const filtered = promptsIndex.filter(matchesFilters);
+        const header = document.createElement('div');
+        header.className = 'search-dropdown-header';
+        header.textContent = `当前筛选匹配 ${filtered.length} / ${promptsIndex.length} 条（输入关键词进一步搜索）`;
+        dropdown.appendChild(header);
+        const sectionIcons = { SystemPrompts:'🤖', CustomInstructions:'✨', Articles:'📰', Jailbreak:'🔓', Security:'🛡️' };
+        for (const p of filtered.slice(0, 20)) {
+            const section = p.category.split('/')[0];
+            const provider = p.category.split('/')[1] || section;
+            const icon = sectionIcons[section] || '📄';
+            const title = p.title || p.id.split('/').pop();
+            const path = p.path_zh || p.path_en || '';
+            const hasZh = !!(p.path_zh && p.path_zh.trim());
+            const item = document.createElement('a');
+            item.className = 'search-result-item';
+            item.tabIndex = -1;
+            item.innerHTML = `
+                <div class="search-result-icon">${icon}</div>
+                <div class="search-result-body">
+                    <div class="search-result-title">${escHtml(title)} ${hasZh ? qsBadge(p.qs) : ''}</div>
+                    <div class="search-result-meta">${escHtml(provider)} ${hasZh ? '· 有中文' : '· 仅英文'}</div>
+                </div>
+            `;
+            item.addEventListener('click', () => {
+                closeSearchDropdown();
+                viewFromIndex(path, p.id);
+            });
+            dropdown.appendChild(item);
+        }
+        dropdown.classList.add('active');
     }
 
     function clearSearch() {
@@ -2108,6 +2204,112 @@
         });
     }
 
+    // ===== Search filter state (persisted in localStorage) =====
+    const FILTER_KEY = 'tbpl.searchFilters.v1';
+    let searchFilters = (() => {
+        try {
+            const saved = JSON.parse(localStorage.getItem(FILTER_KEY) || '{}');
+            return { category: 'all', translation: 'all', quality: 'all', ...saved };
+        } catch { return { category: 'all', translation: 'all', quality: 'all' }; }
+    })();
+
+    function persistFilters() { try { localStorage.setItem(FILTER_KEY, JSON.stringify(searchFilters)); } catch {} }
+
+    function applyFilter(key, value) {
+        searchFilters[key] = value;
+        persistFilters();
+        const q = document.getElementById('headerSearch').value;
+        if (q.length >= 1) performSearch(q);
+    }
+    function resetFilters() {
+        searchFilters = { category: 'all', translation: 'all', quality: 'all' };
+        persistFilters();
+        document.getElementById('filterCategory').value = 'all';
+        document.getElementById('filterTranslation').value = 'all';
+        document.getElementById('filterQuality').value = 'all';
+        const q = document.getElementById('headerSearch').value;
+        if (q.length >= 1) performSearch(q);
+    }
+    function filtersActive() {
+        return searchFilters.category !== 'all' || searchFilters.translation !== 'all' || searchFilters.quality !== 'all';
+    }
+
+    function buildFilterBar() {
+        // Returns DOM element with 3 filter selects + reset, restoring saved state.
+        const wrap = document.createElement('div');
+        wrap.className = 'search-filters';
+        const cats = [
+            ['all', '📂 全部分类'],
+            ['SystemPrompts', '🤖 系统提示词'],
+            ['CustomInstructions', '✨ 自定义指令'],
+            ['Articles', '📰 文章'],
+            ['Jailbreak', '🔓 越狱'],
+            ['Security', '🛡️ 安全'],
+        ];
+        const trans = [
+            ['all', '🌐 全部翻译状态'],
+            ['translated', '✓ 已翻译'],
+            ['untranslated', '✗ 仅英文'],
+        ];
+        const quality = [
+            ['all', '⭐ 全部质量'],
+            ['excellent', '⭐ 优秀 (≥90)'],
+            ['good', '⭐ 良好+ (≥70)'],
+            ['poor', '⚠ 待改进 (<70)'],
+        ];
+        const sel = (id, key, opts) => {
+            const s = document.createElement('select');
+            s.id = id;
+            s.onchange = () => applyFilter(key, s.value);
+            for (const [v, label] of opts) {
+                const o = document.createElement('option');
+                o.value = v; o.textContent = label;
+                if (searchFilters[key] === v) o.selected = true;
+                s.appendChild(o);
+            }
+            if (searchFilters[key] !== 'all') s.classList.add('active');
+            return s;
+        };
+        wrap.appendChild(sel('filterCategory', 'category', cats));
+        wrap.appendChild(sel('filterTranslation', 'translation', trans));
+        wrap.appendChild(sel('filterQuality', 'quality', quality));
+        if (filtersActive()) {
+            const reset = document.createElement('button');
+            reset.className = 'filter-reset';
+            reset.textContent = '× 清除筛选';
+            reset.onclick = resetFilters;
+            wrap.appendChild(reset);
+        }
+        return wrap;
+    }
+
+    function matchesFilters(p) {
+        if (searchFilters.category !== 'all') {
+            const top = (p.category || '').split('/')[0];
+            if (top !== searchFilters.category) return false;
+        }
+        const hasZh = !!(p.path_zh && p.path_zh.trim());
+        if (searchFilters.translation === 'translated' && !hasZh) return false;
+        if (searchFilters.translation === 'untranslated' && hasZh) return false;
+        if (searchFilters.quality !== 'all') {
+            const q = typeof p.qs === 'number' ? p.qs : null;
+            if (q === null) return false;
+            if (searchFilters.quality === 'excellent' && q < 90) return false;
+            if (searchFilters.quality === 'good'      && q < 70) return false;
+            if (searchFilters.quality === 'poor'      && q >= 70) return false;
+        }
+        return true;
+    }
+
+    function qsBadge(score) {
+        if (typeof score !== 'number') return '';
+        let cls = 'qs-bad';
+        if (score >= 90) cls = 'qs-excellent';
+        else if (score >= 70) cls = 'qs-good';
+        else if (score >= 50) cls = 'qs-poor';
+        return `<span class="qs-badge ${cls}" title="翻译质量评分（基于长度比、中文字符占比、代码块/标题/链接保留度的启发式打分，0-100）">质量 ${score}</span>`;
+    }
+
     function performSearch(query) {
         const dropdown = document.getElementById('searchDropdown');
         const q = query.toLowerCase().trim();
@@ -2126,26 +2328,36 @@
             return;
         }
 
-        const results = promptsIndex.filter(p => {
+        const textMatches = promptsIndex.filter(p => {
             const title = (p.title || '').toLowerCase();
             const id = (p.id || '').toLowerCase();
             const cat = (p.category || '').toLowerCase();
             const summary = (p.summary || '').toLowerCase();
             return title.includes(q) || id.includes(q) || cat.includes(q) || summary.includes(q);
-        }).slice(0, 12);
+        });
+        const filtered = textMatches.filter(matchesFilters);
+        const results = filtered.slice(0, 20);
+
+        dropdown.innerHTML = '';
+        dropdown.appendChild(buildFilterBar());
 
         if (results.length === 0) {
-            dropdown.innerHTML = `<div class="search-no-results">未找到包含"${escHtml(query)}"的提示词<br><span style="color:var(--text-muted);font-size:0.8rem;">试试 OpenAI、Claude、GPT、ChatGPT 等关键词</span></div>`;
+            const noRes = document.createElement('div');
+            noRes.className = 'search-no-results';
+            noRes.innerHTML = filtersActive()
+                ? `当前筛选下未找到匹配项<br><span style="color:var(--text-muted);font-size:0.8rem;">尝试 <a onclick="resetFilters()" style="color:var(--accent-blue);cursor:pointer;">清除筛选</a> 或更换关键词</span>`
+                : `未找到包含"${escHtml(query)}"的提示词<br><span style="color:var(--text-muted);font-size:0.8rem;">试试 OpenAI、Claude、GPT、ChatGPT 等关键词</span>`;
+            dropdown.appendChild(noRes);
             dropdown.classList.add('active');
             return;
         }
 
         const sectionIcons = { SystemPrompts:'🤖', CustomInstructions:'✨', Articles:'📰', Jailbreak:'🔓', Security:'🛡️' };
 
-        dropdown.innerHTML = '';
         const header = document.createElement('div');
         header.className = 'search-dropdown-header';
-        header.textContent = `找到 ${results.length} 条结果（共搜索 ${promptsIndex.length} 条）`;
+        const filterNote = filtersActive() ? `（已筛选：${textMatches.length} → ${filtered.length}）` : '';
+        header.textContent = `找到 ${results.length} / ${filtered.length} 条结果，共搜索 ${promptsIndex.length} 条 ${filterNote}`;
         dropdown.appendChild(header);
 
         for (const p of results) {
@@ -2163,8 +2375,8 @@
             item.innerHTML = `
                 <div class="search-result-icon">${icon}</div>
                 <div class="search-result-body">
-                    <div class="search-result-title">${highlightMatch(title, query)}</div>
-                    <div class="search-result-meta">${escHtml(provider)} ${hasZh ? '· 有中文' : ''}</div>
+                    <div class="search-result-title">${highlightMatch(title, query)} ${hasZh ? qsBadge(p.qs) : ''}</div>
+                    <div class="search-result-meta">${escHtml(provider)} ${hasZh ? '· 有中文' : '· 仅英文'}</div>
                 </div>
             `;
             item.addEventListener('click', () => {
