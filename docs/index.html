@@ -1304,7 +1304,11 @@
     const GITHUB_URL  = 'https://github.com/Yuuqq/TheBigPromptLibrary/blob/main';
     const INDEX_URL    = `${GITHUB_RAW}/prompts_index.json`;
     const COVERAGE_URL = `${GITHUB_RAW}/stats/coverage.json`;
+    const RUNS_URL     = `${GITHUB_RAW}/stats/translation-runs.jsonl`;
     const DIR_CACHE_TTL = 30 * 60 * 1000; // 30 min
+    // GLM-Z1-Flash is currently free; use GLM-4-Air rate as the equivalence reference.
+    // Source: https://bigmodel.cn pricing page (combined ¥1 / 1M tokens for input+output).
+    const GLM_AIR_PRICE_PER_M_TOKENS = 1.0; // ¥
 
     // ===== STATE =====
     let currentSection  = 'home';
@@ -1337,6 +1341,67 @@
     renderProviders();
     loadPromptsIndex();
     loadCoverage();
+    loadCostPanel();
+
+    async function loadCostPanel() {
+        try {
+            const res = await fetch(RUNS_URL + '?t=' + Date.now());
+            if (!res.ok) return; // file doesn't exist yet — skip silently
+            const text = await res.text();
+            const lines = text.trim().split(/\n+/).filter(Boolean);
+            const runs = lines.map(l => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean);
+            if (!runs.length) return;
+
+            const now = new Date();
+            const monthStr = now.toISOString().slice(0, 7); // YYYY-MM
+            const monthRuns = runs.filter(r => (r.timestamp || '').startsWith(monthStr));
+            const totalRuns = runs;
+
+            const sum = (arr, k) => arr.reduce((a, r) => a + (r[k] || 0), 0);
+            const monthIn  = sum(monthRuns, 'tokens_in');
+            const monthOut = sum(monthRuns, 'tokens_out');
+            const monthFiles = sum(monthRuns, 'translated') + sum(monthRuns, 'oversized_translated');
+            const totalIn  = sum(totalRuns, 'tokens_in');
+            const totalOut = sum(totalRuns, 'tokens_out');
+
+            const monthCostEquiv = ((monthIn + monthOut) / 1_000_000) * GLM_AIR_PRICE_PER_M_TOKENS;
+            const totalCostEquiv = ((totalIn + totalOut) / 1_000_000) * GLM_AIR_PRICE_PER_M_TOKENS;
+            const fmt = n => n >= 1000 ? (n/1000).toFixed(1) + 'k' : n.toString();
+            const fmtTokens = n => n >= 1_000_000 ? (n/1_000_000).toFixed(2) + 'M' : (n/1000).toFixed(1) + 'k';
+
+            renderCostPanel({
+                monthFiles, monthIn, monthOut, monthCostEquiv,
+                totalIn, totalOut, totalCostEquiv,
+                runCount: monthRuns.length,
+                fmt, fmtTokens,
+            });
+        } catch (e) {
+            console.warn('Cost panel load failed:', e);
+        }
+    }
+
+    function renderCostPanel(d) {
+        // Insert after .hero-stats if not already present
+        if (document.getElementById('costPanel')) return;
+        const hero = document.querySelector('.hero-stats');
+        if (!hero) return;
+        const panel = document.createElement('div');
+        panel.id = 'costPanel';
+        panel.style.cssText = 'max-width:700px;margin:0.75rem auto 0;padding:0.75rem 1.25rem;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:10px;font-size:0.85rem;color:var(--text-secondary);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;';
+        panel.innerHTML = `
+            <span title="本月（${new Date().toISOString().slice(0,7)}）GLM 翻译消耗">
+                📊 <strong style="color:var(--text-primary)">本月翻译</strong>
+                ${d.monthFiles} 个文件 · ${d.fmtTokens(d.monthIn + d.monthOut)} tokens
+                · ${d.runCount} 次运行
+            </span>
+            <span title="GLM-Z1-Flash 免费档实际花费 ¥0；按 GLM-4-Air ¥1/M tokens 折算的等价价格">
+                💰 <strong style="color:var(--accent-green)">实际 ¥0.00</strong>
+                <span style="opacity:0.7">(等价 ¥${d.monthCostEquiv.toFixed(2)})</span>
+                · 累计等价 ¥${d.totalCostEquiv.toFixed(2)}
+            </span>
+        `;
+        hero.parentNode.insertBefore(panel, hero.nextSibling);
+    }
 
     async function loadCoverage() {
         // Try the freshest snapshot from the daily auto-translate workflow.
