@@ -29,6 +29,9 @@ TARGET_DIRS = ["SystemPrompts", "CustomInstructions", "Articles", "Jailbreak", "
 
 MAX_FILES_PER_RUN = int(os.environ.get("MAX_FILES_PER_RUN", "40"))
 MAX_FILE_CHARS = int(os.environ.get("MAX_FILE_CHARS", "30000"))
+TRANSLATE_OVERSIZED = os.environ.get("TRANSLATE_OVERSIZED", "1") == "1"
+MAX_OVERSIZED_PER_RUN = int(os.environ.get("MAX_OVERSIZED_PER_RUN", "5"))
+CHUNK_TARGET_CHARS = int(os.environ.get("CHUNK_TARGET_CHARS", "12000"))
 MAX_RETRIES = 3
 REQUEST_TIMEOUT = 300
 SLEEP_BETWEEN = 1.0
@@ -103,6 +106,71 @@ def is_translatable_size(en_path: Path) -> tuple[bool, int]:
     except Exception:
         return False, 0
     return (10 <= size <= MAX_FILE_CHARS), size
+
+
+def chunk_markdown(text: str, target: int) -> list[str]:
+    """Split markdown into translation chunks while preserving structure.
+
+    Strategy:
+      1. First split on H2/H1 headings (keeping the heading with its body).
+      2. Any chunk still over `target * 1.5` is further split on paragraph breaks.
+      3. Single oversized paragraphs are emitted as-is (best effort).
+    """
+    parts: list[str] = []
+    current: list[str] = []
+    for line in text.splitlines(keepends=True):
+        if line.lstrip().startswith(("# ", "## ")) and current:
+            parts.append("".join(current))
+            current = [line]
+        else:
+            current.append(line)
+    if current:
+        parts.append("".join(current))
+
+    refined: list[str] = []
+    cap = int(target * 1.5)
+    for p in parts:
+        if len(p) <= cap:
+            refined.append(p)
+            continue
+        buf: list[str] = []
+        size = 0
+        for para in p.split("\n\n"):
+            chunk_piece = para + "\n\n"
+            if size + len(chunk_piece) > target and buf:
+                refined.append("".join(buf))
+                buf, size = [], 0
+            buf.append(chunk_piece)
+            size += len(chunk_piece)
+        if buf:
+            refined.append("".join(buf))
+    return [c for c in refined if c.strip()]
+
+
+def translate_oversized(en_path: Path, stats: dict) -> bool:
+    """Chunk-translate a file that exceeds MAX_FILE_CHARS. Returns True on success."""
+    content = en_path.read_text(encoding="utf-8", errors="replace")
+    chunks = chunk_markdown(content, CHUNK_TARGET_CHARS)
+    print(f"  chunked into {len(chunks)} pieces (avg {len(content)//max(1,len(chunks))} chars)")
+    translated_chunks: list[str] = []
+    for j, chunk in enumerate(chunks, 1):
+        print(f"    chunk {j}/{len(chunks)} ({len(chunk)} chars)")
+        try:
+            t, usage = call_glm(chunk)
+        except Exception as e:
+            print(f"    chunk failed: {e}")
+            return False
+        if not t or len(t) < 5:
+            print("    empty chunk translation, aborting file")
+            return False
+        translated_chunks.append(t)
+        stats["tokens_in"] += int(usage.get("prompt_tokens", 0))
+        stats["tokens_out"] += int(usage.get("completion_tokens", 0))
+        time.sleep(SLEEP_BETWEEN)
+    full = "\n\n".join(translated_chunks)
+    zh_path = en_path.with_name(en_path.name.replace(".md", "_zh.md"))
+    zh_path.write_text(full, encoding="utf-8")
+    return True
 
 
 def log_error(file_path: Path, err: Exception) -> None:
@@ -193,8 +261,30 @@ def main() -> int:
             stats["failed"] += 1
             log_error(en, e)
 
-    stats["duration_seconds"] = round(time.time() - started_at, 1)
+    stats["duration_seconds_normal"] = round(time.time() - started_at, 1)
     stats["pending_after_run"] = max(0, len(candidates) - len(batch))
+
+    # ----- Oversized handling: chunked translation -----
+    stats["oversized_translated"] = 0
+    stats["oversized_failed"] = 0
+    if TRANSLATE_OVERSIZED and oversized:
+        oversized_batch = oversized[:MAX_OVERSIZED_PER_RUN]
+        print(
+            f"\nOversized batch: translating {len(oversized_batch)} of "
+            f"{len(oversized)} oversized files (cap={MAX_OVERSIZED_PER_RUN})"
+        )
+        for k, (en, size) in enumerate(oversized_batch, 1):
+            print(f"[oversized {k}/{len(oversized_batch)}] {en} ({size} chars)")
+            try:
+                ok = translate_oversized(en, stats)
+                if ok:
+                    stats["oversized_translated"] += 1
+                else:
+                    stats["oversized_failed"] += 1
+            except Exception as e:
+                print(f"  FAILED: {e}")
+                stats["oversized_failed"] += 1
+                log_error(en, e)
 
     if oversized:
         STATS_DIR.mkdir(parents=True, exist_ok=True)
@@ -202,11 +292,13 @@ def main() -> int:
             "\n".join(f"{p}\t{s}" for p, s in oversized) + "\n", encoding="utf-8"
         )
 
+    stats["duration_seconds"] = round(time.time() - started_at, 1)
     write_stats(stats)
 
     print(
         f"\nDone: {stats['translated']} translated, {stats['failed']} failed, "
         f"{stats['pending_after_run']} pending; "
+        f"oversized: {stats['oversized_translated']} ok / {stats['oversized_failed']} failed; "
         f"tokens in/out: {stats['tokens_in']}/{stats['tokens_out']}; "
         f"{stats['duration_seconds']}s"
     )
