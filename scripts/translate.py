@@ -5,11 +5,15 @@
 - Skips files larger than MAX_FILE_CHARS (cost control).
 - Caps per-run translations at MAX_FILES_PER_RUN (cost control).
 - Strips <think>...</think> blocks (GLM-Z1 reasoning output).
+- Writes per-run stats to stats/translation-runs.jsonl.
 """
+import json
 import os
 import re
 import sys
 import time
+import traceback
+from datetime import datetime, timezone
 from pathlib import Path
 
 import requests
@@ -29,6 +33,10 @@ MAX_RETRIES = 3
 REQUEST_TIMEOUT = 300
 SLEEP_BETWEEN = 1.0
 
+STATS_DIR = Path("stats")
+STATS_LOG = STATS_DIR / "translation-runs.jsonl"
+ERROR_LOG = STATS_DIR / "translation-errors.log"
+
 SYSTEM_PROMPT = """你是专业的中英文翻译专家。请把英文 Markdown 翻译成简体中文。
 
 严格要求：
@@ -41,7 +49,8 @@ SYSTEM_PROMPT = """你是专业的中英文翻译专家。请把英文 Markdown 
 7. 直接输出翻译结果，不要任何解释、前后缀或思考过程"""
 
 
-def call_glm(content: str) -> str:
+def call_glm(content: str) -> tuple[str, dict]:
+    """Returns (translated_text, usage_dict)."""
     last_err = None
     for attempt in range(MAX_RETRIES):
         try:
@@ -69,10 +78,10 @@ def call_glm(content: str) -> str:
             resp.raise_for_status()
             data = resp.json()
             text = data["choices"][0]["message"]["content"]
-            # Strip GLM-Z1 thinking tags
             text = re.sub(r"<think>[\s\S]*?</think>", "", text).strip()
             text = re.sub(r"^```(?:markdown|md)?\n([\s\S]*?)\n```$", r"\1", text).strip()
-            return text
+            usage = data.get("usage", {}) or {}
+            return text, usage
         except Exception as e:
             last_err = e
             print(f"  attempt {attempt + 1} failed: {e}")
@@ -85,6 +94,19 @@ def needs_translation(en_path: Path) -> bool:
     if not zh_path.exists():
         return True
     return en_path.stat().st_mtime > zh_path.stat().st_mtime
+
+
+def log_error(file_path: Path, err: Exception) -> None:
+    STATS_DIR.mkdir(parents=True, exist_ok=True)
+    with ERROR_LOG.open("a", encoding="utf-8") as fp:
+        fp.write(f"\n--- {datetime.now(timezone.utc).isoformat()} {file_path} ---\n")
+        fp.write("".join(traceback.format_exception(type(err), err, err.__traceback__)))
+
+
+def write_stats(stats: dict) -> None:
+    STATS_DIR.mkdir(parents=True, exist_ok=True)
+    with STATS_LOG.open("a", encoding="utf-8") as fp:
+        fp.write(json.dumps(stats, ensure_ascii=False) + "\n")
 
 
 def main() -> int:
@@ -103,19 +125,33 @@ def main() -> int:
                 candidates.append(en)
 
     print(f"Found {len(candidates)} files needing translation")
+
+    stats = {
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "model": MODEL,
+        "candidates": len(candidates),
+        "translated": 0,
+        "failed": 0,
+        "skipped_too_large": 0,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "duration_seconds": 0,
+    }
+
     if not candidates:
+        write_stats(stats)
         return 0
 
     batch = candidates[:MAX_FILES_PER_RUN]
     print(f"Will translate first {len(batch)} this run (cap={MAX_FILES_PER_RUN})")
+    started_at = time.time()
 
-    processed = 0
-    failed = 0
     for i, en in enumerate(batch, 1):
         content = en.read_text(encoding="utf-8", errors="replace")
         size = len(content)
         if size > MAX_FILE_CHARS:
             print(f"[{i}/{len(batch)}] SKIP {en} (too large: {size} chars)")
+            stats["skipped_too_large"] += 1
             continue
         if size < 10:
             print(f"[{i}/{len(batch)}] SKIP {en} (too small)")
@@ -123,20 +159,32 @@ def main() -> int:
 
         print(f"[{i}/{len(batch)}] {en} ({size} chars)")
         try:
-            translated = call_glm(content)
+            translated, usage = call_glm(content)
             if not translated or len(translated) < 10:
-                print(f"  empty translation, skipping")
-                failed += 1
+                print("  empty translation, skipping")
+                stats["failed"] += 1
                 continue
             zh_path = en.with_name(en.name.replace(".md", "_zh.md"))
             zh_path.write_text(translated, encoding="utf-8")
-            processed += 1
+            stats["translated"] += 1
+            stats["tokens_in"] += int(usage.get("prompt_tokens", 0))
+            stats["tokens_out"] += int(usage.get("completion_tokens", 0))
             time.sleep(SLEEP_BETWEEN)
         except Exception as e:
             print(f"  FAILED: {e}")
-            failed += 1
+            stats["failed"] += 1
+            log_error(en, e)
 
-    print(f"\nDone: {processed} translated, {failed} failed, {len(candidates) - len(batch)} pending for next run")
+    stats["duration_seconds"] = round(time.time() - started_at, 1)
+    stats["pending_after_run"] = max(0, len(candidates) - len(batch))
+    write_stats(stats)
+
+    print(
+        f"\nDone: {stats['translated']} translated, {stats['failed']} failed, "
+        f"{stats['pending_after_run']} pending; "
+        f"tokens in/out: {stats['tokens_in']}/{stats['tokens_out']}; "
+        f"{stats['duration_seconds']}s"
+    )
     return 0
 
 
