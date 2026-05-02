@@ -3,8 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Big Prompt Library 中文版</title>
-    <meta name="description" content="大型提示词库 - 系统提示词、自定义指令、越狱提示词合集">
+    <title>The Big Prompt Library 中文版 - AI 提示词大全</title>
+    <meta name="description" content="全面的 AI 提示词库，收录 1784+ 系统提示词、自定义指令和越狱提示词。支持 OpenAI、Claude、Gemini 等 25+ 大型语言模型。">
+    <meta property="og:title" content="The Big Prompt Library 中文版">
+    <meta property="og:description" content="1784+ AI 提示词，支持 OpenAI ChatGPT、Claude、Gemini 等主流 LLM。一键复制，直接使用。">
+    <meta property="og:type" content="website">
     <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-6MTPFC3GJC"></script>
     <script>
@@ -13,7 +16,6 @@
         gtag('js', new Date());
         gtag('config', 'G-6MTPFC3GJC');
     </script>
-    <!-- End Google Analytics -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -36,11 +38,7 @@
             --transition: all 0.2s ease;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -50,15 +48,15 @@
             min-height: 100vh;
         }
 
-        /* Header */
+        /* ===== HEADER ===== */
         header {
-            background: var(--bg-secondary);
+            background: rgba(22,27,34,0.95);
             border-bottom: 1px solid var(--border-color);
-            padding: 1rem 2rem;
+            padding: 0.875rem 2rem;
             position: sticky;
             top: 0;
-            z-index: 100;
-            backdrop-filter: blur(10px);
+            z-index: 200;
+            backdrop-filter: blur(12px);
         }
 
         .header-content {
@@ -66,92 +64,105 @@
             margin: 0 auto;
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            gap: 2rem;
+            gap: 1.5rem;
         }
 
         .logo {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
+            gap: 0.6rem;
             text-decoration: none;
             color: var(--text-primary);
+            flex-shrink: 0;
+            cursor: pointer;
         }
 
-        .logo-icon {
-            font-size: 1.75rem;
-        }
+        .logo-icon { font-size: 1.5rem; }
 
         .logo-text {
-            font-size: 1.25rem;
+            font-size: 1.1rem;
             font-weight: 700;
+            white-space: nowrap;
         }
 
         .logo-badge {
-            background: linear-gradient(135deg, var(--accent-red), var(--accent-orange));
+            background: linear-gradient(135deg, #ef4444, #f97316);
             color: white;
-            font-size: 0.65rem;
-            padding: 0.2rem 0.5rem;
+            font-size: 0.6rem;
+            padding: 0.15rem 0.45rem;
             border-radius: 4px;
-            font-weight: 600;
+            font-weight: 700;
+            letter-spacing: 0.02em;
         }
 
-        /* Search */
-        .search-container {
+        /* Search in header */
+        .header-search {
             flex: 1;
-            max-width: 500px;
+            max-width: 480px;
+            position: relative;
         }
 
-        .search-box {
+        .header-search-box {
             display: flex;
             align-items: center;
             background: var(--bg-tertiary);
             border: 1px solid var(--border-color);
             border-radius: 8px;
-            padding: 0.5rem 1rem;
+            padding: 0.45rem 0.875rem;
+            gap: 0.5rem;
             transition: var(--transition);
         }
 
-        .search-box:focus-within {
+        .header-search-box:focus-within {
             border-color: var(--accent-blue);
-            box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.2);
+            box-shadow: 0 0 0 3px rgba(88,166,255,0.15);
         }
 
-        .search-box input {
+        .header-search-box input {
             flex: 1;
             background: transparent;
             border: none;
             color: var(--text-primary);
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             outline: none;
+            font-family: inherit;
         }
 
-        .search-box input::placeholder {
-            color: var(--text-muted);
-        }
+        .header-search-box input::placeholder { color: var(--text-muted); }
 
-        .search-icon {
-            color: var(--text-muted);
-            margin-right: 0.5rem;
-        }
+        .search-icon-svg { color: var(--text-muted); flex-shrink: 0; }
 
-        /* Nav */
+        .search-clear {
+            background: none; border: none; cursor: pointer;
+            color: var(--text-muted); padding: 0; display: none;
+            font-size: 1rem; line-height: 1;
+        }
+        .search-clear.visible { display: block; }
+
+        /* Header nav */
         nav {
             display: flex;
-            gap: 0.5rem;
+            gap: 0.25rem;
+            margin-left: auto;
+            flex-shrink: 0;
         }
 
-        nav a {
+        nav a, nav button {
             color: var(--text-secondary);
             text-decoration: none;
-            padding: 0.5rem 1rem;
+            padding: 0.45rem 0.875rem;
             border-radius: 6px;
-            font-size: 0.9rem;
+            font-size: 0.875rem;
             font-weight: 500;
             transition: var(--transition);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+            white-space: nowrap;
         }
 
-        nav a:hover {
+        nav a:hover, nav button:hover {
             color: var(--text-primary);
             background: var(--bg-tertiary);
         }
@@ -161,17 +172,153 @@
             background: var(--bg-tertiary);
         }
 
-        /* Main content */
+        /* ===== SEARCH DROPDOWN ===== */
+        .search-dropdown {
+            display: none;
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 0; right: 0;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            box-shadow: var(--card-shadow);
+            z-index: 500;
+            overflow: hidden;
+            max-height: 420px;
+            overflow-y: auto;
+        }
+
+        .search-dropdown.active { display: block; }
+
+        .search-dropdown-header {
+            padding: 0.6rem 1rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--bg-tertiary);
+        }
+
+        .search-result-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid rgba(48,54,61,0.5);
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .search-result-item:hover { background: var(--bg-tertiary); }
+        .search-result-item:last-child { border-bottom: none; }
+
+        .search-result-icon {
+            width: 32px; height: 32px;
+            border-radius: 6px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.875rem;
+            flex-shrink: 0;
+            background: var(--bg-tertiary);
+        }
+
+        .search-result-body { flex: 1; min-width: 0; }
+
+        .search-result-title {
+            font-weight: 500;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .search-result-title mark {
+            background: rgba(88,166,255,0.25);
+            color: var(--accent-blue);
+            border-radius: 2px;
+            padding: 0 1px;
+        }
+
+        .search-result-meta {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.1rem;
+        }
+
+        .search-no-results {
+            padding: 2rem;
+            text-align: center;
+            color: var(--text-muted);
+        }
+
+        /* ===== MAIN LAYOUT ===== */
         main {
             max-width: 1400px;
             margin: 0 auto;
             padding: 2rem;
+            padding-bottom: 5rem;
         }
 
-        /* Hero section */
+        /* ===== TOAST ===== */
+        .toast-container {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            pointer-events: none;
+        }
+
+        .toast {
+            background: #1a2030;
+            border: 1px solid #2d3748;
+            color: #f0f6fc;
+            padding: 0.75rem 1.25rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            animation: toastIn 0.3s ease, toastOut 0.3s ease 2.2s forwards;
+            white-space: nowrap;
+        }
+
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes toastOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+
+        /* ===== HOME PAGE ===== */
         .hero {
             text-align: center;
-            padding: 3rem 0 4rem;
+            padding: 3.5rem 0 3rem;
+        }
+
+        .hero-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(88,166,255,0.1);
+            border: 1px solid rgba(88,166,255,0.2);
+            color: var(--accent-blue);
+            padding: 0.3rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 1.25rem;
+            letter-spacing: 0.02em;
         }
 
         .hero h1 {
@@ -182,43 +329,138 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            line-height: 1.2;
         }
 
         .hero p {
-            font-size: 1.25rem;
+            font-size: 1.15rem;
             color: var(--text-secondary);
-            max-width: 700px;
+            max-width: 640px;
             margin: 0 auto 2rem;
+            line-height: 1.7;
         }
+
+        .hero-cta {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 2.5rem;
+        }
+
+        .btn-hero-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--accent-blue);
+            color: white;
+            padding: 0.75rem 1.75rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            font-family: inherit;
+        }
+
+        .btn-hero-primary:hover { background: #4a90db; transform: translateY(-1px); }
+
+        .btn-hero-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: transparent;
+            color: var(--text-primary);
+            padding: 0.75rem 1.75rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            font-family: inherit;
+        }
+
+        .btn-hero-secondary:hover { border-color: var(--accent-blue); background: rgba(88,166,255,0.05); }
 
         .hero-stats {
             display: flex;
             justify-content: center;
             gap: 3rem;
             flex-wrap: wrap;
+            padding: 1.5rem 2rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            max-width: 700px;
+            margin: 0 auto;
         }
 
-        .stat {
-            text-align: center;
-        }
+        .stat { text-align: center; }
 
         .stat-value {
-            font-size: 2.5rem;
+            font-size: 2.25rem;
             font-weight: 700;
             color: var(--accent-green);
+            line-height: 1;
+            margin-bottom: 0.25rem;
         }
 
-        .stat-label {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
+        .stat-label { font-size: 0.85rem; color: var(--text-secondary); }
+
+        /* ===== HOW TO USE ===== */
+        .how-to-use {
+            margin: 3rem 0;
         }
 
-        /* Category grid */
+        .section-title {
+            font-size: 1.35rem;
+            font-weight: 600;
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+        }
+
+        .step-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1.25rem;
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+
+        .step-num {
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .step-text h3 { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.25rem; }
+        .step-text p { font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5; }
+
+        /* ===== CATEGORY GRID ===== */
         .categories {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 3rem;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 2.5rem;
         }
 
         .category-card {
@@ -230,70 +472,47 @@
             transition: var(--transition);
             text-decoration: none;
             color: inherit;
+            display: block;
         }
 
         .category-card:hover {
-            transform: translateY(-4px);
+            transform: translateY(-3px);
             border-color: var(--accent-blue);
-            box-shadow: var(--card-shadow);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
         }
 
-        .category-icon {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .category-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-
-        .category-desc {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            margin-bottom: 1rem;
-        }
+        .category-icon { font-size: 2rem; margin-bottom: 0.75rem; }
+        .category-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.4rem; }
+        .category-desc { color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 0.875rem; line-height: 1.5; }
 
         .category-count {
             display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.4rem;
             background: var(--bg-tertiary);
-            padding: 0.25rem 0.75rem;
+            padding: 0.2rem 0.65rem;
             border-radius: 20px;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: var(--text-secondary);
         }
 
-        /* Provider section */
-        .providers-section {
-            margin-bottom: 3rem;
-        }
-
-        .section-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
+        /* ===== PROVIDERS ===== */
+        .providers-section { margin-bottom: 2.5rem; }
 
         .providers-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 1rem;
+            grid-template-columns: repeat(auto-fill, minmax(185px, 1fr));
+            gap: 0.875rem;
         }
 
         .provider-card {
             background: var(--bg-secondary);
             border: 1px solid var(--border-color);
             border-radius: 10px;
-            padding: 1.25rem;
+            padding: 1rem 1.25rem;
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: 0.875rem;
             cursor: pointer;
             transition: var(--transition);
             text-decoration: none;
@@ -303,54 +522,124 @@
         .provider-card:hover {
             border-color: var(--accent-blue);
             background: var(--bg-tertiary);
+            transform: translateY(-2px);
         }
 
         .provider-logo {
-            width: 40px;
-            height: 40px;
+            width: 38px; height: 38px;
             border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        .provider-info h3 { font-size: 0.9rem; font-weight: 600; margin-bottom: 0.15rem; }
+        .provider-info span { font-size: 0.78rem; color: var(--text-secondary); }
+
+        /* ===== RECENT SECTION ===== */
+        .recent-section { margin-bottom: 2.5rem; }
+
+        .recent-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 0.875rem;
+        }
+
+        .recent-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1rem 1.25rem;
+            cursor: pointer;
+            transition: var(--transition);
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
+            gap: 0.875rem;
         }
 
-        .provider-info h3 {
+        .recent-card:hover {
+            border-color: var(--accent-blue);
+            background: var(--bg-tertiary);
+        }
+
+        .recent-card-icon {
+            width: 36px; height: 36px;
+            border-radius: 8px;
+            background: var(--bg-tertiary);
+            display: flex; align-items: center; justify-content: center;
             font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .recent-card-body { flex: 1; min-width: 0; }
+        .recent-card-title { font-size: 0.875rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .recent-card-meta { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.15rem; }
+
+        .zh-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.2rem;
+            background: rgba(63,185,80,0.15);
+            color: var(--accent-green);
+            padding: 0.1rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
             font-weight: 600;
-            margin-bottom: 0.25rem;
+            flex-shrink: 0;
         }
 
-        .provider-info span {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-        }
+        /* ===== BROWSER SECTION ===== */
+        #browser-section { display: none; }
+        #browser-section.active { display: block; }
 
-        /* Content browser */
-        .content-browser {
-            display: none;
-        }
-
-        .content-browser.active {
-            display: block;
+        .browser-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+            flex-wrap: wrap;
         }
 
         .breadcrumb {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 1.5rem;
+            gap: 0.4rem;
             color: var(--text-secondary);
-            font-size: 0.9rem;
+            font-size: 0.875rem;
+            flex: 1;
         }
 
         .breadcrumb a {
             color: var(--accent-blue);
             text-decoration: none;
+            cursor: pointer;
         }
 
-        .breadcrumb a:hover {
-            text-decoration: underline;
+        .breadcrumb a:hover { text-decoration: underline; }
+
+        .filter-row {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.25rem;
+        }
+
+        .filter-chip {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 0.3rem 0.875rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: inherit;
+        }
+
+        .filter-chip:hover, .filter-chip.active {
+            border-color: var(--accent-blue);
+            color: var(--accent-blue);
+            background: rgba(88,166,255,0.1);
         }
 
         .file-list {
@@ -363,111 +652,174 @@
         .file-item {
             display: flex;
             align-items: center;
-            gap: 1rem;
-            padding: 1rem 1.5rem;
-            border-bottom: 1px solid var(--border-color);
+            gap: 0.875rem;
+            padding: 0.875rem 1.25rem;
+            border-bottom: 1px solid rgba(48,54,61,0.6);
             cursor: pointer;
             transition: var(--transition);
             text-decoration: none;
             color: inherit;
         }
 
-        .file-item:last-child {
-            border-bottom: none;
+        .file-item:last-child { border-bottom: none; }
+        .file-item:hover { background: var(--bg-tertiary); }
+
+        .file-icon { font-size: 1.1rem; flex-shrink: 0; }
+        .file-name { flex: 1; font-weight: 500; font-size: 0.9rem; }
+        .file-date { color: var(--text-muted); font-size: 0.8rem; flex-shrink: 0; }
+
+        /* ===== VIEWER SECTION ===== */
+        #viewer-section { display: none; }
+        #viewer-section.active { display: block; }
+
+        .viewer-breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin-bottom: 1.25rem;
         }
 
-        .file-item:hover {
-            background: var(--bg-tertiary);
-        }
-
-        .file-icon {
-            font-size: 1.25rem;
-        }
-
-        .file-name {
-            flex: 1;
-            font-weight: 500;
-        }
-
-        .file-date {
-            color: var(--text-muted);
-            font-size: 0.85rem;
-        }
-
-        /* Prompt viewer */
-        .prompt-viewer {
-            display: none;
-        }
-
-        .prompt-viewer.active {
-            display: block;
+        .viewer-breadcrumb a {
+            color: var(--accent-blue);
+            text-decoration: none;
+            cursor: pointer;
         }
 
         .prompt-header {
             display: flex;
             align-items: flex-start;
             justify-content: space-between;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.25rem;
             gap: 1rem;
+            flex-wrap: wrap;
         }
 
-        .prompt-title {
-            font-size: 1.75rem;
-            font-weight: 700;
-        }
+        .prompt-title { font-size: 1.6rem; font-weight: 700; line-height: 1.3; }
 
         .prompt-meta {
             display: flex;
-            gap: 1rem;
+            gap: 0.5rem;
             margin-top: 0.5rem;
             flex-wrap: wrap;
+            align-items: center;
         }
 
         .prompt-tag {
             display: inline-flex;
             align-items: center;
-            gap: 0.25rem;
-            padding: 0.25rem 0.75rem;
+            gap: 0.2rem;
+            padding: 0.2rem 0.65rem;
             background: var(--bg-tertiary);
             border-radius: 20px;
-            font-size: 0.85rem;
+            font-size: 0.78rem;
             color: var(--text-secondary);
         }
 
+        /* Action buttons */
         .prompt-actions {
             display: flex;
             gap: 0.5rem;
+            flex-wrap: wrap;
+            align-items: center;
         }
 
         .btn {
             display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.4rem;
             padding: 0.5rem 1rem;
             border: 1px solid var(--border-color);
             border-radius: 6px;
             background: var(--bg-secondary);
             color: var(--text-primary);
-            font-size: 0.9rem;
+            font-size: 0.875rem;
             cursor: pointer;
             transition: var(--transition);
             text-decoration: none;
+            font-family: inherit;
+            white-space: nowrap;
         }
 
-        .btn:hover {
-            background: var(--bg-tertiary);
-            border-color: var(--accent-blue);
-        }
+        .btn:hover { background: var(--bg-tertiary); border-color: var(--accent-blue); }
 
         .btn-primary {
             background: var(--accent-blue);
             border-color: var(--accent-blue);
             color: white;
+            font-weight: 600;
         }
 
-        .btn-primary:hover {
-            background: #4a90db;
+        .btn-primary:hover { background: #4a90db; border-color: #4a90db; }
+
+        .btn-success {
+            background: var(--accent-green);
+            border-color: var(--accent-green);
+            color: white;
+            font-weight: 600;
         }
+
+        .btn-success:hover { background: #2ea043; border-color: #2ea043; }
+
+        .btn-fav { color: var(--text-muted); }
+        .btn-fav.active { color: #f85149; border-color: rgba(248,81,73,0.4); background: rgba(248,81,73,0.08); }
+
+        /* Quick-use bar */
+        .quick-use-bar {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            background: rgba(63,185,80,0.08);
+            border: 1px solid rgba(63,185,80,0.2);
+            border-radius: 10px;
+            margin-bottom: 1.25rem;
+            flex-wrap: wrap;
+        }
+
+        .quick-use-label {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            margin-right: 0.25rem;
+        }
+
+        .btn-chatgpt {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            background: #10a37f;
+            color: white;
+            border: none;
+            padding: 0.4rem 0.875rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: inherit;
+        }
+
+        .btn-chatgpt:hover { background: #0e8f70; }
+
+        .btn-claude {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            background: #d4a574;
+            color: #1a0f02;
+            border: none;
+            padding: 0.4rem 0.875rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: inherit;
+        }
+
+        .btn-claude:hover { background: #c8975d; }
 
         .prompt-content {
             background: var(--bg-secondary);
@@ -479,808 +831,1044 @@
 
         .prompt-content pre {
             font-family: 'JetBrains Mono', monospace;
-            font-size: 0.9rem;
-            line-height: 1.7;
+            font-size: 0.875rem;
+            line-height: 1.75;
             white-space: pre-wrap;
             word-break: break-word;
         }
 
-        .prompt-content code {
-            font-family: 'JetBrains Mono', monospace;
-        }
+        /* ===== FAVORITES PAGE ===== */
+        #favorites-section { display: none; }
+        #favorites-section.active { display: block; }
 
-        /* Footer */
-        footer {
-            border-top: 1px solid var(--border-color);
-            padding: 2rem;
+        .empty-state {
             text-align: center;
-            color: var(--text-secondary);
-            margin-top: 4rem;
+            padding: 4rem 2rem;
+            color: var(--text-muted);
         }
 
-        footer a {
-            color: var(--accent-blue);
-            text-decoration: none;
-        }
+        .empty-state-icon { font-size: 3rem; margin-bottom: 1rem; }
+        .empty-state h3 { font-size: 1.1rem; color: var(--text-secondary); margin-bottom: 0.5rem; }
+        .empty-state p { font-size: 0.875rem; }
 
-        footer a:hover {
-            text-decoration: underline;
-        }
-
-        /* Loading */
+        /* ===== LOADING ===== */
         .loading {
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 3rem;
             color: var(--text-secondary);
+            gap: 0.75rem;
         }
 
         .spinner {
-            width: 24px;
-            height: 24px;
+            width: 20px; height: 20px;
             border: 2px solid var(--border-color);
             border-top-color: var(--accent-blue);
             border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-right: 0.75rem;
+            animation: spin 0.8s linear infinite;
         }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* Search results */
-        .search-results {
-            display: none;
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            margin-top: 0.5rem;
-            max-height: 400px;
-            overflow-y: auto;
-            box-shadow: var(--card-shadow);
-            z-index: 1000;
-        }
-
-        .search-results.active {
-            display: block;
-        }
-
-        .search-result-item {
-            display: block;
-            padding: 0.75rem 1rem;
-            border-bottom: 1px solid var(--border-color);
-            cursor: pointer;
-            transition: var(--transition);
-            text-decoration: none;
-            color: inherit;
-        }
-
-        .search-result-item:hover {
-            background: var(--bg-tertiary);
-        }
-
-        .search-result-item:last-child {
-            border-bottom: none;
-        }
-
-        .search-result-title {
-            font-weight: 500;
-            margin-bottom: 0.25rem;
-        }
-
-        .search-result-path {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .header-content {
-                flex-wrap: wrap;
-            }
-
-            .search-container {
-                order: 3;
-                max-width: 100%;
-                width: 100%;
-            }
-
-            nav {
-                display: none;
-            }
-
-            .hero h1 {
-                font-size: 2rem;
-            }
-
-            .hero-stats {
-                gap: 1.5rem;
-            }
-
-            .stat-value {
-                font-size: 1.75rem;
-            }
-
-            .categories {
-                grid-template-columns: 1fr;
-            }
-
-            main {
-                padding: 1rem;
-            }
-        }
-
-        /* Markdown styles */
-        .markdown-body {
-            color: var(--text-primary);
-        }
-
+        /* ===== MARKDOWN ===== */
+        .markdown-body { color: var(--text-primary); }
         .markdown-body h1, .markdown-body h2, .markdown-body h3 {
-            margin-top: 1.5rem;
-            margin-bottom: 1rem;
+            margin-top: 1.5rem; margin-bottom: 0.75rem;
             font-weight: 600;
             border-bottom: 1px solid var(--border-color);
-            padding-bottom: 0.5rem;
+            padding-bottom: 0.4rem;
         }
-
-        .markdown-body h1 { font-size: 1.75rem; }
-        .markdown-body h2 { font-size: 1.5rem; }
-        .markdown-body h3 { font-size: 1.25rem; border-bottom: none; }
-
-        .markdown-body p {
-            margin-bottom: 1rem;
-        }
-
-        .markdown-body ul, .markdown-body ol {
-            margin-bottom: 1rem;
-            padding-left: 2rem;
-        }
-
-        .markdown-body li {
-            margin-bottom: 0.5rem;
-        }
-
+        .markdown-body h1 { font-size: 1.6rem; }
+        .markdown-body h2 { font-size: 1.35rem; }
+        .markdown-body h3 { font-size: 1.1rem; border-bottom: none; }
+        .markdown-body p { margin-bottom: 1rem; line-height: 1.7; }
+        .markdown-body ul, .markdown-body ol { margin-bottom: 1rem; padding-left: 1.75rem; }
+        .markdown-body li { margin-bottom: 0.4rem; }
         .markdown-body code {
-            background: var(--bg-tertiary);
-            padding: 0.2rem 0.4rem;
-            border-radius: 4px;
-            font-size: 0.9em;
+            background: var(--bg-tertiary); padding: 0.15rem 0.35rem;
+            border-radius: 4px; font-size: 0.875em;
+            font-family: 'JetBrains Mono', monospace;
         }
-
         .markdown-body pre {
-            background: var(--bg-tertiary);
-            padding: 1rem;
-            border-radius: 8px;
-            overflow-x: auto;
-            margin-bottom: 1rem;
+            background: var(--bg-tertiary); padding: 1rem; border-radius: 8px;
+            overflow-x: auto; margin-bottom: 1rem;
         }
-
-        .markdown-body pre code {
-            background: none;
-            padding: 0;
-        }
-
+        .markdown-body pre code { background: none; padding: 0; }
         .markdown-body blockquote {
-            border-left: 4px solid var(--accent-blue);
-            padding-left: 1rem;
-            margin: 1rem 0;
+            border-left: 3px solid var(--accent-blue);
+            padding-left: 1rem; margin: 1rem 0;
             color: var(--text-secondary);
         }
+        .markdown-body a { color: var(--accent-blue); text-decoration: none; }
+        .markdown-body a:hover { text-decoration: underline; }
+        .markdown-body table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; }
+        .markdown-body th, .markdown-body td { border: 1px solid var(--border-color); padding: 0.6rem 0.75rem; text-align: left; }
+        .markdown-body th { background: var(--bg-tertiary); font-weight: 600; }
+        .markdown-body hr { border: none; border-top: 1px solid var(--border-color); margin: 1.5rem 0; }
 
-        .markdown-body a {
-            color: var(--accent-blue);
-            text-decoration: none;
+        /* ===== FOOTER ===== */
+        footer {
+            border-top: 1px solid var(--border-color);
+            padding: 1.5rem 2rem;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin-top: 4rem;
         }
 
-        .markdown-body a:hover {
-            text-decoration: underline;
+        footer a { color: var(--accent-blue); text-decoration: none; }
+        footer a:hover { text-decoration: underline; }
+
+        /* ===== MOBILE BOTTOM NAV ===== */
+        .mobile-nav {
+            display: none;
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            background: rgba(22,27,34,0.97);
+            border-top: 1px solid var(--border-color);
+            padding: 0.5rem;
+            z-index: 300;
+            backdrop-filter: blur(12px);
         }
 
-        .markdown-body table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 1rem;
+        .mobile-nav-inner {
+            display: flex;
+            justify-content: space-around;
+            max-width: 400px;
+            margin: 0 auto;
         }
 
-        .markdown-body th, .markdown-body td {
-            border: 1px solid var(--border-color);
-            padding: 0.75rem;
-            text-align: left;
+        .mobile-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.2rem;
+            padding: 0.4rem 0.75rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            background: none;
+            color: var(--text-muted);
+            font-family: inherit;
+            font-size: 0.65rem;
+            font-weight: 500;
         }
 
-        .markdown-body th {
-            background: var(--bg-tertiary);
-            font-weight: 600;
+        .mobile-nav-item.active { color: var(--accent-blue); }
+        .mobile-nav-item svg { width: 20px; height: 20px; }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .header-content { gap: 0.75rem; }
+            .logo-text { display: none; }
+            .logo-icon { font-size: 1.75rem; }
+            nav { display: none; }
+            main { padding: 1rem; padding-bottom: 5rem; }
+            .hero h1 { font-size: 2rem; }
+            .hero-stats { gap: 1.5rem; padding: 1rem; }
+            .stat-value { font-size: 1.75rem; }
+            .categories { grid-template-columns: 1fr; }
+            .providers-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+            .steps-grid { grid-template-columns: 1fr; }
+            .mobile-nav { display: block; }
+            .prompt-header { flex-direction: column; }
+            .prompt-actions { justify-content: flex-start; }
+            .quick-use-bar { flex-direction: column; align-items: flex-start; }
+            .toast-container { bottom: 80px; width: calc(100% - 2rem); }
+            .toast { white-space: normal; }
         }
     </style>
 </head>
 <body>
-    <header>
-        <div class="header-content">
-            <a href="#" class="logo" onclick="showHome()">
-                <span class="logo-icon">📚</span>
-                <span class="logo-text">The Big Prompt Library</span>
-                <span class="logo-badge">中文版</span>
-            </a>
-            <div class="search-container" style="position: relative;">
-                <div class="search-box">
-                    <span class="search-icon">🔍</span>
-                    <input type="text" id="searchInput" placeholder="搜索提示词、指令..." oninput="handleSearch(this.value)">
-                </div>
-                <div id="searchResults" class="search-results"></div>
+
+<!-- Toast container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Mobile nav -->
+<div class="mobile-nav">
+    <div class="mobile-nav-inner">
+        <button class="mobile-nav-item active" id="mob-home" onclick="showHome()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            首页
+        </button>
+        <button class="mobile-nav-item" id="mob-system" onclick="showSection('system-prompts')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            系统提示词
+        </button>
+        <button class="mobile-nav-item" id="mob-custom" onclick="showSection('custom-instructions')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            自定义指令
+        </button>
+        <button class="mobile-nav-item" id="mob-favs" onclick="showFavorites()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            收藏
+        </button>
+    </div>
+</div>
+
+<!-- Header -->
+<header>
+    <div class="header-content">
+        <a class="logo" onclick="showHome()">
+            <span class="logo-icon">📚</span>
+            <span class="logo-text">Prompt Library</span>
+            <span class="logo-badge">中文版</span>
+        </a>
+
+        <div class="header-search">
+            <div class="header-search-box">
+                <svg class="search-icon-svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" id="headerSearch" placeholder="搜索提示词..." autocomplete="off" oninput="handleHeaderSearch(this.value)" onkeydown="handleSearchKey(event)">
+                <button class="search-clear" id="searchClearBtn" onclick="clearSearch()">✕</button>
             </div>
-            <nav>
-                <a href="#" onclick="showSection('system-prompts')" id="nav-system">系统提示词</a>
-                <a href="#" onclick="showSection('custom-instructions')" id="nav-custom">自定义指令</a>
-                <a href="https://github.com/Yuuqq/TheBigPromptLibrary" target="_blank">GitHub</a>
-            </nav>
+            <div class="search-dropdown" id="searchDropdown"></div>
         </div>
-    </header>
 
-    <main>
-        <!-- Home Section -->
-        <section id="home-section">
-            <div class="hero">
-                <h1>🎯 The Big Prompt Library</h1>
-                <p>全面的系统提示词、自定义指令、越狱提示词和 GPT 保护机制合集。学习提示词工程、理解 LLM 行为的最佳资源。</p>
-                <div class="hero-stats">
-                    <div class="stat">
-                        <div class="stat-value">190+</div>
-                        <div class="stat-label">系统提示词</div>
+        <nav>
+            <a href="#" onclick="showSection('system-prompts')" id="nav-system">系统提示词</a>
+            <a href="#" onclick="showSection('custom-instructions')" id="nav-custom">自定义指令</a>
+            <a href="#" onclick="showFavorites()" id="nav-favs">❤ 收藏</a>
+            <a href="https://github.com/Yuuqq/TheBigPromptLibrary" target="_blank">GitHub ↗</a>
+        </nav>
+    </div>
+</header>
+
+<main>
+    <!-- ===== HOME ===== -->
+    <section id="home-section">
+        <div class="hero">
+            <div class="hero-eyebrow">✦ 中文 AI 提示词情报站</div>
+            <h1>找到任何 AI 的系统提示词</h1>
+            <p>收录来自 OpenAI、Claude、Gemini 等 25+ 大型语言模型的真实系统提示词和自定义指令。一键复制，直接在 ChatGPT 或 Claude 中使用。</p>
+            <div class="hero-cta">
+                <button class="btn-hero-primary" onclick="showSection('system-prompts')">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    浏览系统提示词
+                </button>
+                <a class="btn-hero-secondary" href="https://github.com/Yuuqq/TheBigPromptLibrary" target="_blank">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                    GitHub 仓库
+                </a>
+            </div>
+            <div class="hero-stats" id="heroStats">
+                <div class="stat">
+                    <div class="stat-value" id="statTotal">1784+</div>
+                    <div class="stat-label">提示词条目</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">190+</div>
+                    <div class="stat-label">系统提示词</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">25+</div>
+                    <div class="stat-label">LLM 提供商</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- How to use -->
+        <div class="how-to-use">
+            <h2 class="section-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                如何使用
+            </h2>
+            <div class="steps-grid">
+                <div class="step-card">
+                    <div class="step-num">1</div>
+                    <div class="step-text">
+                        <h3>搜索或浏览</h3>
+                        <p>在顶部搜索框输入关键词，或按类别浏览提示词。</p>
                     </div>
-                    <div class="stat">
-                        <div class="stat-value">3,300+</div>
-                        <div class="stat-label">自定义指令</div>
+                </div>
+                <div class="step-card">
+                    <div class="step-num">2</div>
+                    <div class="step-text">
+                        <h3>查看内容</h3>
+                        <p>点击任意条目查看完整提示词内容，支持中英文切换。</p>
                     </div>
-                    <div class="stat">
-                        <div class="stat-value">10+</div>
-                        <div class="stat-label">LLM 提供商</div>
+                </div>
+                <div class="step-card">
+                    <div class="step-num">3</div>
+                    <div class="step-text">
+                        <h3>一键复制</h3>
+                        <p>点击「复制提示词」按钮，然后直接粘贴到 ChatGPT 或 Claude 使用。</p>
+                    </div>
+                </div>
+                <div class="step-card">
+                    <div class="step-num">4</div>
+                    <div class="step-text">
+                        <h3>收藏常用</h3>
+                        <p>点击心形图标收藏，随时在「收藏」页面找到你存下的提示词。</p>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <div class="categories">
-                <a class="category-card" onclick="showSection('system-prompts')">
-                    <div class="category-icon">🤖</div>
-                    <div class="category-title">系统提示词</div>
-                    <div class="category-desc">来自 OpenAI、Anthropic、Google、Meta 等主要 LLM 提供商的官方系统提示词。</div>
-                    <div class="category-count">
-                        <span>📄</span> 190+ 个提示词
-                    </div>
-                </a>
-                <a class="category-card" onclick="showSection('custom-instructions')">
-                    <div class="category-icon">✨</div>
-                    <div class="category-title">自定义指令</div>
-                    <div class="category-desc">丰富的 ChatGPT 自定义指令合集，涵盖各种应用场景和专业领域。</div>
-                    <div class="category-count">
-                        <span>📄</span> 3,300+ 个指令
-                    </div>
-                </a>
-                <a class="category-card" onclick="showSection('jailbreak')">
-                    <div class="category-icon">🔓</div>
-                    <div class="category-title">越狱提示词</div>
-                    <div class="category-desc">教育性的提示词注入技术示例，帮助理解 LLM 安全机制。</div>
-                    <div class="category-count">
-                        <span>📄</span> 仅供研究
-                    </div>
-                </a>
-                <a class="category-card" onclick="showSection('security')">
-                    <div class="category-icon">🛡️</div>
-                    <div class="category-title">安全与保护</div>
-                    <div class="category-desc">GPT 指令保护机制和最佳实践，防止提示词泄露。</div>
-                    <div class="category-count">
-                        <span>📄</span> 保护策略
-                    </div>
-                </a>
+        <!-- Categories -->
+        <div class="categories">
+            <a class="category-card" onclick="showSection('system-prompts')">
+                <div class="category-icon">🤖</div>
+                <div class="category-title">系统提示词</div>
+                <div class="category-desc">来自 OpenAI、Anthropic、Google、Meta 等主要 LLM 提供商的官方和逆向工程系统提示词。</div>
+                <div class="category-count">📄 190+ 个提示词</div>
+            </a>
+            <a class="category-card" onclick="showSection('custom-instructions')">
+                <div class="category-icon">✨</div>
+                <div class="category-title">自定义指令</div>
+                <div class="category-desc">丰富的 ChatGPT 自定义指令合集，涵盖写作、编程、教育、商务等各种专业场景。</div>
+                <div class="category-count">📄 3,300+ 个指令</div>
+            </a>
+            <a class="category-card" onclick="showSection('jailbreak')">
+                <div class="category-icon">🔓</div>
+                <div class="category-title">越狱提示词</div>
+                <div class="category-desc">仅供教育研究的提示词注入技术示例，帮助理解 LLM 安全机制和防护策略。</div>
+                <div class="category-count">📄 仅供研究</div>
+            </a>
+            <a class="category-card" onclick="showSection('security')">
+                <div class="category-icon">🛡️</div>
+                <div class="category-title">安全与保护</div>
+                <div class="category-desc">GPT 指令保护机制和最佳实践，防止你的 AI 助手的系统提示词被窃取或泄露。</div>
+                <div class="category-count">📄 保护策略</div>
+            </a>
+        </div>
+
+        <!-- Providers -->
+        <div class="providers-section">
+            <h2 class="section-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                支持的 LLM 提供商
+            </h2>
+            <div class="providers-grid" id="providersGrid">
+                <!-- rendered by JS -->
             </div>
+        </div>
 
-            <div class="providers-section">
-                <h2 class="section-title">🏢 支持的 LLM 提供商</h2>
-                <div class="providers-grid">
-                    <a class="provider-card" onclick="loadProvider('OpenAI')">
-                        <div class="provider-logo" style="background: linear-gradient(135deg, #10a37f, #1a7f64);">🟢</div>
-                        <div class="provider-info">
-                            <h3>OpenAI</h3>
-                            <span>GPT-4, GPT-4o, GPT-4.5</span>
-                        </div>
-                    </a>
-                    <a class="provider-card" onclick="loadProvider('Anthropic')">
-                        <div class="provider-logo" style="background: linear-gradient(135deg, #d4a574, #b8956a);">🟤</div>
-                        <div class="provider-info">
-                            <h3>Anthropic</h3>
-                            <span>Claude 3, 3.5, 3.7, Sonnet 4</span>
-                        </div>
-                    </a>
-                    <a class="provider-card" onclick="loadProvider('Google')">
-                        <div class="provider-logo" style="background: linear-gradient(135deg, #4285f4, #34a853);">🔵</div>
-                        <div class="provider-info">
-                            <h3>Google</h3>
-                            <span>Gemini 1.5, 2.0, Jules</span>
-                        </div>
-                    </a>
-                    <a class="provider-card" onclick="loadProvider('Meta.ai')">
-                        <div class="provider-logo" style="background: linear-gradient(135deg, #0668E1, #0084FF);">🔷</div>
-                        <div class="provider-info">
-                            <h3>Meta.ai</h3>
-                            <span>Llama 3, Llama 4</span>
-                        </div>
-                    </a>
-                    <a class="provider-card" onclick="loadProvider('Copilot')">
-                        <div class="provider-logo" style="background: linear-gradient(135deg, #00BCF2, #0078D4);">💠</div>
-                        <div class="provider-info">
-                            <h3>Microsoft Copilot</h3>
-                            <span>GitHub & Windows</span>
-                        </div>
-                    </a>
-                    <a class="provider-card" onclick="loadProvider('Perplexity.ai')">
-                        <div class="provider-logo" style="background: linear-gradient(135deg, #20B2AA, #008B8B);">🌊</div>
-                        <div class="provider-info">
-                            <h3>Perplexity.ai</h3>
-                            <span>Pro & Desktop</span>
-                        </div>
-                    </a>
-                    <a class="provider-card" onclick="loadProvider('xAI')">
-                        <div class="provider-logo" style="background: linear-gradient(135deg, #1DA1F2, #0d8ecf);">❌</div>
-                        <div class="provider-info">
-                            <h3>xAI</h3>
-                            <span>Grok 2</span>
-                        </div>
-                    </a>
-                    <a class="provider-card" onclick="loadProvider('Mistral')">
-                        <div class="provider-logo" style="background: linear-gradient(135deg, #FF7000, #FF4500);">🟠</div>
-                        <div class="provider-info">
-                            <h3>Mistral</h3>
-                            <span>Le Chat</span>
-                        </div>
-                    </a>
-                </div>
-            </div>
-        </section>
+        <!-- Recent additions -->
+        <div class="recent-section" id="recentSection" style="display:none;">
+            <h2 class="section-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                最新收录
+            </h2>
+            <div class="recent-grid" id="recentGrid"></div>
+        </div>
+    </section>
 
-        <!-- Content Browser Section -->
-        <section id="browser-section" class="content-browser">
+    <!-- ===== BROWSER ===== -->
+    <section id="browser-section" class="content-browser">
+        <div class="browser-header">
             <div class="breadcrumb" id="breadcrumb">
-                <a href="#" onclick="showHome()">首页</a>
+                <a onclick="showHome()">首页</a>
                 <span>/</span>
                 <span id="currentPath">系统提示词</span>
             </div>
-            <div id="fileList" class="file-list">
-                <div class="loading">
-                    <div class="spinner"></div>
-                    加载中...
-                </div>
-            </div>
-        </section>
+        </div>
+        <div id="filterRow" class="filter-row"></div>
+        <div id="fileList" class="file-list">
+            <div class="loading"><div class="spinner"></div>加载中...</div>
+        </div>
+    </section>
 
-        <!-- Prompt Viewer Section -->
-        <section id="viewer-section" class="prompt-viewer">
-            <div class="breadcrumb" id="viewerBreadcrumb">
-                <a href="#" onclick="showHome()">首页</a>
-                <span>/</span>
-                <a href="#" onclick="goBack()" id="backLink">系统提示词</a>
-                <span>/</span>
-                <span id="currentFile">文件名</span>
+    <!-- ===== VIEWER ===== -->
+    <section id="viewer-section" class="prompt-viewer">
+        <div class="viewer-breadcrumb" id="viewerBreadcrumb">
+            <a onclick="showHome()">首页</a>
+            <span>/</span>
+            <a onclick="goBack()" id="backLink">返回</a>
+            <span>/</span>
+            <span id="currentFile">...</span>
+        </div>
+        <div class="prompt-header">
+            <div>
+                <h1 class="prompt-title" id="promptTitle">加载中...</h1>
+                <div class="prompt-meta" id="promptMeta"></div>
             </div>
-            <div class="prompt-header">
-                <div>
-                    <h1 class="prompt-title" id="promptTitle">提示词标题</h1>
-                    <div class="prompt-meta" id="promptMeta">
-                        <span class="prompt-tag">📅 日期</span>
-                        <span class="prompt-tag">🏷️ 分类</span>
+            <div class="prompt-actions" id="promptActions">
+                <button class="btn btn-fav" id="favBtn" onclick="toggleFav()">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                    收藏
+                </button>
+                <button class="btn" id="langToggle" onclick="toggleLanguage()" style="display:none;">切换语言</button>
+                <button class="btn" onclick="sharePrompt()">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                    分享
+                </button>
+                <a class="btn" id="githubLink" href="#" target="_blank">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                    GitHub
+                </a>
+                <button class="btn btn-primary" onclick="copyPrompt()">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                    复制提示词
+                </button>
+            </div>
+        </div>
+
+        <!-- Quick use bar -->
+        <div class="quick-use-bar" id="quickUseBar" style="display:none;">
+            <span class="quick-use-label">快速使用：</span>
+            <button class="btn-chatgpt" onclick="useInChatGPT()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.0729zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.872zm16.5963 3.8558L13.1038 8.364 15.1192 7.2a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.407-.667zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L9.409 9.2297V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1638a.0804.0804 0 0 1-.038-.0567V6.0742a4.4992 4.4992 0 0 1 7.3757-3.4537l-.142.0805L8.704 5.459a.7948.7948 0 0 0-.3927.6813zm1.0976-2.3654l2.602-1.4998 2.6069 1.4998v2.9994l-2.5974 1.4997-2.6067-1.4997Z"/></svg>
+                在 ChatGPT 中使用
+            </button>
+            <button class="btn-claude" onclick="useInClaude()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M4.709 15.955l4.72-2.647.08-.23-.08-.128H9.2l-.79-.048-2.698-.073-2.339-.097-1.356-.097-.919-.097C.71 12.43.042 11.573 0 10.695c.03-.785.618-1.572 1.51-1.698l.893-.11 1.307-.12 2.371-.1 2.657-.074.766-.046h.272l.028-.154-.27-.137-1.923-.965-2.12-1.117-1.29-.699-.655-.382C2.594 5.048 2.23 4.041 2.745 3.23c.41-.72 1.295-1.005 2.189-.792l.609.173 1.083.37 2.346.929 1.95.814.62.28.1.038.066-.19-.019-.062-.699-1.904-.714-2.055-.49-1.482-.241-.775-.09-.43C9.294.369 9.837-.099 10.59.015c.69.08 1.275.65 1.41 1.32l.063.4.133.822.352 2.168.347 2.215.093.528.1.04.101-.04.16-.493.47-1.318.638-1.762.567-1.473.396-1.037.3-.782c.367-.78 1.236-1.22 2.05-.985.76.207 1.272.888 1.292 1.62-.015.363-.094.63-.245 1.023l-.32.79-.783 2.017-1.032 2.59-.221.5.14.136h.152l2.823-.073 2.872-.033.858.032.638.073.446.14c.714.346 1.022.978 1.01 1.647-.012.694-.405 1.317-1.118 1.55l-.47.12-.617.107-1.04.073-2.337.073-2.42.048h-.555l-.07.126.08.19.41.598 1.4 2.082 1.134 1.697.41.614.2.408c.24.71-.058 1.517-.742 1.894-.7.37-1.54.214-2.014-.368l-.44-.59-.608-.925-1.47-2.284-1.28-2.023-.158-.28-.141.017-.09.172-.067.16-.93 2.226-.79 1.883-.31.73-.264.631c-.35.666-1.11 1.046-1.892.913-.757-.16-1.323-.773-1.393-1.523l.035-.54.154-.61.313-.838.626-1.56 1.08-2.717.27-.685.124-.328z"/></svg>
+                在 Claude 中使用
+            </button>
+            <span style="font-size:0.75rem; color: var(--text-muted);">（将复制提示词并打开对应网站）</span>
+        </div>
+
+        <div class="prompt-content">
+            <pre id="promptContent">加载中...</pre>
+        </div>
+    </section>
+
+    <!-- ===== FAVORITES ===== -->
+    <section id="favorites-section">
+        <h2 class="section-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            我的收藏
+        </h2>
+        <div id="favoritesContainer"></div>
+    </section>
+</main>
+
+<footer>
+    <p>
+        本仓库是 <a href="https://github.com/0xeb/TheBigPromptLibrary" target="_blank">0xeb/TheBigPromptLibrary</a> 的中文翻译版本 ·
+        <a href="https://github.com/Yuuqq/TheBigPromptLibrary" target="_blank">GitHub</a> ·
+        仅供教育和研究目的
+    </p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script>
+    // ===== CONFIG =====
+    const GITHUB_API  = 'https://api.github.com/repos/Yuuqq/TheBigPromptLibrary/contents';
+    const GITHUB_RAW  = 'https://raw.githubusercontent.com/Yuuqq/TheBigPromptLibrary/main';
+    const GITHUB_URL  = 'https://github.com/Yuuqq/TheBigPromptLibrary/blob/main';
+    const INDEX_URL   = `${GITHUB_RAW}/prompts_index.json`;
+
+    // ===== STATE =====
+    let currentSection  = 'home';
+    let currentPath     = '';
+    let currentViewPath = '';
+    let hasChineseVersion = false;
+    let promptsIndex    = [];
+    let indexLoaded     = false;
+    let currentPromptId = '';  // for favorites
+
+    // ===== PROVIDERS CONFIG =====
+    const PROVIDERS = [
+        { name: 'OpenAI',        emoji: '🟢', bg: 'linear-gradient(135deg,#10a37f,#1a7f64)',  models: 'GPT-4, GPT-4o, 4.5' },
+        { name: 'Anthropic',     emoji: '🟤', bg: 'linear-gradient(135deg,#d4a574,#b8956a)',  models: 'Claude 3, 3.5, 3.7' },
+        { name: 'Google',        emoji: '🔵', bg: 'linear-gradient(135deg,#4285f4,#34a853)',  models: 'Gemini 1.5, 2.0' },
+        { name: 'Meta.ai',       emoji: '🔷', bg: 'linear-gradient(135deg,#0668E1,#0084FF)',  models: 'Llama 3, Llama 4' },
+        { name: 'Copilot',       emoji: '💠', bg: 'linear-gradient(135deg,#00BCF2,#0078D4)',  models: 'GitHub & Windows' },
+        { name: 'Perplexity.ai', emoji: '🌊', bg: 'linear-gradient(135deg,#20B2AA,#008B8B)', models: 'Pro & Desktop' },
+        { name: 'xAI',           emoji: '✖', bg: 'linear-gradient(135deg,#333,#111)',        models: 'Grok 2' },
+        { name: 'Mistral',       emoji: '🟠', bg: 'linear-gradient(135deg,#FF7000,#FF4500)', models: 'Le Chat' },
+        { name: 'DeepSeek',      emoji: '🐋', bg: 'linear-gradient(135deg,#4b6bfb,#6a3de8)', models: 'DeepSeek' },
+        { name: 'Cursor.com',    emoji: '⚡', bg: 'linear-gradient(135deg,#7c3aed,#4f46e5)', models: 'Cursor AI' },
+        { name: 'QWEN',          emoji: '🌙', bg: 'linear-gradient(135deg,#f59e0b,#d97706)', models: 'Qwen 系列' },
+        { name: 'V0.dev',        emoji: '▲',  bg: 'linear-gradient(135deg,#111,#333)',       models: 'Vercel v0' },
+    ];
+
+    // ===== INIT =====
+    renderProviders();
+    loadPromptsIndex();
+
+    function renderProviders() {
+        const grid = document.getElementById('providersGrid');
+        grid.innerHTML = PROVIDERS.map(p => `
+            <a class="provider-card" onclick="loadProvider('${p.name}')">
+                <div class="provider-logo" style="background:${p.bg};">${p.emoji}</div>
+                <div class="provider-info">
+                    <h3>${p.name}</h3>
+                    <span>${p.models}</span>
+                </div>
+            </a>
+        `).join('');
+    }
+
+    async function loadPromptsIndex() {
+        try {
+            const res = await fetch(INDEX_URL);
+            promptsIndex = await res.json();
+            indexLoaded = true;
+            document.getElementById('statTotal').textContent = promptsIndex.length.toLocaleString() + '+';
+            renderRecentPrompts();
+        } catch (e) {
+            console.warn('Index load failed:', e);
+        }
+    }
+
+    function renderRecentPrompts() {
+        const sorted = [...promptsIndex]
+            .filter(p => p.updatedAt)
+            .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
+            .slice(0, 12);
+
+        if (sorted.length === 0) return;
+
+        const section = document.getElementById('recentSection');
+        const grid = document.getElementById('recentGrid');
+        section.style.display = 'block';
+
+        const sectionIcons = { SystemPrompts:'🤖', CustomInstructions:'✨', Articles:'📰', Jailbreak:'🔓', Security:'🛡️' };
+
+        grid.innerHTML = sorted.map(p => {
+            const section = p.category.split('/')[0];
+            const provider = p.category.split('/')[1] || '';
+            const icon = sectionIcons[section] || '📄';
+            const hasZh = p.path_zh && p.path_zh.trim();
+            return `
+                <div class="recent-card" onclick="viewFromIndex('${escAttr(p.path_en || p.path_zh)}', '${escAttr(p.id)}')">
+                    <div class="recent-card-icon">${icon}</div>
+                    <div class="recent-card-body">
+                        <div class="recent-card-title">${escHtml(p.title || p.id.split('/').pop())}</div>
+                        <div class="recent-card-meta">${provider || section} · ${p.updatedAt || ''}</div>
                     </div>
+                    ${hasZh ? '<span class="zh-badge">中文</span>' : ''}
                 </div>
-                <div class="prompt-actions">
-                    <button class="btn" id="langToggle" onclick="toggleLanguage()" style="display: none;">🇺🇸 English</button>
-                    <button class="btn" onclick="copyPrompt()">📋 复制</button>
-                    <a class="btn btn-primary" id="githubLink" href="#" target="_blank">🔗 在 GitHub 查看</a>
-                </div>
-            </div>
-            <div class="prompt-content">
-                <pre id="promptContent">加载中...</pre>
-            </div>
-        </section>
-    </main>
+            `;
+        }).join('');
+    }
 
-    <footer>
-        <p>
-            本仓库是 <a href="https://github.com/0xeb/TheBigPromptLibrary" target="_blank">0xeb/TheBigPromptLibrary</a> 的中文翻译版本
-        </p>
-        <p style="margin-top: 0.5rem;">
-            <a href="https://github.com/Yuuqq/TheBigPromptLibrary" target="_blank">GitHub</a> ·
-            仅供教育和研究目的
-        </p>
-    </footer>
+    // ===== NAVIGATION =====
+    function showHome() {
+        hide('browser-section');
+        hide('viewer-section');
+        hide('favorites-section');
+        show('home-section');
+        currentSection = 'home';
+        updateNav('home');
+        updateMobileNav('home');
+    }
 
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <script>
-        // GitHub API 配置
-        const GITHUB_API = 'https://api.github.com/repos/Yuuqq/TheBigPromptLibrary/contents';
-        const GITHUB_RAW = 'https://raw.githubusercontent.com/Yuuqq/TheBigPromptLibrary/main';
-        const GITHUB_URL = 'https://github.com/Yuuqq/TheBigPromptLibrary/blob/main';
+    function showSection(section) {
+        hide('home-section');
+        hide('viewer-section');
+        hide('favorites-section');
+        show('browser-section');
+        currentSection = section;
+        updateNav(section);
+        updateMobileNav(section);
 
-        // 状态管理
-        let currentSection = 'home';
-        let currentPath = '';
-        let searchIndex = [];
-        let currentViewPath = ''; // 当前查看的文件路径
-        let hasChineseVersion = false; // 当前文件是否有中文版本
-
-        // 系统提示词数据
-        const systemPromptsData = {
-            'OpenAI': [
-                { name: 'ChatGPT 4o - Full System Prompt (Study Mode)', file: 'chatgpt_4o_full_07292025.md', date: '2025-07-29' },
-                { name: 'ChatGPT 4.1 Mini', file: 'gpt41_mini_06292025.md', date: '2025-06-29' },
-                { name: 'ChatGPT 4.1', file: 'gpt41_06292025.md', date: '2025-06-29' },
-                { name: 'ChatGPT 4.5', file: 'gpt45_06292025.md', date: '2025-06-29' },
-                { name: 'ChatGPT 4o with image_gen tool', file: 'gpt4o_03272025.md', date: '2025-03-27' },
-                { name: 'ChatGPT 4o with SearchGPT', file: 'gpt4o_web_10312024.md', date: '2024-10-31' },
-                { name: 'ChatGPT 4o Canvas', file: 'gpt4o_canvas_10032024.md', date: '2024-10-03' },
-                { name: 'ChatGPT 4o', file: 'gpt4o_10192024.md', date: '2024-10-19' },
-            ],
-            'Anthropic': [
-                { name: 'Claude Chrome Extension', file: '20250916-Claude-Chrome-Extension.md', date: '2025-09-16' },
-                { name: 'Claude Sonnet 4', file: '20250603-Claude-Sonnet4.md', date: '2025-06-03' },
-                { name: 'Claude 3.7 Sonnet', file: '20250225-Claude3.7-Sonnet.md', date: '2025-02-25' },
-                { name: 'Claude 3.5 Sonnet', file: '20240904-Claude3.5-Sonnet.md', date: '2024-09-04' },
-                { name: 'Claude 3 Opus', file: '20240712-Claude3-Opus.md', date: '2024-07-12' },
-                { name: 'Claude 3 Haiku', file: '20240712-Claude3-Haiku.md', date: '2024-07-12' },
-                { name: 'Computer Use', file: '20241022-Computer-Use.md', date: '2024-10-22' },
-            ],
-            'Google': [
-                { name: 'Jules', file: '08042025-Jules.md', date: '2025-08-04' },
-                { name: 'Gemini 2.5 Pro IMO', file: '07232025-gemini-2.5-pro-imo.md', date: '2025-07-23' },
-                { name: 'Gemini 2.0 Flash', file: 'gemini-2.0-flash-03072025.md', date: '2025-03-07' },
-                { name: 'Gemini Advanced Pro 1.5', file: 'gemini-advanced-pro-1.5-12122024.md', date: '2024-12-12' },
-                { name: 'Notebook LM', file: 'notebooklm-10202024.md', date: '2024-10-20' },
-            ],
-            'Meta.ai': [
-                { name: 'Llama 4 - WhatsApp', file: 'metaai_llama4-whatsapp-07292025.md', date: '2025-07-29' },
-                { name: 'Llama 4', file: 'metaai_llama4-04082025.md', date: '2025-04-08' },
-                { name: 'Llama 3', file: 'metaai_llama3-04182024.md', date: '2024-04-18' },
-            ],
-            'Copilot': [
-                { name: 'Microsoft Copilot Website', file: 'microsoft_copilot_website_02252025.md', date: '2025-02-25' },
-                { name: 'Microsoft Copilot Desktop', file: 'microsoft_copilot_desktop_11132024.md', date: '2024-11-13' },
-                { name: 'GitHub Copilot VS Code', file: 'github_copilot_vscode_11112024.md', date: '2024-11-11' },
-            ],
-            'Perplexity.ai': [
-                { name: 'Perplexity Pro', file: '12122024-Perplexity-Pro.md', date: '2024-12-12' },
-                { name: 'Perplexity Desktop App', file: '20241024-Perplexity-Desktop-App.md', date: '2024-10-24' },
-                { name: 'Perplexity Spaces', file: '20241018-Perplexity-Spaces.md', date: '2024-10-18' },
-            ],
-            'xAI': [
-                { name: 'Grok 2 (Fun)', file: '12122024-Grok2-fun.md', date: '2024-12-12' },
-                { name: 'Grok 2', file: '12122024-Grok2.md', date: '2024-12-12' },
-                { name: 'Grok 2 Mini Beta', file: '08212024-Grok2.md', date: '2024-08-21' },
-            ],
-            'Mistral': [
-                { name: 'Le Chat (Feb 2025)', file: 'lechat-02122025.md', date: '2025-02-12' },
-                { name: 'Le Chat (Nov 2024)', file: 'lechat-11182024.md', date: '2024-11-18' },
-            ]
+        const map = {
+            'system-prompts':     { path: 'SystemPrompts',              title: '系统提示词' },
+            'custom-instructions':{ path: 'CustomInstructions/ChatGPT', title: '自定义指令' },
+            'jailbreak':          { path: 'Jailbreak',                  title: '越狱提示词' },
+            'security':           { path: 'Security',                   title: '安全与保护' },
         };
 
-        // 显示首页
-        function showHome() {
-            document.getElementById('home-section').style.display = 'block';
-            document.getElementById('browser-section').classList.remove('active');
-            document.getElementById('viewer-section').classList.remove('active');
-            currentSection = 'home';
-            updateNav();
+        const cfg = map[section] || { path: section, title: section };
+        currentPath = cfg.path;
+        document.getElementById('currentPath').textContent = cfg.title;
+        document.getElementById('filterRow').innerHTML = '';
+
+        // Show provider filter chips on system-prompts
+        if (section === 'system-prompts') {
+            renderProviderFilters();
         }
 
-        // 显示分类
-        function showSection(section) {
-            document.getElementById('home-section').style.display = 'none';
-            document.getElementById('browser-section').classList.add('active');
-            document.getElementById('viewer-section').classList.remove('active');
-            currentSection = section;
-            updateNav();
+        loadDirectory(cfg.path);
+    }
 
-            let path = '';
-            let title = '';
+    function renderProviderFilters() {
+        const row = document.getElementById('filterRow');
+        const chips = ['全部', ...PROVIDERS.map(p => p.name)];
+        row.innerHTML = chips.map((c, i) => `
+            <button class="filter-chip ${i === 0 ? 'active' : ''}"
+                onclick="filterChipClick(this, '${c}')">${c}</button>
+        `).join('');
+    }
 
-            switch(section) {
-                case 'system-prompts':
-                    path = 'SystemPrompts';
-                    title = '系统提示词';
-                    break;
-                case 'custom-instructions':
-                    path = 'CustomInstructions/ChatGPT';
-                    title = '自定义指令';
-                    break;
-                case 'jailbreak':
-                    path = 'Jailbreak';
-                    title = '越狱提示词';
-                    break;
-                case 'security':
-                    path = 'Security';
-                    title = '安全与保护';
-                    break;
-            }
-
-            currentPath = path;
-            document.getElementById('currentPath').textContent = title;
-            loadDirectory(path);
+    function filterChipClick(el, provider) {
+        document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+        el.classList.add('active');
+        if (provider === '全部') {
+            loadDirectory('SystemPrompts');
+            document.getElementById('currentPath').textContent = '系统提示词';
+        } else {
+            loadProvider(provider);
         }
+    }
 
-        // 加载提供商
-        function loadProvider(provider) {
-            document.getElementById('home-section').style.display = 'none';
-            document.getElementById('browser-section').classList.add('active');
-            document.getElementById('viewer-section').classList.remove('active');
+    function loadProvider(provider) {
+        hide('home-section');
+        hide('viewer-section');
+        hide('favorites-section');
+        show('browser-section');
 
-            currentPath = `SystemPrompts/${provider}`;
-            document.getElementById('currentPath').textContent = provider;
+        currentPath = `SystemPrompts/${provider}`;
+        document.getElementById('currentPath').textContent = provider;
 
-            const data = systemPromptsData[provider];
-            if (data) {
-                renderFileList(data.map(item => ({
-                    name: item.name,
-                    path: `SystemPrompts/${provider}/${item.file}`,
-                    type: 'file',
-                    date: item.date
-                })));
-            } else {
-                loadDirectory(`SystemPrompts/${provider}`);
-            }
-        }
-
-        // 加载目录 - 过滤中文版本文件，自动加载时会优先选择中文
-        async function loadDirectory(path) {
-            const fileList = document.getElementById('fileList');
-            fileList.innerHTML = '<div class="loading"><div class="spinner"></div>加载中...</div>';
-
-            try {
-                const response = await fetch(`${GITHUB_API}/${path}`);
-                const data = await response.json();
-
-                if (Array.isArray(data)) {
-                    // 收集所有中文版本文件名
-                    const zhFiles = new Set(data
-                        .filter(item => item.name.endsWith('_zh.md'))
-                        .map(item => item.name.replace('_zh.md', '.md')));
-
-                    const items = data
-                        .filter(item =>
-                            item.name !== 'README.md' &&
-                            !item.name.startsWith('.') &&
-                            !item.name.endsWith('_zh.md') // 不显示中文版本文件，会自动加载
-                        )
-                        .map(item => ({
-                            name: item.name.replace('.md', '').replace(/_/g, ' '),
-                            path: item.path,
-                            type: item.type,
-                            date: extractDate(item.name),
-                            hasZh: zhFiles.has(item.name) // 标记是否有中文版本
-                        }))
-                        .sort((a, b) => b.date.localeCompare(a.date));
-
-                    renderFileList(items);
-                }
-            } catch (error) {
-                fileList.innerHTML = '<div class="loading">加载失败，请稍后重试</div>';
-            }
-        }
-
-        // 渲染文件列表 - 显示中文版本标记
-        function renderFileList(items) {
-            const fileList = document.getElementById('fileList');
-
-            if (items.length === 0) {
-                fileList.innerHTML = '<div class="loading">暂无内容</div>';
-                return;
-            }
-
-            fileList.innerHTML = items.map(item => `
-                <a class="file-item" onclick="${item.type === 'dir' ? `loadDirectory('${item.path}')` : `viewFile('${item.path}')`}">
-                    <span class="file-icon">${item.type === 'dir' ? '📁' : '📄'}</span>
-                    <span class="file-name">${item.name}</span>
-                    ${item.hasZh ? '<span class="prompt-tag" style="background: var(--accent-green); color: white; font-size: 0.75rem; padding: 0.15rem 0.5rem;">🇨🇳 中文</span>' : ''}
-                    ${item.date ? `<span class="file-date">${item.date}</span>` : ''}
-                </a>
-            `).join('');
-        }
-
-        // 查看文件 - 优先加载中文版本，支持语言切换
-        async function viewFile(path, forceLanguage = null) {
-            document.getElementById('browser-section').classList.remove('active');
-            document.getElementById('viewer-section').classList.add('active');
-
-            currentViewPath = path; // 保存原始路径
-            const fileName = path.split('/').pop().replace('.md', '').replace('_zh', '');
-            document.getElementById('currentFile').textContent = fileName;
-            document.getElementById('promptTitle').textContent = fileName.replace(/_/g, ' ');
-
-            // 检查中文版本是否存在
-            let zhPath = path.replace('.md', '_zh.md');
-            let zhExists = false;
-            let actualPath = path;
-            let isChineseVersion = false;
-
-            // 如果原路径已经是中文版本
-            if (path.endsWith('_zh.md')) {
-                zhPath = path;
-                zhExists = true;
-                isChineseVersion = true;
-                currentViewPath = path.replace('_zh.md', '.md');
-            } else {
-                // 检查中文版本是否存在
-                try {
-                    const zhResponse = await fetch(`${GITHUB_RAW}/${zhPath}`, { method: 'HEAD' });
-                    zhExists = zhResponse.ok;
-                } catch (e) {
-                    zhExists = false;
-                }
-            }
-
-            hasChineseVersion = zhExists;
-
-            // 根据 forceLanguage 或默认优先中文
-            if (forceLanguage === 'en') {
-                actualPath = currentViewPath;
-                isChineseVersion = false;
-            } else if (forceLanguage === 'zh' && zhExists) {
-                actualPath = zhPath;
-                isChineseVersion = true;
-            } else if (zhExists && forceLanguage !== 'en') {
-                // 默认优先中文
-                actualPath = zhPath;
-                isChineseVersion = true;
-            }
-
-            document.getElementById('githubLink').href = `${GITHUB_URL}/${actualPath}`;
-
-            // 显示/隐藏语言切换按钮
-            const langToggle = document.getElementById('langToggle');
-            if (zhExists) {
-                langToggle.style.display = 'inline-flex';
-                if (isChineseVersion) {
-                    langToggle.innerHTML = '🇺🇸 English';
-                    langToggle.dataset.currentLang = 'zh';
-                } else {
-                    langToggle.innerHTML = '🇨🇳 中文';
-                    langToggle.dataset.currentLang = 'en';
-                }
-            } else {
-                langToggle.style.display = 'none';
-            }
-
-            const date = extractDate(fileName);
-            const category = path.split('/')[0];
-            document.getElementById('promptMeta').innerHTML = `
-                ${date ? `<span class="prompt-tag">📅 ${date}</span>` : ''}
-                <span class="prompt-tag">🏷️ ${category}</span>
-                ${isChineseVersion ? '<span class="prompt-tag" style="background: var(--accent-green); color: white;">🇨🇳 中文</span>' : '<span class="prompt-tag" style="background: var(--accent-orange); color: white;">🇺🇸 English</span>'}
-            `;
-
-            try {
-                const response = await fetch(`${GITHUB_RAW}/${actualPath}`);
-                const content = await response.text();
-
-                // 使用 marked 渲染 Markdown
-                if (typeof marked !== 'undefined') {
-                    document.getElementById('promptContent').innerHTML = marked.parse(content);
-                    document.getElementById('promptContent').parentElement.classList.add('markdown-body');
-                } else {
-                    document.getElementById('promptContent').textContent = content;
-                }
-
-                // 保存原始内容用于复制
-                document.getElementById('promptContent').dataset.raw = content;
-            } catch (error) {
-                document.getElementById('promptContent').textContent = '加载失败，请稍后重试';
-            }
-        }
-
-        // 切换语言
-        function toggleLanguage() {
-            const langToggle = document.getElementById('langToggle');
-            const currentLang = langToggle.dataset.currentLang;
-            if (currentLang === 'zh') {
-                viewFile(currentViewPath, 'en');
-            } else {
-                viewFile(currentViewPath, 'zh');
-            }
-        }
-
-        // 返回上一级
-        function goBack() {
-            showSection(currentSection);
-        }
-
-        // 复制提示词
-        function copyPrompt() {
-            const content = document.getElementById('promptContent').dataset.raw ||
-                           document.getElementById('promptContent').textContent;
-            navigator.clipboard.writeText(content).then(() => {
-                alert('已复制到剪贴板！');
-            });
-        }
-
-        // 提取日期
-        function extractDate(name) {
-            const match = name.match(/(\d{8}|\d{4}-\d{2}-\d{2}|\d{2}\d{2}\d{4})/);
-            if (match) {
-                const d = match[0].replace(/-/g, '');
-                if (d.length === 8) {
-                    // 尝试不同的日期格式
-                    if (d.startsWith('20')) {
-                        return `${d.slice(0,4)}-${d.slice(4,6)}-${d.slice(6,8)}`;
-                    } else {
-                        return `20${d.slice(4,8)}-${d.slice(0,2)}-${d.slice(2,4)}`;
-                    }
-                }
-            }
-            return '';
-        }
-
-        // 更新导航状态
-        function updateNav() {
-            document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
-            if (currentSection === 'system-prompts') {
-                document.getElementById('nav-system').classList.add('active');
-            } else if (currentSection === 'custom-instructions') {
-                document.getElementById('nav-custom').classList.add('active');
-            }
-        }
-
-        // 搜索功能
-        let searchTimeout;
-        async function handleSearch(query) {
-            const resultsContainer = document.getElementById('searchResults');
-
-            if (!query || query.length < 2) {
-                resultsContainer.classList.remove('active');
-                return;
-            }
-
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(async () => {
-                // 从本地数据搜索
-                const results = [];
-
-                for (const [provider, items] of Object.entries(systemPromptsData)) {
-                    for (const item of items) {
-                        if (item.name.toLowerCase().includes(query.toLowerCase())) {
-                            results.push({
-                                title: item.name,
-                                path: `SystemPrompts/${provider}/${item.file}`,
-                                category: provider
-                            });
-                        }
-                    }
-                }
-
-                if (results.length > 0) {
-                    resultsContainer.innerHTML = results.slice(0, 10).map(r => `
-                        <a class="search-result-item" onclick="viewFile('${r.path}'); document.getElementById('searchResults').classList.remove('active');">
-                            <div class="search-result-title">${r.title}</div>
-                            <div class="search-result-path">${r.category}</div>
-                        </a>
-                    `).join('');
-                    resultsContainer.classList.add('active');
-                } else {
-                    resultsContainer.innerHTML = '<div class="search-result-item">未找到结果</div>';
-                    resultsContainer.classList.add('active');
-                }
-            }, 300);
-        }
-
-        // 点击外部关闭搜索结果
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.search-container')) {
-                document.getElementById('searchResults').classList.remove('active');
-            }
+        // Activate chip if visible
+        document.querySelectorAll('.filter-chip').forEach(c => {
+            c.classList.toggle('active', c.textContent === provider);
         });
 
-        // 初始化
-        showHome();
-    </script>
+        loadDirectory(`SystemPrompts/${provider}`);
+    }
+
+    function showFavorites() {
+        hide('home-section');
+        hide('browser-section');
+        hide('viewer-section');
+        show('favorites-section');
+        currentSection = 'favorites';
+        updateNav('favorites');
+        updateMobileNav('favorites');
+        renderFavoritesPage();
+    }
+
+    // ===== DIRECTORY LOADING =====
+    async function loadDirectory(path) {
+        const fileList = document.getElementById('fileList');
+        fileList.innerHTML = '<div class="loading"><div class="spinner"></div>加载中...</div>';
+
+        try {
+            const res = await fetch(`${GITHUB_API}/${path}`);
+            const data = await res.json();
+
+            if (!Array.isArray(data)) {
+                fileList.innerHTML = '<div class="loading">加载失败，请稍后重试</div>';
+                return;
+            }
+
+            const zhFiles = new Set(
+                data.filter(i => i.name.endsWith('_zh.md'))
+                    .map(i => i.name.replace('_zh.md', '.md'))
+            );
+
+            const items = data
+                .filter(i => i.name !== 'README.md' && i.name !== 'README_zh.md' &&
+                             !i.name.startsWith('.') && !i.name.endsWith('_zh.md'))
+                .map(i => ({
+                    name: i.name.replace('.md', '').replace(/_/g, ' '),
+                    path: i.path,
+                    type: i.type,
+                    date: extractDate(i.name),
+                    hasZh: zhFiles.has(i.name),
+                }))
+                .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+
+            renderFileList(items);
+        } catch (e) {
+            fileList.innerHTML = '<div class="loading">加载失败，请检查网络连接</div>';
+        }
+    }
+
+    function renderFileList(items) {
+        const fileList = document.getElementById('fileList');
+        if (items.length === 0) {
+            fileList.innerHTML = '<div class="loading">暂无内容</div>';
+            return;
+        }
+        fileList.innerHTML = items.map(item => {
+            const onclick = item.type === 'dir'
+                ? `loadDirectory('${escAttr(item.path)}')`
+                : `viewFile('${escAttr(item.path)}')`;
+            const icon = item.type === 'dir' ? '📁' : '📄';
+            return `
+                <a class="file-item" onclick="${onclick}">
+                    <span class="file-icon">${icon}</span>
+                    <span class="file-name">${escHtml(item.name)}</span>
+                    ${item.hasZh ? '<span class="zh-badge">中文</span>' : ''}
+                    ${item.date ? `<span class="file-date">${item.date}</span>` : ''}
+                </a>
+            `;
+        }).join('');
+    }
+
+    // ===== FILE VIEWER =====
+    async function viewFile(path, forceLanguage = null, promptId = '') {
+        hide('home-section');
+        hide('browser-section');
+        hide('favorites-section');
+        show('viewer-section');
+
+        currentViewPath = path.endsWith('_zh.md') ? path.replace('_zh.md', '.md') : path;
+        currentPromptId = promptId || path;
+
+        const fileName = path.split('/').pop().replace('.md','').replace('_zh','').replace(/_/g,' ');
+        document.getElementById('currentFile').textContent = fileName;
+        document.getElementById('promptTitle').textContent = fileName;
+        document.getElementById('promptContent').innerHTML = '<div class="loading"><div class="spinner"></div>加载内容中...</div>';
+        document.getElementById('promptMeta').innerHTML = '';
+        hide('quickUseBar');
+
+        // Check zh version
+        let zhPath = currentViewPath.replace('.md', '_zh.md');
+        let zhExists = false;
+        let isChineseVersion = false;
+
+        if (path.endsWith('_zh.md')) {
+            zhPath = path;
+            zhExists = true;
+            isChineseVersion = true;
+        } else {
+            try {
+                const r = await fetch(`${GITHUB_RAW}/${zhPath}`, { method: 'HEAD' });
+                zhExists = r.ok;
+            } catch(e) { zhExists = false; }
+        }
+
+        hasChineseVersion = zhExists;
+
+        let actualPath = currentViewPath;
+        if (forceLanguage === 'en') {
+            actualPath = currentViewPath;
+            isChineseVersion = false;
+        } else if (zhExists) {
+            actualPath = zhPath;
+            isChineseVersion = true;
+        }
+
+        document.getElementById('githubLink').href = `${GITHUB_URL}/${actualPath}`;
+
+        // Language toggle
+        const langBtn = document.getElementById('langToggle');
+        if (zhExists) {
+            langBtn.style.display = 'inline-flex';
+            langBtn.innerHTML = isChineseVersion
+                ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg> 查看英文原文'
+                : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg> 查看中文翻译';
+            langBtn.dataset.currentLang = isChineseVersion ? 'zh' : 'en';
+        } else {
+            langBtn.style.display = 'none';
+        }
+
+        // Meta tags
+        const date = extractDate(path.split('/').pop());
+        const category = path.split('/')[0];
+        const provider = path.split('/')[1] || '';
+        document.getElementById('promptMeta').innerHTML = `
+            ${date ? `<span class="prompt-tag">📅 ${date}</span>` : ''}
+            <span class="prompt-tag">🏷️ ${category}</span>
+            ${provider && provider !== category ? `<span class="prompt-tag">🔧 ${provider}</span>` : ''}
+            ${isChineseVersion ? '<span class="prompt-tag" style="background:rgba(63,185,80,0.15);color:var(--accent-green);">中文版</span>' : '<span class="prompt-tag" style="background:rgba(88,166,255,0.1);color:var(--accent-blue);">英文原版</span>'}
+        `;
+
+        // Update fav button
+        updateFavButton();
+
+        // Load content
+        try {
+            const res = await fetch(`${GITHUB_RAW}/${actualPath}`);
+            const content = await res.text();
+
+            const el = document.getElementById('promptContent');
+            if (typeof marked !== 'undefined') {
+                el.innerHTML = marked.parse(content);
+                el.parentElement.classList.add('markdown-body');
+            } else {
+                el.textContent = content;
+            }
+            el.dataset.raw = content;
+
+            // Show quick-use bar for system prompts
+            if (category === 'SystemPrompts') {
+                show('quickUseBar');
+            }
+        } catch (e) {
+            document.getElementById('promptContent').textContent = '加载失败，请检查网络连接或直接在 GitHub 查看。';
+        }
+    }
+
+    function viewFromIndex(path, id) {
+        currentPromptId = id;
+        viewFile(path, null, id);
+    }
+
+    function toggleLanguage() {
+        const btn = document.getElementById('langToggle');
+        const lang = btn.dataset.currentLang;
+        viewFile(currentViewPath, lang === 'zh' ? 'en' : 'zh', currentPromptId);
+    }
+
+    function goBack() {
+        if (currentSection && currentSection !== 'home') {
+            showSection(currentSection);
+        } else {
+            showHome();
+        }
+    }
+
+    // ===== COPY =====
+    function copyPrompt() {
+        const content = document.getElementById('promptContent').dataset.raw ||
+                        document.getElementById('promptContent').innerText;
+        navigator.clipboard.writeText(content).then(() => {
+            showToast('✓ 已复制到剪贴板！', 'success');
+        }).catch(() => {
+            // Fallback
+            const ta = document.createElement('textarea');
+            ta.value = content;
+            ta.style.position = 'fixed';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+            showToast('✓ 已复制到剪贴板！', 'success');
+        });
+    }
+
+    function useInChatGPT() {
+        const content = document.getElementById('promptContent').dataset.raw ||
+                        document.getElementById('promptContent').innerText;
+        navigator.clipboard.writeText(content).then(() => {
+            showToast('✓ 提示词已复制，正在打开 ChatGPT...');
+            setTimeout(() => window.open('https://chatgpt.com/', '_blank'), 600);
+        });
+    }
+
+    function useInClaude() {
+        const content = document.getElementById('promptContent').dataset.raw ||
+                        document.getElementById('promptContent').innerText;
+        navigator.clipboard.writeText(content).then(() => {
+            showToast('✓ 提示词已复制，正在打开 Claude...');
+            setTimeout(() => window.open('https://claude.ai/', '_blank'), 600);
+        });
+    }
+
+    function sharePrompt() {
+        const url = window.location.href;
+        navigator.clipboard.writeText(url).then(() => {
+            showToast('✓ 链接已复制，可以分享给朋友！');
+        });
+    }
+
+    // ===== FAVORITES =====
+    function getFavs() {
+        try { return JSON.parse(localStorage.getItem('prompt_favs') || '[]'); } catch(e) { return []; }
+    }
+
+    function saveFavs(favs) {
+        localStorage.setItem('prompt_favs', JSON.stringify(favs));
+    }
+
+    function isFav(id) {
+        return getFavs().some(f => f.id === id);
+    }
+
+    function updateFavButton() {
+        const btn = document.getElementById('favBtn');
+        if (isFav(currentPromptId)) {
+            btn.classList.add('active');
+            btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> 已收藏`;
+        } else {
+            btn.classList.remove('active');
+            btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> 收藏`;
+        }
+    }
+
+    function toggleFav() {
+        const favs = getFavs();
+        const idx = favs.findIndex(f => f.id === currentPromptId);
+        if (idx > -1) {
+            favs.splice(idx, 1);
+            showToast('已取消收藏');
+        } else {
+            const title = document.getElementById('promptTitle').textContent;
+            favs.push({ id: currentPromptId, title, path: currentViewPath, addedAt: new Date().toISOString() });
+            showToast('❤ 已加入收藏！');
+        }
+        saveFavs(favs);
+        updateFavButton();
+    }
+
+    function renderFavoritesPage() {
+        const favs = getFavs();
+        const container = document.getElementById('favoritesContainer');
+        if (favs.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">💔</div>
+                    <h3>还没有收藏任何提示词</h3>
+                    <p>在查看提示词时，点击心形图标即可收藏，方便下次快速访问。</p>
+                </div>
+            `;
+            return;
+        }
+        container.innerHTML = `
+            <div class="file-list">
+                ${favs.reverse().map(f => `
+                    <div class="file-item" onclick="viewFile('${escAttr(f.path)}', null, '${escAttr(f.id)}')">
+                        <span class="file-icon">❤️</span>
+                        <span class="file-name">${escHtml(f.title)}</span>
+                        <button style="background:none;border:none;color:var(--text-muted);cursor:pointer;padding:0.25rem 0.5rem;font-size:0.8rem;" onclick="event.stopPropagation();removeFav('${escAttr(f.id)}')">移除</button>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+
+    function removeFav(id) {
+        const favs = getFavs().filter(f => f.id !== id);
+        saveFavs(favs);
+        renderFavoritesPage();
+        showToast('已从收藏中移除');
+    }
+
+    // ===== SEARCH =====
+    let searchTimer;
+
+    function handleHeaderSearch(query) {
+        const clearBtn = document.getElementById('searchClearBtn');
+        clearBtn.classList.toggle('visible', query.length > 0);
+
+        if (!query || query.length < 1) {
+            closeSearchDropdown();
+            return;
+        }
+
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(() => performSearch(query), 200);
+    }
+
+    function clearSearch() {
+        document.getElementById('headerSearch').value = '';
+        document.getElementById('searchClearBtn').classList.remove('visible');
+        closeSearchDropdown();
+    }
+
+    function handleSearchKey(e) {
+        if (e.key === 'Escape') clearSearch();
+    }
+
+    function performSearch(query) {
+        const dropdown = document.getElementById('searchDropdown');
+        const q = query.toLowerCase().trim();
+
+        let results = [];
+
+        if (indexLoaded && promptsIndex.length > 0) {
+            results = promptsIndex.filter(p => {
+                const title = (p.title || '').toLowerCase();
+                const id = (p.id || '').toLowerCase();
+                const cat = (p.category || '').toLowerCase();
+                const summary = (p.summary || '').toLowerCase();
+                return title.includes(q) || id.includes(q) || cat.includes(q) || summary.includes(q);
+            }).slice(0, 12);
+        }
+
+        if (results.length === 0) {
+            dropdown.innerHTML = `<div class="search-no-results">未找到包含"${escHtml(query)}"的提示词</div>`;
+            dropdown.classList.add('active');
+            return;
+        }
+
+        const sectionIcons = { SystemPrompts:'🤖', CustomInstructions:'✨', Articles:'📰', Jailbreak:'🔓', Security:'🛡️' };
+
+        dropdown.innerHTML = `
+            <div class="search-dropdown-header">找到 ${results.length} 条结果（共搜索 ${promptsIndex.length} 条）</div>
+            ${results.map(p => {
+                const section = p.category.split('/')[0];
+                const provider = p.category.split('/')[1] || section;
+                const icon = sectionIcons[section] || '📄';
+                const title = p.title || p.id.split('/').pop();
+                const highlighted = highlightMatch(title, query);
+                const path = p.path_zh || p.path_en || '';
+                const hasZh = !!(p.path_zh && p.path_zh.trim());
+                return `
+                    <a class="search-result-item" onclick="closeSearchDropdown(); viewFromIndex('${escAttr(path)}', '${escAttr(p.id)}')">
+                        <div class="search-result-icon">${icon}</div>
+                        <div class="search-result-body">
+                            <div class="search-result-title">${highlighted}</div>
+                            <div class="search-result-meta">${provider} ${hasZh ? '· 有中文' : ''}</div>
+                        </div>
+                    </a>
+                `;
+            }).join('')}
+        `;
+        dropdown.classList.add('active');
+    }
+
+    function closeSearchDropdown() {
+        document.getElementById('searchDropdown').classList.remove('active');
+    }
+
+    function highlightMatch(text, query) {
+        if (!query) return escHtml(text);
+        const idx = text.toLowerCase().indexOf(query.toLowerCase());
+        if (idx === -1) return escHtml(text);
+        return escHtml(text.slice(0, idx)) +
+               '<mark>' + escHtml(text.slice(idx, idx + query.length)) + '</mark>' +
+               escHtml(text.slice(idx + query.length));
+    }
+
+    document.addEventListener('click', e => {
+        if (!e.target.closest('.header-search')) closeSearchDropdown();
+    });
+
+    // ===== TOAST =====
+    function showToast(msg, type) {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.style.borderColor = type === 'success' ? '#3fb950' : '#2d3748';
+        toast.textContent = msg;
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 2700);
+    }
+
+    // ===== NAV STATE =====
+    function updateNav(active) {
+        document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+        if (active === 'system-prompts') document.getElementById('nav-system').classList.add('active');
+        else if (active === 'custom-instructions') document.getElementById('nav-custom').classList.add('active');
+        else if (active === 'favorites') document.getElementById('nav-favs').classList.add('active');
+    }
+
+    function updateMobileNav(active) {
+        document.querySelectorAll('.mobile-nav-item').forEach(b => b.classList.remove('active'));
+        const map = { home:'mob-home', 'system-prompts':'mob-system', 'custom-instructions':'mob-custom', favorites:'mob-favs' };
+        const id = map[active];
+        if (id) document.getElementById(id).classList.add('active');
+    }
+
+    // ===== HELPERS =====
+    function extractDate(name) {
+        const match = name.match(/(\d{8}|\d{4}-\d{2}-\d{2})/);
+        if (match) {
+            const d = match[0].replace(/-/g, '');
+            if (d.length === 8 && d.startsWith('20')) {
+                return `${d.slice(0,4)}-${d.slice(4,6)}-${d.slice(6,8)}`;
+            }
+        }
+        return '';
+    }
+
+    function show(id) {
+        const el = document.getElementById(id);
+        if (el) el.style.display = '';
+        if (id === 'browser-section') el.classList.add('active');
+        if (id === 'viewer-section')  el.classList.add('active');
+        if (id === 'favorites-section') el.classList.add('active');
+    }
+
+    function hide(id) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        if (id === 'home-section') { el.style.display = 'none'; return; }
+        el.classList.remove('active');
+        el.style.display = '';
+    }
+
+    function escHtml(str) {
+        return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function escAttr(str) {
+        return String(str).replace(/'/g,"\\'").replace(/"/g,'&quot;');
+    }
+
+    // ===== INIT =====
+    showHome();
+</script>
 </body>
 </html>
