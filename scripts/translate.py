@@ -96,6 +96,15 @@ def needs_translation(en_path: Path) -> bool:
     return en_path.stat().st_mtime > zh_path.stat().st_mtime
 
 
+def is_translatable_size(en_path: Path) -> tuple[bool, int]:
+    """Return (is_translatable, char_count). Files outside [10, MAX_FILE_CHARS] are not."""
+    try:
+        size = len(en_path.read_text(encoding="utf-8", errors="replace"))
+    except Exception:
+        return False, 0
+    return (10 <= size <= MAX_FILE_CHARS), size
+
+
 def log_error(file_path: Path, err: Exception) -> None:
     STATS_DIR.mkdir(parents=True, exist_ok=True)
     with ERROR_LOG.open("a", encoding="utf-8") as fp:
@@ -111,6 +120,7 @@ def write_stats(stats: dict) -> None:
 
 def main() -> int:
     candidates: list[Path] = []
+    oversized: list[tuple[Path, int]] = []
     for d in TARGET_DIRS:
         base = Path(d)
         if not base.exists():
@@ -121,24 +131,39 @@ def main() -> int:
                 continue
             if name_low in ("readme.md", "license.md"):
                 continue
-            if needs_translation(en):
-                candidates.append(en)
+            if not needs_translation(en):
+                continue
+            ok, size = is_translatable_size(en)
+            if not ok:
+                if size > MAX_FILE_CHARS:
+                    oversized.append((en, size))
+                continue
+            candidates.append(en)
 
-    print(f"Found {len(candidates)} files needing translation")
+    print(
+        f"Found {len(candidates)} translatable files needing translation; "
+        f"{len(oversized)} oversized (>{MAX_FILE_CHARS} chars) deferred"
+    )
 
     stats = {
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "model": MODEL,
         "candidates": len(candidates),
+        "oversized_deferred": len(oversized),
         "translated": 0,
         "failed": 0,
-        "skipped_too_large": 0,
         "tokens_in": 0,
         "tokens_out": 0,
         "duration_seconds": 0,
     }
 
     if not candidates:
+        # Persist the oversized list so it's visible without re-scanning the tree
+        if oversized:
+            STATS_DIR.mkdir(parents=True, exist_ok=True)
+            (STATS_DIR / "oversized.txt").write_text(
+                "\n".join(f"{p}\t{s}" for p, s in oversized) + "\n", encoding="utf-8"
+            )
         write_stats(stats)
         return 0
 
@@ -149,13 +174,6 @@ def main() -> int:
     for i, en in enumerate(batch, 1):
         content = en.read_text(encoding="utf-8", errors="replace")
         size = len(content)
-        if size > MAX_FILE_CHARS:
-            print(f"[{i}/{len(batch)}] SKIP {en} (too large: {size} chars)")
-            stats["skipped_too_large"] += 1
-            continue
-        if size < 10:
-            print(f"[{i}/{len(batch)}] SKIP {en} (too small)")
-            continue
 
         print(f"[{i}/{len(batch)}] {en} ({size} chars)")
         try:
@@ -177,6 +195,13 @@ def main() -> int:
 
     stats["duration_seconds"] = round(time.time() - started_at, 1)
     stats["pending_after_run"] = max(0, len(candidates) - len(batch))
+
+    if oversized:
+        STATS_DIR.mkdir(parents=True, exist_ok=True)
+        (STATS_DIR / "oversized.txt").write_text(
+            "\n".join(f"{p}\t{s}" for p, s in oversized) + "\n", encoding="utf-8"
+        )
+
     write_stats(stats)
 
     print(
