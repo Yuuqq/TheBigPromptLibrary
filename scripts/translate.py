@@ -32,6 +32,9 @@ MAX_FILE_CHARS = int(os.environ.get("MAX_FILE_CHARS", "30000"))
 TRANSLATE_OVERSIZED = os.environ.get("TRANSLATE_OVERSIZED", "1") == "1"
 MAX_OVERSIZED_PER_RUN = int(os.environ.get("MAX_OVERSIZED_PER_RUN", "5"))
 CHUNK_TARGET_CHARS = int(os.environ.get("CHUNK_TARGET_CHARS", "12000"))
+# Force re-translation of _zh.md files whose latest git commit date is older than this.
+# Format: YYYY-MM-DD. Set empty to disable.
+RETRANSLATE_OLDER_THAN = os.environ.get("RETRANSLATE_OLDER_THAN", "").strip()
 MAX_RETRIES = 3
 REQUEST_TIMEOUT = 300
 SLEEP_BETWEEN = 1.0
@@ -40,7 +43,7 @@ STATS_DIR = Path("stats")
 STATS_LOG = STATS_DIR / "translation-runs.jsonl"
 ERROR_LOG = STATS_DIR / "translation-errors.log"
 
-SYSTEM_PROMPT = """你是专业的中英文翻译专家。请把英文 Markdown 翻译成简体中文。
+SYSTEM_PROMPT = """你是专业的 AI / LLM 领域中英翻译专家。请把英文 Markdown 翻译成简体中文。
 
 严格要求：
 1. 保留所有 Markdown 格式（标题、列表、链接、粗体、斜体等）原样
@@ -49,7 +52,58 @@ SYSTEM_PROMPT = """你是专业的中英文翻译专家。请把英文 Markdown 
 4. 保留变量名、函数名、文件路径、URL、英文专有名词
 5. 翻译符合中文表达习惯，技术术语使用业界通用译法
 6. 提示词（system prompt）的指令性内容要准确翻译，保持原意
-7. 直接输出翻译结果，不要任何解释、前后缀或思考过程"""
+7. 直接输出翻译结果，不要任何解释、前后缀或思考过程
+
+术语表（必须严格遵守，括号内为指定中译，斜杠表示可保留英文）：
+- LLM / Large Language Model → 大语言模型
+- prompt → 提示词
+- system prompt → 系统提示词
+- user prompt → 用户提示词
+- prompt engineering → 提示词工程
+- agent / AI agent → 智能体
+- multi-agent → 多智能体
+- jailbreak → 越狱
+- prompt injection → 提示词注入
+- guardrails → 安全防护栏
+- alignment → 对齐
+- red team / red teaming → 红队 / 红队测试
+- chain of thought / CoT → 思维链
+- few-shot → 少样本
+- zero-shot → 零样本
+- one-shot → 单样本
+- in-context learning → 上下文学习
+- fine-tune / fine-tuning → 微调
+- RLHF → 基于人类反馈的强化学习（RLHF）
+- embedding → 嵌入向量
+- vector database → 向量数据库
+- RAG / Retrieval-Augmented Generation → 检索增强生成（RAG）
+- token → token（保留英文）
+- context window → 上下文窗口
+- temperature → 温度参数
+- top-p / top-k → top-p / top-k（保留）
+- inference → 推理
+- completion → 补全
+- chat completion → 对话补全
+- hallucination → 幻觉
+- grounding → 信息基底 / 锚定
+- assistant → 助手
+- tool use / function calling → 工具调用 / 函数调用
+- reasoning model → 推理模型
+- thinking / chain-of-thought → 思考过程 / 思维链
+- knowledge cutoff → 知识截止日期
+- self-attention → 自注意力
+- transformer → Transformer（保留）
+- diffusion model → 扩散模型
+- multimodal → 多模态
+- vision-language → 视觉语言
+- safety / safety policy → 安全 / 安全策略
+- refusal → 拒绝回答
+- persona → 人设
+- role-play → 角色扮演
+- character → 角色
+- workflow → 工作流
+- pipeline → 流水线
+- 主流模型/产品名保留英文：ChatGPT, Claude, Gemini, GPT-4, GPT-4o, GPT-5, o1, o3, Llama, Mistral, Qwen, DeepSeek, Copilot, Grok, Cursor, Perplexity, V0, Cline 等"""
 
 
 def call_glm(content: str) -> tuple[str, dict]:
@@ -92,11 +146,56 @@ def call_glm(content: str) -> tuple[str, dict]:
     raise RuntimeError(f"All {MAX_RETRIES} retries failed: {last_err}")
 
 
+_GIT_ZH_DATES: dict[str, str] | None = None
+
+
+def _build_zh_git_dates() -> dict[str, str]:
+    """Map _zh.md path → latest git commit date (YYYY-MM-DD).
+
+    One git invocation up-front is much faster than per-file git log calls.
+    Falls back to {} if not in a git repo.
+    """
+    import subprocess
+    try:
+        out = subprocess.check_output(
+            ["git", "log", "--name-only", "--diff-filter=AM", "--pretty=format:%cs"],
+            stderr=subprocess.DEVNULL, text=True,
+        )
+    except Exception:
+        return {}
+    dates: dict[str, str] = {}
+    cur_date: str | None = None
+    date_re = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+    for line in out.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        if date_re.match(line):
+            cur_date = line
+        elif line.endswith("_zh.md") and cur_date and line not in dates:
+            dates[line] = cur_date  # first occurrence == most recent
+    return dates
+
+
+def _zh_git_date(zh_path: Path) -> str | None:
+    global _GIT_ZH_DATES
+    if _GIT_ZH_DATES is None:
+        _GIT_ZH_DATES = _build_zh_git_dates()
+    return _GIT_ZH_DATES.get(str(zh_path).replace("\\", "/"))
+
+
 def needs_translation(en_path: Path) -> bool:
     zh_path = en_path.with_name(en_path.name.replace(".md", "_zh.md"))
     if not zh_path.exists():
         return True
-    return en_path.stat().st_mtime > zh_path.stat().st_mtime
+    if en_path.stat().st_mtime > zh_path.stat().st_mtime:
+        return True
+    # Force re-translation if existing zh is older than the cutoff
+    if RETRANSLATE_OLDER_THAN:
+        d = _zh_git_date(zh_path)
+        if d and d < RETRANSLATE_OLDER_THAN:
+            return True
+    return False
 
 
 def is_translatable_size(en_path: Path) -> tuple[bool, int]:
