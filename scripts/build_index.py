@@ -3,15 +3,21 @@
 
 Output format matches what docs/index.html consumes:
   { id, title, category, path_en, path_zh, tags, summary, updatedAt }
+
+Also writes:
+  - stats/coverage.json (latest snapshot, simple to consume)
+  - stats/coverage.jsonl (append-only history)
 """
 import json
 import re
 import subprocess
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 TARGET_DIRS = ["SystemPrompts", "CustomInstructions", "Articles", "Jailbreak", "Security"]
 OUTPUT = Path("prompts_index.json")
+STATS_DIR = Path("stats")
 DATE_RE = re.compile(r"(\d{8}|\d{4}-\d{2}-\d{2})")
 
 
@@ -26,7 +32,6 @@ def extract_date(name: str) -> str:
 
 
 def git_last_modified(path: Path) -> str:
-    """Return ISO date of last git commit touching this file."""
     try:
         out = subprocess.check_output(
             ["git", "log", "-1", "--format=%cs", "--", str(path)],
@@ -38,19 +43,16 @@ def git_last_modified(path: Path) -> str:
 
 
 def derive_title(content: str, fallback: str) -> str:
-    """Pick the first H1/H2 heading or the bold first line as the title."""
     for line in content.splitlines():
         line = line.strip()
         if line.startswith("# "):
             return line[2:].strip()
         if line.startswith("## "):
             return line[3:].strip()
-    # Fall back to filename (cleaned)
     return fallback.replace(".md", "").replace("_", " ")
 
 
 def derive_summary(content: str, max_len: int = 160) -> str:
-    # First non-empty, non-heading paragraph
     for raw in content.splitlines():
         line = raw.strip()
         if not line or line.startswith("#") or line.startswith("```") or line.startswith("---"):
@@ -63,6 +65,33 @@ def derive_summary(content: str, max_len: int = 160) -> str:
             text = text[: max_len - 1] + "…"
         return text
     return ""
+
+
+def write_coverage(entries: list[dict]) -> None:
+    total = len(entries)
+    with_zh = sum(1 for e in entries if e.get("path_zh"))
+    by_cat: dict[str, dict] = {}
+    for e in entries:
+        top = e["category"].split("/")[0] if e.get("category") else "_root"
+        bucket = by_cat.setdefault(top, {"total": 0, "with_zh": 0})
+        bucket["total"] += 1
+        if e.get("path_zh"):
+            bucket["with_zh"] += 1
+
+    snap = {
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "total": total,
+        "with_zh": with_zh,
+        "coverage_pct": round(with_zh / total * 100, 1) if total else 0.0,
+        "by_category": by_cat,
+    }
+
+    STATS_DIR.mkdir(parents=True, exist_ok=True)
+    (STATS_DIR / "coverage.json").write_text(
+        json.dumps(snap, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
+    with (STATS_DIR / "coverage.jsonl").open("a", encoding="utf-8") as fp:
+        fp.write(json.dumps(snap, ensure_ascii=False) + "\n")
 
 
 def main() -> int:
@@ -103,11 +132,17 @@ def main() -> int:
             })
 
     OUTPUT.write_text(
-        json.dumps(entries, ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8",
+        json.dumps(entries, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
+    write_coverage(entries)
+
     zh_count = sum(1 for e in entries if e["path_zh"])
-    print(f"Wrote {len(entries)} entries to {OUTPUT} ({zh_count} have Chinese translation)")
+    pct = (zh_count / len(entries) * 100) if entries else 0
+    print(
+        f"Wrote {len(entries)} entries to {OUTPUT}; "
+        f"{zh_count} have Chinese ({pct:.1f}% coverage); "
+        f"snapshot saved to {STATS_DIR}/coverage.json"
+    )
     return 0
 
 
