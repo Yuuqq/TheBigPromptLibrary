@@ -78,21 +78,13 @@ def main() -> int:
         top = scored[:TOP_K]
         if not top:
             continue
-        out[a["id"]] = [
-            {
-                "id": b["id"],
-                "title": b["title"],
-                "category": b["category"],
-                "path_zh": b["path_zh"],
-                "path_en": b["path_en"],
-                "score": round(s, 3),
-            }
-            for s, b in top
-        ]
+        # Compact format: only id + score. Frontend looks up title/category/paths
+        # by id from prompts_index.json (already loaded).
+        out[a["id"]] = [{"id": b["id"], "score": round(s, 3)} for s, b in top]
 
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(
-        json.dumps(out, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        json.dumps(out, ensure_ascii=False, separators=(",", ":"), sort_keys=True),
         encoding="utf-8",
     )
     avg_neighbors = (sum(len(v) for v in out.values()) / len(out)) if out else 0
