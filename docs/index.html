@@ -2739,6 +2739,8 @@
 
     // ===== Q4.2 lazy-loaded tags sidecar (joined into entries on demand) =====
     // Format: { "<path_en>": { "tags": [...], "mode": "heuristic"|"llm", ... } }
+    // NOT eager-loaded: 566KB would block first paint on mobile. Triggered on
+    // first card-render or first viewer-open (whichever comes first).
     var tagsIndex = null;
     var tagsLoading = null;
     function ensureTags() {
@@ -2746,7 +2748,14 @@
         if (tagsLoading) return tagsLoading;
         tagsLoading = fetch(RAW + '/stats/tags.json')
             .then(function(r) { return r.ok ? r.json() : {}; })
-            .then(function(j) { tagsIndex = j || {}; return tagsIndex; })
+            .then(function(j) {
+                tagsIndex = j || {};
+                // Re-run card enhancement once tags arrive so chips appear without
+                // requiring DOM to re-render. Cards already marked data-q4done
+                // skip the badge work but still get tag chips appended.
+                try { backfillTagsOnExistingCards(); } catch (e) {}
+                return tagsIndex;
+            })
             .catch(function() { tagsIndex = {}; return {}; });
         return tagsLoading;
     }
@@ -2755,8 +2764,23 @@
         var rec = tagsIndex[entry.path_en];
         return (rec && rec.tags) || [];
     }
-    // Eager-load tags so card chips appear without waiting for viewer open.
-    ensureTags();
+    function backfillTagsOnExistingCards() {
+        var cards = document.querySelectorAll('.recent-card[data-q4done]');
+        for (var i = 0; i < cards.length; i++) {
+            var card = cards[i];
+            var meta = card.querySelector('.recent-card-meta');
+            if (!meta || meta.querySelector('.q4-tag-mini')) continue;
+            var titleEl = card.querySelector('.recent-card-title');
+            if (!titleEl) continue;
+            var entry = findEntry({title: titleEl.textContent.replace(/^\s*(新|更新)\s*/, '')});
+            var t = tagsFor(entry);
+            if (!t.length) continue;
+            var chips = t.slice(0, 3).map(function(x) {
+                return '<span class="q4-tag-mini" style="margin-left:0.4rem;color:var(--accent-purple);font-size:0.7rem;">#' + escHtml(x) + '</span>';
+            }).join('');
+            meta.insertAdjacentHTML('beforeend', chips);
+        }
+    }
 
     // ===== Q4.3 lazy-loaded similar-prompts index =====
     var similarIndex = null;
@@ -2833,6 +2857,8 @@
     // ===== Card badge enhancement (Q4.4) =====
     function enhanceCards() {
         if (!getIndex().length) return;
+        // Trigger lazy tag fetch on first card-render (homepage idle moment).
+        ensureTags();
 
         // Recent cards on homepage
         var recents = document.querySelectorAll('.recent-card:not([data-q4done])');
@@ -2962,7 +2988,12 @@
         document.querySelectorAll('[data-q4tag]').forEach(function(el) { el.remove(); });
     }
 
-    // Track current prompt id; when it changes, reset enhancements
+    // Reset enhancements whenever the viewer reloads.
+    // Two triggers, because a EN/ZH toggle keeps the same currentPromptId but
+    // does rebuild promptMeta; without observing meta, the Q4 chips/compare
+    // button would never re-appear after a language flip.
+    //   1) currentPromptId change   → poll (id is on `currentPromptId`, not in DOM)
+    //   2) promptMeta rebuild       → MutationObserver
     var lastSeenId = null;
     setInterval(function() {
         var id = getCurId();
@@ -2971,23 +3002,55 @@
             clearViewerEnhancements();
         }
     }, 400);
+    var meta0 = document.getElementById('promptMeta');
+    if (meta0) {
+        new MutationObserver(function(muts) {
+            // Ignore mutations we caused ourselves (chip / compare-btn appendChild).
+            // Heuristic: if every added node is one of ours, skip.
+            var foreign = false;
+            for (var m = 0; m < muts.length; m++) {
+                var added = muts[m].addedNodes || [];
+                for (var n = 0; n < added.length; n++) {
+                    var nd = added[n];
+                    if (nd.nodeType !== 1) { foreign = true; break; }
+                    if (nd.id === 'q4CompareBtn') continue;
+                    if (nd.classList && nd.classList.contains('q4-tag-chip')) continue;
+                    foreign = true; break;
+                }
+                if (foreign) break;
+            }
+            if (foreign) clearViewerEnhancements();
+        }).observe(meta0, { childList: true });
+    }
 
     // ===== Q4.1 augment search dropdown with body-excerpt matches =====
+    // Self-throttling: each mutation may fire many times during a re-render, so
+    // we (a) skip if our section already exists, (b) cancel a pending augment
+    // when a new mutation arrives. No stale-flag gating — that broke when the
+    // user changed filters with the same query (dropdown rebuilt, but flag stayed).
+    var dropdownAugmentTimer = null;
     var dropdownObserver = new MutationObserver(function() {
         var dropdown = document.getElementById('searchDropdown');
         var input = document.getElementById('headerSearch');
         if (!dropdown || !input || !dropdown.classList.contains('active')) return;
         var q = (input.value || '').trim().toLowerCase();
         if (q.length < 2) return;
-        if (dropdown.getAttribute('data-q4q') === q) return;
-        dropdown.setAttribute('data-q4q', q);
-
+        // Already augmented for the current dropdown render — nothing to do.
+        if (dropdown.querySelector('.q4-excerpt-section')) return;
+        if (dropdownAugmentTimer) clearTimeout(dropdownAugmentTimer);
+        dropdownAugmentTimer = setTimeout(function() {
+            dropdownAugmentTimer = null;
+            doAugmentDropdown(dropdown, input, q);
+        }, 50);
+    });
+    function doAugmentDropdown(dropdown, input, q) {
         ensureSearchIndex().then(function(ix) {
             // Re-check: query may have changed
             var cur = (input.value || '').trim().toLowerCase();
             if (cur !== q) return;
             if (!ix || Object.keys(ix).length === 0) return;
-            // Avoid double-augmenting
+            // Re-check: dropdown may have been rebuilt (cleared) or already augmented.
+            if (!dropdown.classList.contains('active')) return;
             if (dropdown.querySelector('.q4-excerpt-section')) return;
 
             var shown = new Set();
@@ -3042,7 +3105,7 @@
                 dropdown.appendChild(item);
             }
         });
-    });
+    }
 
     function highlightSnippet(text, q) {
         if (!text) return '';
