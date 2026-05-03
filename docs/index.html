@@ -1638,6 +1638,13 @@
             try {
                 const res = await fetch(INDEX_URL);
                 promptsIndex = await res.json();
+                // Q4: enrich entries — id/updatedAt are derivable, so build_index.py
+                // omits them to keep prompts_index.json under the 1MB transfer ceiling.
+                for (let __i = 0; __i < promptsIndex.length; __i++) {
+                    const __e = promptsIndex[__i];
+                    if (!__e.id && __e.path_en) __e.id = __e.path_en.replace(/\.md$/, '');
+                    if (!__e.updatedAt) __e.updatedAt = __e.last_modified || '';
+                }
                 indexLoaded = true;
                 document.getElementById('statTotal').textContent = promptsIndex.length.toLocaleString();
                 renderRecentPrompts();
