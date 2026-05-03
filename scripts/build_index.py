@@ -276,8 +276,11 @@ def main() -> int:
 
             entries.append(entry)
 
+    # Compact JSON: separators=(',', ':') strips all whitespace.
+    # Saves ~30% file size for the largest artifact the frontend loads.
     OUTPUT.write_text(
-        json.dumps(entries, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+        json.dumps(entries, ensure_ascii=False, separators=(",", ":")),
+        encoding="utf-8",
     )
     write_coverage(entries)
     write_quality(qs_map)
