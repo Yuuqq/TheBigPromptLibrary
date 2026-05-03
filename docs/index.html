@@ -1080,6 +1080,140 @@
             .toast-container { bottom: 80px; width: calc(100% - 2rem); }
             .toast { white-space: normal; }
         }
+/* ===== Q4 features ===== */
+
+/* Q4.4 — "新/更新" badges */
+.q4-badge {
+    display: inline-block;
+    padding: 0.05rem 0.4rem;
+    border-radius: 999px;
+    font-size: 0.62rem;
+    font-weight: 700;
+    margin-right: 0.4rem;
+    vertical-align: middle;
+    line-height: 1.4;
+}
+.q4-badge-new { background: var(--accent-green); color: #fff; }
+.q4-badge-upd { background: var(--accent-blue); color: #fff; }
+
+/* Q4.2 — tag chips on viewer */
+.q4-tag-chip {
+    background: rgba(163,113,247,0.12) !important;
+    color: var(--accent-purple) !important;
+    cursor: pointer;
+    font-size: 0.72rem !important;
+    transition: all 0.15s;
+}
+.q4-tag-chip:hover {
+    background: rgba(163,113,247,0.25) !important;
+}
+
+.q4-compare-btn {
+    background: rgba(88,166,255,0.12) !important;
+    color: var(--accent-blue) !important;
+    border: 1px dashed var(--accent-blue);
+    cursor: pointer !important;
+    text-decoration: none !important;
+}
+.q4-compare-btn:hover { background: rgba(88,166,255,0.25) !important; }
+
+/* Q4.3 — similar prompts grid */
+.q4-similar {
+    margin: 2rem 0 0;
+    padding: 1.25rem 0 0;
+    border-top: 1px solid var(--border-color);
+}
+.q4-similar h3 {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+.q4-similar-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 0.75rem;
+}
+.q4-similar-card {
+    display: block;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 0.75rem 0.875rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-decoration: none;
+    color: inherit;
+}
+.q4-similar-card:hover {
+    border-color: var(--accent-blue);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.q4-similar-title {
+    font-weight: 600;
+    font-size: 0.88rem;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.q4-similar-meta {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+}
+
+/* Q4.6 — Mobile improvements */
+@media (max-width: 640px) {
+    header { padding: 0.5rem 0.75rem !important; }
+    .header-content { gap: 0.5rem !important; flex-wrap: wrap; }
+    .logo-text { font-size: 0.95rem !important; }
+    .header-search { max-width: 100% !important; min-width: 0; }
+    nav { display: none !important; }
+
+    /* Sticky bottom search bar variant on small screens */
+    body { padding-bottom: 4rem; }
+
+    .recent-card { padding: 0.85rem !important; }
+    .q4-similar-grid { grid-template-columns: 1fr !important; }
+
+    main, .content-browser, .prompt-viewer {
+        padding: 0.75rem !important;
+    }
+
+    .prompt-actions {
+        flex-wrap: wrap;
+        gap: 0.4rem !important;
+    }
+    .prompt-actions button, .prompt-actions a {
+        font-size: 0.78rem !important;
+        padding: 0.4rem 0.7rem !important;
+    }
+
+    /* Swipe hint */
+    .q4-swipe-hint {
+        position: fixed;
+        bottom: 4.5rem;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--bg-tertiary);
+        color: var(--text-secondary);
+        padding: 0.4rem 0.75rem;
+        border-radius: 999px;
+        font-size: 0.7rem;
+        opacity: 0.85;
+        pointer-events: none;
+        z-index: 50;
+    }
+}
+
+/* PWA standalone tweaks */
+@media (display-mode: standalone) {
+    header { padding-top: env(safe-area-inset-top, 0.5rem) !important; }
+    body { padding-bottom: env(safe-area-inset-bottom, 0); }
+}
+
     </style>
 </head>
 <body>
@@ -2505,6 +2639,453 @@
     showHome();
     // If user landed with #/p/... before index loads, handleHashRoute will be retried after index loads
     handleHashRoute();
+
+    // ===== Q4 bridge: expose lexical state to the Q4 enhancement script below =====
+    window.tbpl = {
+        getIndex: function() { return promptsIndex; },
+        isLoaded: function() { return indexLoaded; },
+        getCurId: function() { return currentPromptId; },
+        getCurPath: function() { return currentViewPath; },
+        matchesFilters: matchesFilters,
+        viewFromIndex: viewFromIndex,
+        closeSearchDropdown: closeSearchDropdown,
+    };
+</script>
+<script id="q4-features">
+/* ===== Q4 features (Q4.1/2/3/4/5/6) ===== */
+(function() {
+    'use strict';
+
+    var RAW = 'https://raw.githubusercontent.com/Yuuqq/TheBigPromptLibrary/main';
+    var SEVEN_DAYS = 7 * 24 * 3600 * 1000;
+    var NOW = Date.now();
+    var BRIDGE = window.tbpl || {};
+
+    // ===== Q4.6 PWA: register manifest + service worker =====
+    if (!document.querySelector('link[rel="manifest"]')) {
+        var link = document.createElement('link');
+        link.rel = 'manifest';
+        link.href = 'manifest.json';
+        document.head.appendChild(link);
+    }
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+            navigator.serviceWorker.register('sw.js').catch(function(e) {
+                console.warn('SW registration failed:', e);
+            });
+        });
+    }
+
+    // ===== Q4.4 last-visit tracking =====
+    var lastVisit = 0;
+    try { lastVisit = parseInt(localStorage.getItem('tbpl.lastVisit') || '0', 10) || 0; } catch (e) {}
+
+    function isNewBadge(updatedAt) {
+        if (!updatedAt) return false;
+        var t = Date.parse(updatedAt);
+        if (isNaN(t)) return false;
+        return t > NOW - SEVEN_DAYS;
+    }
+    function isUpdatedBadge(updatedAt) {
+        if (!updatedAt || !lastVisit) return false;
+        var t = Date.parse(updatedAt);
+        if (isNaN(t)) return false;
+        return t > lastVisit && t <= NOW - SEVEN_DAYS;
+    }
+    function badgeFor(p) {
+        if (!p) return '';
+        var ts = p.last_modified_zh || p.last_modified || p.updatedAt;
+        if (isNewBadge(ts)) return '<span class="q4-badge q4-badge-new">新</span>';
+        if (isUpdatedBadge(ts)) return '<span class="q4-badge q4-badge-upd">更新</span>';
+        return '';
+    }
+    // Persist current visit after a short delay so this session can still detect "updated since last visit"
+    setTimeout(function() {
+        try { localStorage.setItem('tbpl.lastVisit', String(NOW)); } catch (e) {}
+    }, 30000);
+
+    // ===== Q4.1 lazy-loaded full-text search index =====
+    var searchIndex = null;
+    var searchIndexLoading = null;
+    function ensureSearchIndex() {
+        if (searchIndex !== null) return Promise.resolve(searchIndex);
+        if (searchIndexLoading) return searchIndexLoading;
+        searchIndexLoading = fetch(RAW + '/stats/search_index.json')
+            .then(function(r) { return r.ok ? r.json() : []; })
+            .then(function(arr) {
+                var map = Object.create(null);
+                if (Array.isArray(arr)) {
+                    for (var i = 0; i < arr.length; i++) {
+                        var e = arr[i];
+                        if (e && e.id && e.ex) map[e.id] = String(e.ex).toLowerCase();
+                    }
+                }
+                searchIndex = map;
+                return map;
+            })
+            .catch(function() { searchIndex = {}; return {}; });
+        return searchIndexLoading;
+    }
+    document.addEventListener('focusin', function(e) {
+        if (e.target && e.target.id === 'headerSearch') ensureSearchIndex();
+    });
+
+    // ===== Q4.3 lazy-loaded similar-prompts index =====
+    var similarIndex = null;
+    var similarLoading = null;
+    function ensureSimilar() {
+        if (similarIndex !== null) return Promise.resolve(similarIndex);
+        if (similarLoading) return similarLoading;
+        similarLoading = fetch(RAW + '/stats/similar.json')
+            .then(function(r) { return r.ok ? r.json() : {}; })
+            .then(function(j) { similarIndex = j || {}; return similarIndex; })
+            .catch(function() { similarIndex = {}; return {}; });
+        return similarLoading;
+    }
+
+    // ===== Helpers =====
+    function escHtml(s) {
+        return String(s == null ? '' : s)
+            .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+    function getIndex() {
+        if (typeof BRIDGE.getIndex === 'function') return BRIDGE.getIndex() || [];
+        return [];
+    }
+    function getCurId() {
+        if (typeof BRIDGE.getCurId === 'function') return BRIDGE.getCurId();
+        return '';
+    }
+    function getCurPath() {
+        if (typeof BRIDGE.getCurPath === 'function') return BRIDGE.getCurPath();
+        return '';
+    }
+    function matchesFiltersBridge(p) {
+        if (typeof BRIDGE.matchesFilters === 'function') return BRIDGE.matchesFilters(p);
+        return true;
+    }
+    function viewFromIndex(path, id) {
+        if (typeof window.viewFromIndex === 'function') return window.viewFromIndex(path, id);
+        if (typeof BRIDGE.viewFromIndex === 'function') return BRIDGE.viewFromIndex(path, id);
+    }
+    function closeSearchDropdown() {
+        if (typeof window.closeSearchDropdown === 'function') return window.closeSearchDropdown();
+        if (typeof BRIDGE.closeSearchDropdown === 'function') return BRIDGE.closeSearchDropdown();
+    }
+
+    var _indexById = null;
+    function indexById() {
+        var idx = getIndex();
+        if (_indexById && _indexById._n === idx.length) return _indexById;
+        var m = Object.create(null);
+        for (var i = 0; i < idx.length; i++) m[idx[i].id] = idx[i];
+        m._n = idx.length;
+        _indexById = m;
+        return m;
+    }
+    function findEntry({id, title, path}) {
+        var idx = getIndex();
+        if (id) {
+            var m = indexById();
+            if (m[id]) return m[id];
+        }
+        if (path) {
+            for (var i = 0; i < idx.length; i++) {
+                if (idx[i].path_zh === path || idx[i].path_en === path) return idx[i];
+            }
+        }
+        if (title) {
+            for (var j = 0; j < idx.length; j++) {
+                if ((idx[j].title || '').trim() === title.trim()) return idx[j];
+            }
+        }
+        return null;
+    }
+
+    // ===== Card badge enhancement (Q4.4) =====
+    function enhanceCards() {
+        if (!getIndex().length) return;
+
+        // Recent cards on homepage
+        var recents = document.querySelectorAll('.recent-card:not([data-q4done])');
+        for (var i = 0; i < recents.length; i++) {
+            var card = recents[i];
+            card.setAttribute('data-q4done', '1');
+            var titleEl = card.querySelector('.recent-card-title');
+            if (!titleEl) continue;
+            var entry = findEntry({title: titleEl.textContent});
+            var b = badgeFor(entry);
+            if (b) titleEl.insertAdjacentHTML('afterbegin', b);
+            // Tag chips appended to meta
+            if (entry && entry.tags && entry.tags.length) {
+                var meta = card.querySelector('.recent-card-meta');
+                if (meta && !meta.querySelector('.q4-tag-mini')) {
+                    var chips = entry.tags.slice(0, 3).map(function(t) {
+                        return '<span class="q4-tag-mini" style="margin-left:0.4rem;color:var(--accent-purple);font-size:0.7rem;">#' + escHtml(t) + '</span>';
+                    }).join('');
+                    meta.insertAdjacentHTML('beforeend', chips);
+                }
+            }
+        }
+
+        // Search dropdown items
+        var items = document.querySelectorAll('.search-result-item:not([data-q4done])');
+        for (var k = 0; k < items.length; k++) {
+            var item = items[k];
+            item.setAttribute('data-q4done', '1');
+            var t2 = item.querySelector('.search-result-title');
+            if (!t2) continue;
+            var rawTitle = t2.textContent.split('质量')[0].trim();
+            var entry2 = findEntry({title: rawTitle});
+            var b2 = badgeFor(entry2);
+            if (b2) t2.insertAdjacentHTML('afterbegin', b2);
+        }
+    }
+
+    // ===== Viewer enhancement (Q4.2 tags + Q4.3 similar + Q4.5 compare button) =====
+    var viewerEnhanceInProgress = false;
+    function enhanceViewer() {
+        if (viewerEnhanceInProgress) return;
+        var content = document.getElementById('promptContent');
+        if (!content || !content.innerHTML.trim()) return;
+        if (content.getAttribute('data-q4Enhanced') === '1') return;
+        var entry = findEntry({id: getCurId(), path: getCurPath()});
+        if (!entry) return;
+        viewerEnhanceInProgress = true;
+        try {
+            content.setAttribute('data-q4Enhanced', '1');
+
+            var meta = document.getElementById('promptMeta');
+            // Q4.5 compare button
+            if (meta && !document.getElementById('q4CompareBtn')) {
+                var sharePath = getCurPath() || entry.path_zh || entry.path_en;
+                var btn = document.createElement('a');
+                btn.id = 'q4CompareBtn';
+                btn.href = 'compare.html?a=' + encodeURIComponent(sharePath);
+                btn.target = '_blank';
+                btn.rel = 'noopener';
+                btn.className = 'prompt-tag q4-compare-btn';
+                btn.innerHTML = '📑 与另一个对比';
+                meta.appendChild(btn);
+            }
+            // Q4.2 tag chips
+            if (meta && entry.tags && entry.tags.length) {
+                for (var i = 0; i < Math.min(entry.tags.length, 8); i++) {
+                    var t = entry.tags[i];
+                    if (meta.querySelector('[data-q4tag="' + CSS.escape(t) + '"]')) continue;
+                    var chip = document.createElement('span');
+                    chip.className = 'prompt-tag q4-tag-chip';
+                    chip.setAttribute('data-q4tag', t);
+                    chip.textContent = '#' + t;
+                    meta.appendChild(chip);
+                }
+            }
+            // Q4.3 similar prompts
+            ensureSimilar().then(function(idx) {
+                var sims = (idx && idx[entry.id]) || [];
+                if (!sims.length) return;
+                var existing = document.getElementById('q4SimilarBox');
+                if (existing) existing.remove();
+                var box = document.createElement('section');
+                box.id = 'q4SimilarBox';
+                box.className = 'q4-similar';
+                var html = '<h3>🔗 相似提示词</h3><div class="q4-similar-grid">';
+                for (var j = 0; j < sims.length; j++) {
+                    var s = sims[j];
+                    var cat = (s.category || '').split('/').pop() || s.category || '';
+                    var pct = Math.round((s.score || 0) * 100);
+                    html += '<a class="q4-similar-card" data-path="' + escHtml(s.path_zh || s.path_en) +
+                            '" data-id="' + escHtml(s.id) + '">' +
+                            '<div class="q4-similar-title">' + escHtml(s.title || s.id) + '</div>' +
+                            '<div class="q4-similar-meta">' + escHtml(cat) + ' · ' + pct + '% 相似</div>' +
+                            '</a>';
+                }
+                html += '</div>';
+                box.innerHTML = html;
+                content.parentElement.appendChild(box);
+                box.querySelectorAll('.q4-similar-card').forEach(function(c) {
+                    c.addEventListener('click', function() {
+                        var p = c.getAttribute('data-path');
+                        var i = c.getAttribute('data-id');
+                        if (p) viewFromIndex(p, i);
+                    });
+                });
+            });
+        } finally {
+            viewerEnhanceInProgress = false;
+        }
+    }
+
+    function clearViewerEnhancements() {
+        var content = document.getElementById('promptContent');
+        if (content) content.removeAttribute('data-q4Enhanced');
+        var box = document.getElementById('q4SimilarBox');
+        if (box) box.remove();
+        var btn = document.getElementById('q4CompareBtn');
+        if (btn) btn.remove();
+        document.querySelectorAll('[data-q4tag]').forEach(function(el) { el.remove(); });
+    }
+
+    // Track current prompt id; when it changes, reset enhancements
+    var lastSeenId = null;
+    setInterval(function() {
+        var id = getCurId();
+        if (id !== lastSeenId) {
+            lastSeenId = id;
+            clearViewerEnhancements();
+        }
+    }, 400);
+
+    // ===== Q4.1 augment search dropdown with body-excerpt matches =====
+    var dropdownObserver = new MutationObserver(function() {
+        var dropdown = document.getElementById('searchDropdown');
+        var input = document.getElementById('headerSearch');
+        if (!dropdown || !input || !dropdown.classList.contains('active')) return;
+        var q = (input.value || '').trim().toLowerCase();
+        if (q.length < 2) return;
+        if (dropdown.getAttribute('data-q4q') === q) return;
+        dropdown.setAttribute('data-q4q', q);
+
+        ensureSearchIndex().then(function(ix) {
+            // Re-check: query may have changed
+            var cur = (input.value || '').trim().toLowerCase();
+            if (cur !== q) return;
+            if (!ix || Object.keys(ix).length === 0) return;
+            // Avoid double-augmenting
+            if (dropdown.querySelector('.q4-excerpt-section')) return;
+
+            var shown = new Set();
+            dropdown.querySelectorAll('.search-result-item').forEach(function(it) {
+                var t = it.querySelector('.search-result-title');
+                if (t) shown.add(t.textContent.split('质量')[0].trim());
+            });
+
+            var idx = getIndex();
+            var extra = [];
+            for (var i = 0; i < idx.length && extra.length < 10; i++) {
+                var p = idx[i];
+                var ex = ix[p.id];
+                if (!ex || ex.indexOf(q) === -1) continue;
+                var title = p.title || p.id;
+                if (shown.has(title.trim())) continue;
+                if (!matchesFiltersBridge(p)) continue;
+                extra.push(p);
+            }
+            if (!extra.length) return;
+
+            var sectionIcons = { SystemPrompts:'🤖', CustomInstructions:'✨', Articles:'📰', Jailbreak:'🔓', Security:'🛡️' };
+            var sep = document.createElement('div');
+            sep.className = 'search-dropdown-header q4-excerpt-section';
+            sep.style.borderTop = '1px solid var(--border-color)';
+            sep.textContent = '📄 正文匹配（' + extra.length + ' 条）';
+            dropdown.appendChild(sep);
+
+            for (var j = 0; j < extra.length; j++) {
+                var p2 = extra[j];
+                var section = (p2.category || '').split('/')[0];
+                var icon = sectionIcons[section] || '📄';
+                var path = p2.path_zh || p2.path_en || '';
+                var title2 = p2.title || p2.id.split('/').pop();
+                var snippet = highlightSnippet(ix[p2.id], q);
+                var item = document.createElement('a');
+                item.className = 'search-result-item';
+                item.style.cursor = 'pointer';
+                item.tabIndex = -1;
+                item.innerHTML =
+                    '<div class="search-result-icon">' + icon + '</div>' +
+                    '<div class="search-result-body">' +
+                        '<div class="search-result-title">' + escHtml(title2) + '</div>' +
+                        '<div class="search-result-meta" style="white-space:normal;font-style:italic;">…' + snippet + '…</div>' +
+                    '</div>';
+                (function(p2, path) {
+                    item.addEventListener('click', function() {
+                        closeSearchDropdown();
+                        viewFromIndex(path, p2.id);
+                    });
+                })(p2, path);
+                dropdown.appendChild(item);
+            }
+        });
+    });
+
+    function highlightSnippet(text, q) {
+        if (!text) return '';
+        var idx = text.indexOf(q);
+        if (idx === -1) return escHtml(text.slice(0, 100));
+        var start = Math.max(0, idx - 40);
+        var end = Math.min(text.length, idx + q.length + 60);
+        var slice = text.slice(start, end);
+        var rel = idx - start;
+        return escHtml(slice.slice(0, rel)) +
+            '<mark>' + escHtml(slice.slice(rel, rel + q.length)) + '</mark>' +
+            escHtml(slice.slice(rel + q.length));
+    }
+
+    // ===== Q4.6 swipe gestures in viewer =====
+    var touchStartX = 0, touchStartY = 0, touchActive = false;
+    document.addEventListener('touchstart', function(e) {
+        var view = document.getElementById('viewer-section');
+        if (!view || !view.classList.contains('active')) return;
+        if (!e.touches || e.touches.length !== 1) return;
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+        touchActive = true;
+    }, { passive: true });
+    document.addEventListener('touchend', function(e) {
+        if (!touchActive) return;
+        touchActive = false;
+        var view = document.getElementById('viewer-section');
+        if (!view || !view.classList.contains('active')) return;
+        var dx = e.changedTouches[0].clientX - touchStartX;
+        var dy = e.changedTouches[0].clientY - touchStartY;
+        if (Math.abs(dx) < 100 || Math.abs(dy) > 60) return;
+        var idx = getIndex();
+        var curId = getCurId();
+        var i = -1;
+        for (var k = 0; k < idx.length; k++) if (idx[k].id === curId) { i = k; break; }
+        if (i === -1) return;
+        var target = dx < 0 ? i + 1 : i - 1;
+        if (target < 0 || target >= idx.length) return;
+        var t = idx[target];
+        var path = t.path_zh || t.path_en;
+        if (path) {
+            viewFromIndex(path, t.id);
+            // Show small hint
+            var hint = document.createElement('div');
+            hint.className = 'q4-swipe-hint';
+            hint.textContent = (dx < 0 ? '→ 下一个' : '← 上一个') + '：' + (t.title || '').slice(0, 30);
+            document.body.appendChild(hint);
+            setTimeout(function() { hint.remove(); }, 1200);
+        }
+    }, { passive: true });
+
+    // ===== INIT =====
+    var globalObserver = new MutationObserver(function() {
+        enhanceCards();
+        enhanceViewer();
+    });
+    function init() {
+        var main = document.querySelector('main');
+        if (main) globalObserver.observe(main, { childList: true, subtree: true });
+        var dropdown = document.getElementById('searchDropdown');
+        if (dropdown) dropdownObserver.observe(dropdown, { childList: true, subtree: true });
+        // Also do an initial pass after index loads
+        var tries = 0;
+        var t = setInterval(function() {
+            if (getIndex().length || ++tries > 60) {
+                enhanceCards();
+                enhanceViewer();
+                if (getIndex().length) clearInterval(t);
+            }
+        }, 500);
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+})();
+
 </script>
 </body>
 </html>

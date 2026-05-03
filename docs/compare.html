@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>并排对比 — The Big Prompt Library 中文版</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-tertiary: #21262d;
+            --text-primary: #f0f6fc;
+            --text-secondary: #8b949e;
+            --text-muted: #6e7681;
+            --border: #30363d;
+            --accent: #58a6ff;
+            --diff-add: rgba(63,185,80,0.18);
+            --diff-add-border: #3fb950;
+            --diff-del: rgba(248,81,73,0.18);
+            --diff-del-border: #f85149;
+        }
+        [data-theme="light"] {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f6f8fa;
+            --bg-tertiary: #eaeef2;
+            --text-primary: #1f2328;
+            --text-secondary: #59636e;
+            --text-muted: #818b98;
+            --border: #d1d9e0;
+            --accent: #0969da;
+            --diff-add: rgba(26,127,55,0.12);
+            --diff-add-border: #1a7f37;
+            --diff-del: rgba(207,34,46,0.12);
+            --diff-del-border: #cf222e;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        header {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            position: sticky; top: 0; z-index: 10;
+            display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;
+        }
+        header h1 { font-size: 1.1rem; }
+        header a { color: var(--accent); text-decoration: none; font-size: 0.9rem; }
+        header a:hover { text-decoration: underline; }
+        .controls { display: flex; gap: 0.5rem; margin-left: auto; align-items: center; flex-wrap: wrap; }
+        .controls button {
+            background: var(--bg-tertiary); color: var(--text-primary);
+            border: 1px solid var(--border); padding: 0.45rem 0.9rem;
+            border-radius: 6px; cursor: pointer; font-size: 0.85rem;
+            font-family: inherit; transition: all 0.15s;
+        }
+        .controls button:hover { border-color: var(--accent); color: var(--accent); }
+        .controls button.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+        .pickers {
+            padding: 1rem 2rem;
+            display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .picker { display: flex; flex-direction: column; gap: 0.4rem; }
+        .picker label { font-size: 0.8rem; color: var(--text-secondary); }
+        .picker select {
+            background: var(--bg-tertiary); color: var(--text-primary);
+            border: 1px solid var(--border); padding: 0.55rem 0.75rem;
+            border-radius: 6px; font-size: 0.9rem; font-family: inherit;
+        }
+        main {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 1px;
+            background: var(--border);
+            min-height: calc(100vh - 200px);
+        }
+        .pane {
+            background: var(--bg-primary); padding: 1.5rem 2rem;
+            overflow-x: auto;
+        }
+        .pane h2 {
+            font-size: 1rem; color: var(--text-secondary); margin-bottom: 1rem;
+            padding-bottom: 0.5rem; border-bottom: 1px solid var(--border);
+            position: sticky; top: 0; background: var(--bg-primary);
+        }
+        .diff-line {
+            white-space: pre-wrap; word-break: break-word;
+            padding: 0.1rem 0.5rem; margin: 0;
+            font-family: 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
+            font-size: 0.82rem; line-height: 1.55;
+        }
+        .diff-add  { background: var(--diff-add);  border-left: 3px solid var(--diff-add-border); }
+        .diff-del  { background: var(--diff-del);  border-left: 3px solid var(--diff-del-border); }
+        .diff-same { color: var(--text-secondary); border-left: 3px solid transparent; }
+        .empty {
+            padding: 3rem 2rem; text-align: center; color: var(--text-muted);
+            grid-column: 1 / -1;
+        }
+        .loading { padding: 2rem; text-align: center; color: var(--text-secondary); }
+        .legend {
+            display: flex; gap: 1rem; font-size: 0.78rem; color: var(--text-secondary);
+        }
+        .legend-swatch { display: inline-block; width: 14px; height: 14px; border-radius: 3px; vertical-align: middle; margin-right: 0.3rem; }
+
+        @media (max-width: 768px) {
+            .pickers, main { grid-template-columns: 1fr; }
+            .pickers { gap: 0.5rem; }
+            header { padding: 0.75rem 1rem; }
+            .pane { padding: 1rem; }
+        }
+    </style>
+    <script>
+        (function() {
+            try {
+                var saved = localStorage.getItem('prompt_theme');
+                var theme = saved || (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+                if (theme === 'light') document.documentElement.setAttribute('data-theme', 'light');
+            } catch(e) {}
+        })();
+    </script>
+</head>
+<body>
+
+<header>
+    <a href="./">&larr; 返回首页</a>
+    <h1>📑 并排对比</h1>
+    <div class="legend">
+        <span><span class="legend-swatch" style="background:var(--diff-del)"></span>仅在 A 中</span>
+        <span><span class="legend-swatch" style="background:var(--diff-add)"></span>仅在 B 中</span>
+    </div>
+    <div class="controls">
+        <button id="modeFull"  class="active" onclick="setMode('full')">完整</button>
+        <button id="modeDiff"             onclick="setMode('diff')">仅差异</button>
+        <button onclick="copyShareLink()">🔗 分享</button>
+    </div>
+</header>
+
+<div class="pickers">
+    <div class="picker">
+        <label>左侧（A）</label>
+        <select id="pickA"></select>
+    </div>
+    <div class="picker">
+        <label>右侧（B）</label>
+        <select id="pickB"></select>
+    </div>
+</div>
+
+<main>
+    <div class="pane">
+        <h2 id="titleA">— 选择 A —</h2>
+        <div id="contentA" class="loading">请从上方下拉框选择两个文件以开始对比</div>
+    </div>
+    <div class="pane">
+        <h2 id="titleB">— 选择 B —</h2>
+        <div id="contentB"></div>
+    </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/diff@5.2.0/dist/diff.min.js"></script>
+<script>
+    const RAW = 'https://raw.githubusercontent.com/Yuuqq/TheBigPromptLibrary/main';
+    const INDEX_URL = RAW + '/prompts_index.json';
+
+    let prompts = [];
+    let mode = 'full';   // 'full' | 'diff'
+
+    async function init() {
+        try {
+            const r = await fetch(INDEX_URL);
+            prompts = await r.json();
+            populatePickers();
+            const params = new URLSearchParams(location.search);
+            const a = params.get('a'), b = params.get('b');
+            if (a) document.getElementById('pickA').value = a;
+            if (b) document.getElementById('pickB').value = b;
+            if (a && b) await renderCompare();
+        } catch (e) {
+            document.getElementById('contentA').textContent = '加载提示词索引失败：' + e.message;
+        }
+    }
+
+    function populatePickers() {
+        const opts = ['<option value="">— 选择文件 —</option>'];
+        for (const p of prompts) {
+            const path = p.path_zh || p.path_en;
+            if (!path) continue;
+            const label = (p.title || p.id) + '  (' + (p.category || '') + ')';
+            opts.push(`<option value="${esc(path)}">${esc(label)}</option>`);
+        }
+        const html = opts.join('');
+        const a = document.getElementById('pickA');
+        const b = document.getElementById('pickB');
+        a.innerHTML = html;
+        b.innerHTML = html;
+        a.addEventListener('change', renderCompare);
+        b.addEventListener('change', renderCompare);
+    }
+
+    async function renderCompare() {
+        const a = document.getElementById('pickA').value;
+        const b = document.getElementById('pickB').value;
+        if (!a || !b) return;
+        if (a === b) {
+            document.getElementById('contentA').innerHTML =
+            document.getElementById('contentB').innerHTML =
+                '<div class="empty">请选择两个不同的文件</div>';
+            return;
+        }
+        // Update URL
+        const u = new URL(location.href);
+        u.searchParams.set('a', a);
+        u.searchParams.set('b', b);
+        history.replaceState(null, '', u.toString());
+
+        document.getElementById('titleA').textContent = a;
+        document.getElementById('titleB').textContent = b;
+        document.getElementById('contentA').innerHTML = '<div class="loading">加载中...</div>';
+        document.getElementById('contentB').innerHTML = '<div class="loading">加载中...</div>';
+
+        try {
+            const [textA, textB] = await Promise.all([fetchText(a), fetchText(b)]);
+            renderDiff(textA, textB);
+        } catch (e) {
+            document.getElementById('contentA').textContent = '加载失败：' + e.message;
+        }
+    }
+
+    async function fetchText(path) {
+        const r = await fetch(RAW + '/' + path);
+        if (!r.ok) throw new Error(path + ' → ' + r.status);
+        return r.text();
+    }
+
+    function renderDiff(a, b) {
+        const diff = window.Diff.diffLines(a, b);
+        const left = [], right = [];
+        for (const part of diff) {
+            const lines = part.value.split('\n');
+            if (lines.length > 1 && lines[lines.length - 1] === '') lines.pop();
+            for (const line of lines) {
+                if (part.added) {
+                    if (mode === 'full' || mode === 'diff')
+                        right.push(['add', line]);
+                } else if (part.removed) {
+                    if (mode === 'full' || mode === 'diff')
+                        left.push(['del', line]);
+                } else {
+                    if (mode === 'full') {
+                        left.push(['same', line]);
+                        right.push(['same', line]);
+                    }
+                }
+            }
+        }
+        document.getElementById('contentA').innerHTML = renderLines(left)  || '<div class="empty">无内容</div>';
+        document.getElementById('contentB').innerHTML = renderLines(right) || '<div class="empty">无内容</div>';
+    }
+
+    function renderLines(arr) {
+        return arr.map(([k, l]) =>
+            `<div class="diff-line diff-${k}">${esc(l) || '&nbsp;'}</div>`
+        ).join('');
+    }
+
+    function setMode(m) {
+        mode = m;
+        document.getElementById('modeFull').classList.toggle('active', m === 'full');
+        document.getElementById('modeDiff').classList.toggle('active', m === 'diff');
+        renderCompare();
+    }
+
+    function copyShareLink() {
+        navigator.clipboard.writeText(location.href).then(() => {
+            const btn = event.target;
+            const orig = btn.textContent;
+            btn.textContent = '✓ 已复制';
+            setTimeout(() => btn.textContent = orig, 1500);
+        });
+    }
+
+    function esc(s) {
+        return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    init();
+</script>
+</body>
+</html>

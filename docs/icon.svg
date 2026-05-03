@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="96" fill="#0d1117"/>
+  <rect x="48" y="48" width="416" height="416" rx="64" fill="none" stroke="#58a6ff" stroke-width="12"/>
+  <text x="256" y="290" font-family="ui-sans-serif,system-ui,'Segoe UI',Inter,sans-serif" font-size="220" font-weight="700" fill="#58a6ff" text-anchor="middle">提</text>
+  <circle cx="404" cy="108" r="36" fill="#3fb950"/>
+  <text x="404" y="123" font-family="ui-sans-serif,system-ui,sans-serif" font-size="40" font-weight="700" fill="#0d1117" text-anchor="middle">中</text>
+</svg>

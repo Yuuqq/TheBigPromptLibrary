@@ -1,0 +1,62 @@
+{
+  "_meta": {
+    "version": 1,
+    "description": "Controlled vocabulary for AI auto-tagging (Q4.2). Heuristic + LLM taggers must pick from this list — no inventing new tags."
+  },
+  "providers": {
+    "openai":      ["openai", "chatgpt", "gpt-3", "gpt-4", "gpt-5", "o1", "o3", "dalle", "sora"],
+    "anthropic":   ["anthropic", "claude"],
+    "google":      ["google", "gemini", "bard", "palm"],
+    "meta":        ["meta", "llama"],
+    "mistral":     ["mistral", "le chat"],
+    "deepseek":    ["deepseek"],
+    "qwen":        ["qwen", "tongyi"],
+    "xai":         ["xai", "grok"],
+    "perplexity":  ["perplexity"],
+    "copilot":     ["copilot"],
+    "cursor":      ["cursor.com", "cursor ai"],
+    "v0":          ["v0.dev", "vercel v0"]
+  },
+  "types": {
+    "system-prompt":      ["system prompt", "system message"],
+    "custom-instruction": ["custom instruction", "custom gpt"],
+    "jailbreak":          ["jailbreak", "dan", "stan", "developer mode", "evil", "uncensored"],
+    "agent":              ["agent", "autonomous", "browse", "tool use", "function call"],
+    "persona":            ["persona", "role-play", "roleplay", "character", "assistant named"],
+    "prompt-injection":   ["prompt injection", "prompt leak"]
+  },
+  "domains": {
+    "coding":          ["code", "coding", "developer", "programming", "python", "javascript", "typescript"],
+    "writing":         ["writing", "essay", "creative", "story", "novel", "poem"],
+    "translation":     ["translate", "translation", "translator"],
+    "summarization":   ["summarize", "summary", "tldr"],
+    "image-gen":       ["image", "dall-e", "dalle", "midjourney", "flux"],
+    "voice":           ["voice", "audio", "speech"],
+    "search":          ["search", "browsing", "web access"],
+    "math":            ["math", "calculation", "equation"],
+    "data-analysis":   ["data analysis", "csv", "spreadsheet", "pandas"],
+    "research":        ["research", "academic", "paper"],
+    "marketing":       ["marketing", "copy", "sales", "ads"],
+    "education":       ["teach", "tutor", "student", "homework", "explain"],
+    "productivity":    ["productivity", "workflow", "task", "todo"],
+    "finance":         ["finance", "trading", "stock", "investment"],
+    "legal":           ["legal", "law", "contract"],
+    "medical":         ["medical", "health", "doctor"],
+    "translation-zh":  ["chinese", "中文", "汉语"]
+  },
+  "techniques": {
+    "chain-of-thought": ["chain of thought", "cot", "step by step", "think step"],
+    "few-shot":         ["few-shot", "few shot", "examples"],
+    "zero-shot":        ["zero-shot"],
+    "rag":              ["rag", "retrieval"],
+    "memory":           ["memory", "remember", "context window"],
+    "json-output":      ["json", "structured output"],
+    "markdown-output":  ["markdown"],
+    "guardrails":       ["guardrail", "safety", "refuse", "decline", "policy"]
+  },
+  "risk": {
+    "safe":      [],
+    "sensitive": ["adult", "violence", "harm"],
+    "jailbreak": ["jailbreak", "dan", "evil", "uncensored", "no restriction"]
+  }
+}

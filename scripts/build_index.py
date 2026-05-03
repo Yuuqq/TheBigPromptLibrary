@@ -2,11 +2,13 @@
 """Rebuild prompts_index.json by scanning the file system.
 
 Output format matches what docs/index.html consumes:
-  { id, title, category, path_en, path_zh, tags, summary, updatedAt }
+  { id, title, category, path_en, path_zh, tags, summary, updatedAt,
+    last_modified, last_modified_zh, qs }
 
 Also writes:
   - stats/coverage.json (latest snapshot, simple to consume)
   - stats/coverage.jsonl (append-only history)
+  - stats/quality.json  (qs distribution + worst-50 list)
 """
 import json
 import re
@@ -18,6 +20,7 @@ from pathlib import Path
 TARGET_DIRS = ["SystemPrompts", "CustomInstructions", "Articles", "Jailbreak", "Security"]
 OUTPUT = Path("prompts_index.json")
 STATS_DIR = Path("stats")
+TAGS_FILE = STATS_DIR / "tags.json"
 DATE_RE = re.compile(r"(\d{8}|\d{4}-\d{2}-\d{2})")
 
 # ----- Quality scoring -----
@@ -44,7 +47,6 @@ def score_translation(en_text: str, zh_text: str) -> tuple[int, list[str]]:
         return 0, ["empty_or_truncated"]
 
     ratio = zh_len / en_len
-    # Chinese is denser than English; expect ~0.35-0.85 char ratio for healthy translations.
     if ratio < 0.18 or ratio > 1.8:
         score -= 30
         issues.append("length_anomaly")
@@ -96,15 +98,27 @@ def extract_date(name: str) -> str:
     return ""
 
 
-def git_last_modified(path: Path) -> str:
+def _bulk_git_dates() -> dict[str, str]:
+    """One git call → ISO date for every tracked file. Avoids per-file fork overhead."""
+    cache: dict[str, str] = {}
     try:
+        # %x00 NUL between fields, NUL after each commit. --name-only lists files per commit.
+        # We only need the *latest* commit per file, so walk in chronological order overwriting.
         out = subprocess.check_output(
-            ["git", "log", "-1", "--format=%cs", "--", str(path)],
+            ["git", "log", "--reverse", "--name-only", "--format=%x00%cs", "--diff-filter=AM"],
             stderr=subprocess.DEVNULL,
-        ).decode().strip()
-        return out
+        ).decode("utf-8", errors="replace")
     except Exception:
-        return ""
+        return cache
+    current_date = ""
+    for line in out.splitlines():
+        if not line:
+            continue
+        if line.startswith("\x00"):
+            current_date = line[1:].strip()
+        else:
+            cache[line] = current_date
+    return cache
 
 
 def derive_title(content: str, fallback: str) -> str:
@@ -160,7 +174,6 @@ def write_coverage(entries: list[dict]) -> None:
 
 
 def write_quality(qs_map: dict[str, dict]) -> None:
-    """Write stats/quality.json with score distribution + worst-50 list."""
     if not qs_map:
         return
     scores = [v["score"] for v in qs_map.values()]
@@ -181,6 +194,8 @@ def write_quality(qs_map: dict[str, dict]) -> None:
         "average_score": avg,
         "distribution": dist,
         "worst_50": low,
+        # Q3.4 / Q4.4 alias used by build_search_index + retranslate_worst
+        "worst": low,
     }
     STATS_DIR.mkdir(parents=True, exist_ok=True)
     (STATS_DIR / "quality.json").write_text(
@@ -188,7 +203,25 @@ def write_quality(qs_map: dict[str, dict]) -> None:
     )
 
 
+def load_tags() -> dict[str, list[str]]:
+    """Load Q4.2 tags.json → {path_en: [tag, ...]}. Returns empty dict if missing."""
+    if not TAGS_FILE.exists():
+        return {}
+    try:
+        raw = json.loads(TAGS_FILE.read_text(encoding="utf-8"))
+        return {p: (v.get("tags") or []) for p, v in raw.items() if isinstance(v, dict)}
+    except Exception:
+        return {}
+
+
 def main() -> int:
+    print("Indexing prompts...")
+    git_dates = _bulk_git_dates()
+    print(f"  loaded git dates for {len(git_dates)} tracked files")
+    tags_map = load_tags()
+    if tags_map:
+        print(f"  loaded tags for {len(tags_map)} files (from {TAGS_FILE})")
+
     entries: list[dict] = []
     qs_map: dict[str, dict] = {}
     for d in TARGET_DIRS:
@@ -213,20 +246,25 @@ def main() -> int:
             id_ = str(en_path.with_suffix("")).replace("\\", "/")
             category = "/".join(en_path.parts[:-1])
             file_date = extract_date(en_path.name)
-            git_date = git_last_modified(en_path)
+            en_path_str = str(en_path).replace("\\", "/")
+            zh_path_str = str(zh_path).replace("\\", "/") if has_zh else ""
+            git_date_en = git_dates.get(en_path_str, "")
+            git_date_zh = git_dates.get(zh_path_str, "") if has_zh else ""
 
             entry = {
                 "id": id_,
                 "title": derive_title(content_en, en_path.name),
                 "category": category,
-                "path_en": str(en_path).replace("\\", "/"),
-                "path_zh": str(zh_path).replace("\\", "/") if has_zh else "",
-                "tags": [],
+                "path_en": en_path_str,
+                "path_zh": zh_path_str,
+                "tags": tags_map.get(en_path_str, []),
                 "summary": derive_summary(content_en),
-                "updatedAt": file_date or git_date,
+                "updatedAt": file_date or git_date_en,
+                # Q4.4: separate fields for "新/更新" badge logic in frontend
+                "last_modified": git_date_en,
+                "last_modified_zh": git_date_zh,
             }
 
-            # ---- Quality score (only if zh exists) ----
             if has_zh:
                 try:
                     content_zh = zh_path.read_text(encoding="utf-8", errors="replace")
@@ -247,10 +285,12 @@ def main() -> int:
     zh_count = sum(1 for e in entries if e["path_zh"])
     pct = (zh_count / len(entries) * 100) if entries else 0
     avg_qs = (sum(v["score"] for v in qs_map.values()) / len(qs_map)) if qs_map else 0
+    tagged_count = sum(1 for e in entries if e["tags"])
     print(
         f"Wrote {len(entries)} entries to {OUTPUT}; "
         f"{zh_count} have Chinese ({pct:.1f}% coverage); "
         f"avg translation quality: {avg_qs:.1f}/100 over {len(qs_map)} pairs; "
+        f"{tagged_count} entries tagged; "
         f"snapshots saved to {STATS_DIR}/coverage.json + quality.json"
     )
     return 0
