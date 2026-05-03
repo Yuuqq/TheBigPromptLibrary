@@ -2880,10 +2880,13 @@
                     meta.appendChild(chip);
                 }
             }
-            // Q4.3 similar prompts
+            // Q4.3 similar prompts (compact format: only id+score; look up rest from prompts_index)
             ensureSimilar().then(function(idx) {
                 var sims = (idx && idx[entry.id]) || [];
                 if (!sims.length) return;
+                var allEntries = (window.tbpl && window.tbpl.getIndex && window.tbpl.getIndex()) || [];
+                var byId = {};
+                for (var k = 0; k < allEntries.length; k++) byId[allEntries[k].id] = allEntries[k];
                 var existing = document.getElementById('q4SimilarBox');
                 if (existing) existing.remove();
                 var box = document.createElement('section');
@@ -2892,11 +2895,14 @@
                 var html = '<h3>🔗 相似提示词</h3><div class="q4-similar-grid">';
                 for (var j = 0; j < sims.length; j++) {
                     var s = sims[j];
-                    var cat = (s.category || '').split('/').pop() || s.category || '';
+                    var ent = byId[s.id] || {};
+                    var cat = (ent.category || '').split('/').pop() || ent.category || '';
                     var pct = Math.round((s.score || 0) * 100);
-                    html += '<a class="q4-similar-card" data-path="' + escHtml(s.path_zh || s.path_en) +
+                    var pth = ent.path_zh || ent.path_en || '';
+                    if (!pth) continue;
+                    html += '<a class="q4-similar-card" data-path="' + escHtml(pth) +
                             '" data-id="' + escHtml(s.id) + '">' +
-                            '<div class="q4-similar-title">' + escHtml(s.title || s.id) + '</div>' +
+                            '<div class="q4-similar-title">' + escHtml(ent.title || s.id) + '</div>' +
                             '<div class="q4-similar-meta">' + escHtml(cat) + ' · ' + pct + '% 相似</div>' +
                             '</a>';
                 }
