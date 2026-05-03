@@ -257,7 +257,8 @@ def main() -> int:
                 "category": category,
                 "path_en": en_path_str,
                 "path_zh": zh_path_str,
-                "tags": tags_map.get(en_path_str, []),
+                # tags intentionally NOT inlined — frontend joins via stats/tags.json
+                # to keep prompts_index.json under the 1MB transfer ceiling.
                 "summary": derive_summary(content_en),
                 "updatedAt": file_date or git_date_en,
                 # Q4.4: separate fields for "新/更新" badge logic in frontend
@@ -288,7 +289,7 @@ def main() -> int:
     zh_count = sum(1 for e in entries if e["path_zh"])
     pct = (zh_count / len(entries) * 100) if entries else 0
     avg_qs = (sum(v["score"] for v in qs_map.values()) / len(qs_map)) if qs_map else 0
-    tagged_count = sum(1 for e in entries if e["tags"])
+    tagged_count = sum(1 for e in entries if tags_map.get(e["path_en"]))
     print(
         f"Wrote {len(entries)} entries to {OUTPUT}; "
         f"{zh_count} have Chinese ({pct:.1f}% coverage); "
