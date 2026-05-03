@@ -76,7 +76,7 @@ def main() -> int:
         excerpt = strip_markdown(content)[:EXCERPT_LEN]
         if not excerpt:
             continue
-        out.append({"id": e["id"], "ex": excerpt})
+        out.append({"id": e.get("id") or e.get("path_en", "").rsplit(".md", 1)[0], "ex": excerpt})
 
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(
