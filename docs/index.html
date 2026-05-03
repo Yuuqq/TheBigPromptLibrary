@@ -73,6 +73,19 @@
         [data-theme="light"] .step-card,
         [data-theme="light"] .category-card { background: var(--bg-secondary) !important; }
         [data-theme="light"] body { background: #ffffff; }
+        /* Header is hardcoded dark for the default theme — override in light mode. */
+        [data-theme="light"] header {
+            background: rgba(255,255,255,0.92);
+            border-bottom: 1px solid var(--border-color);
+        }
+        [data-theme="light"] .logo,
+        [data-theme="light"] .nav-link {
+            color: var(--text-primary);
+        }
+        [data-theme="light"] .nav-link:hover {
+            background: var(--bg-tertiary);
+            color: var(--accent-blue);
+        }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
