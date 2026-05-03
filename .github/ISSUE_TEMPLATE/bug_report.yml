@@ -1,0 +1,57 @@
+name: Bug 报告 / Bug report
+description: 报告网站功能或翻译流水线的故障
+title: "[Bug] "
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        如果是翻译质量问题，请使用「翻译修正」模板。
+  - type: dropdown
+    id: area
+    attributes:
+      label: 影响范围
+      options:
+        - 网站首页 / 搜索 / 过滤器
+        - 单个 prompt 详情页
+        - 翻译流水线（GitHub Actions）
+        - 移动端显示
+        - 其他
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: 现象 / What happened
+      description: 详细描述你看到的问题
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 预期 / Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: 复现步骤 / Steps to reproduce
+      placeholder: |
+        1. 打开 ...
+        2. 点击 ...
+        3. 看到 ...
+  - type: input
+    id: url
+    attributes:
+      label: 出问题的 URL（如适用）
+      placeholder: https://thebigpromptlibrary.aisbest.eu.cc/...
+  - type: input
+    id: env
+    attributes:
+      label: 浏览器 / 设备 / 操作系统
+      placeholder: Chrome 124 / macOS 14 / iPhone 15
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: 截图 / 控制台错误（可选）
+      description: 拖拽截图到此处，或贴 console 报错

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 上游英文原始仓库 / Upstream English source
+    url: https://github.com/0xeb/TheBigPromptLibrary
+    about: 本仓库是 0xeb/TheBigPromptLibrary 的中文镜像翻译版。如果是英文原文内容问题（不是翻译问题），请去上游仓库提交。
+  - name: 项目路线图 / Roadmap
+    url: https://github.com/Yuuqq/TheBigPromptLibrary/blob/main/docs/ROADMAP.md
+    about: 看看接下来计划做什么

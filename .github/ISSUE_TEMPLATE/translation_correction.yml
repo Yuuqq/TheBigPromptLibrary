@@ -1,0 +1,52 @@
+name: 翻译修正 / Translation correction
+description: 报告某个中文翻译不准确、有歧义、或需要改进
+title: "[翻译] "
+labels: ["translation", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢帮忙改进翻译质量！请尽量提供：原文路径、问题段落、建议翻译。
+  - type: input
+    id: file
+    attributes:
+      label: 文件路径 / File path
+      description: 需要修正的 `_zh.md` 文件相对路径（例如 `SystemPrompts/OpenAI/gpt-5_zh.md`）
+      placeholder: SystemPrompts/...
+    validations:
+      required: true
+  - type: textarea
+    id: original
+    attributes:
+      label: 当前翻译 / Current translation
+      description: 把当前有问题的中文段落贴在这里（可附原文对照）
+      render: markdown
+    validations:
+      required: true
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: 建议翻译 / Suggested translation
+      description: 你认为应该怎么翻译。如果是术语问题，请说明你认为的标准译法。
+      render: markdown
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: 问题类型
+      options:
+        - 术语错译（agent 译成"代理"等）
+        - 漏译 / 部分未翻译
+        - 语义偏差
+        - Markdown 格式破坏
+        - 其他
+    validations:
+      required: true
+  - type: checkboxes
+    id: pr
+    attributes:
+      label: 你愿意提交 PR 修复吗？
+      options:
+        - label: 我愿意提交 PR
+        - label: 我不熟悉 git，希望维护者修复
