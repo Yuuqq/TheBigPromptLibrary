@@ -180,6 +180,12 @@ print(f"Active provider chain: {[p['name'] + ':' + p['model'] for p in PROVIDER_
 PROVIDER_STATS: dict[str, dict] = {p["name"]: {"calls": 0, "tokens_in": 0, "tokens_out": 0, "failures": 0} for p in PROVIDER_CHAIN}
 
 
+class _NonRetriableProviderError(RuntimeError):
+    """Raised inside _post_one_provider to skip per-provider retries and let
+    call_llm switch to the next provider in the chain immediately (e.g. 429/5xx).
+    """
+
+
 def _post_one_provider(provider: dict, content: str) -> tuple[str, dict]:
     """Single provider call with internal MAX_RETRIES on transient errors. Raises on hard fail."""
     last_err = None
@@ -202,15 +208,13 @@ def _post_one_provider(provider: dict, content: str) -> tuple[str, dict]:
                 timeout=REQUEST_TIMEOUT,
             )
             if resp.status_code == 429:
-                wait = 15 * (attempt + 1)
-                print(f"    [{provider['name']}] rate-limited, waiting {wait}s")
-                time.sleep(wait)
-                continue
+                # Fast-fail to next provider in chain — burning 90s here just
+                # to discover GLM is still rate-limited blocks the whole run.
+                # The chain (Qwen, DeepSeek) is the right place to absorb load.
+                raise _NonRetriableProviderError(f"{provider['name']} rate-limited (429)")
             if 500 <= resp.status_code < 600:
-                wait = 5 * (attempt + 1)
-                print(f"    [{provider['name']}] server error {resp.status_code}, waiting {wait}s")
-                time.sleep(wait)
-                continue
+                # Same logic: 5xx = service-side; another provider may be healthy.
+                raise _NonRetriableProviderError(f"{provider['name']} server error {resp.status_code}")
             resp.raise_for_status()
             data = resp.json()
             text = data["choices"][0]["message"]["content"]
@@ -219,6 +223,9 @@ def _post_one_provider(provider: dict, content: str) -> tuple[str, dict]:
             text = re.sub(r"^```(?:markdown|md)?\n([\s\S]*?)\n```$", r"\1", text).strip()
             usage = data.get("usage", {}) or {}
             return text, usage
+        except _NonRetriableProviderError:
+            # Don't retry — let call_llm switch providers immediately.
+            raise
         except Exception as e:
             last_err = e
             print(f"    [{provider['name']}] attempt {attempt + 1} failed: {e}")
@@ -434,8 +441,10 @@ def diff_translate(en_path: Path, zh_path: Path, run_stats: dict) -> tuple[bool,
         if key:
             prior_map[key] = old_zh_paras[i]
 
-    # Resolve every new paragraph: prior_map → TM → translate
-    out_paras: list[str] = []
+    # Single-pass resolution: prior_map → TM → defer for translation.
+    # Doing it in one walk avoids double-counting TM stats and saves CPU.
+    out_paras: list[str | None] = []
+    deferred: list[tuple[int, str]] = []  # (index_in_out_paras, new_paragraph)
     for new_p in new_paras:
         if not new_p.strip():
             out_paras.append(new_p)
@@ -451,50 +460,37 @@ def diff_translate(en_path: Path, zh_path: Path, run_stats: dict) -> tuple[bool,
             info["tm_hits"] += 1
             info["reused"] += 1
             continue
+        # Needs translation — reserve slot, translate later
         info["changed"] += 1
+        deferred.append((len(out_paras), new_p))
+        out_paras.append(None)
 
-    # If too much changed, fall back to full translate (better LLM context)
+    # If too much changed, fall back to full translate (better LLM context).
     eligible_for_change = sum(1 for p in new_paras if p.strip())
     if eligible_for_change and (info["changed"] / eligible_for_change) > DIFF_FALLBACK_RATIO:
         info["reason"] = f"too_many_changes_{info['changed']}/{eligible_for_change}"
         return False, None, info
 
-    # Now actually translate the changed paragraphs (we re-walk so index aligns)
-    out_paras = []
-    for new_p in new_paras:
-        if not new_p.strip():
-            out_paras.append(new_p)
-            continue
-        norm = _normalize_para(new_p)
-        if norm in prior_map:
-            out_paras.append(prior_map[norm])
-            continue
-        tm_hit = tm_lookup(new_p)
-        if tm_hit is not None:
-            out_paras.append(tm_hit)
-            continue
-        # Translate this single paragraph
+    # Translate only the deferred paragraphs.
+    for idx, new_p in deferred:
         try:
-            translated, usage, provider = call_llm(new_p)
+            translated, usage, _provider = call_llm(new_p)
         except Exception as e:
             info["reason"] = f"llm_failed_on_para:{e}"
             return False, None, info
         if not translated or len(translated) < 3:
             info["reason"] = "empty_para_translation"
             return False, None, info
-        out_paras.append(translated)
+        out_paras[idx] = translated
         tm_store(new_p, translated)
         info["api_calls"] += 1
         run_stats["tokens_in"] += int(usage.get("prompt_tokens", 0))
         run_stats["tokens_out"] += int(usage.get("completion_tokens", 0))
         time.sleep(SLEEP_BETWEEN)
 
-    full_zh = "\n".join(out_paras) if not new_en.endswith("\n") else "\n".join(out_paras)
-    # Preserve original join behavior: split_paragraphs splits on \n+, so rejoin with \n\n where needed.
-    # Simpler & safer: join with \n\n for non-empty paras, preserve trailing newline.
-    rebuilt: list[str] = []
-    for p in out_paras:
-        rebuilt.append(p if p.endswith("\n") else p + "\n")
+    # Rebuild final markdown: split_paragraphs preserves trailing \n on each
+    # fragment, so joining with \n restores the blank-line separators.
+    rebuilt = [(p if p.endswith("\n") else p + "\n") for p in out_paras if p is not None]
     full_zh = "\n".join(rebuilt).rstrip() + "\n"
     info["reason"] = "ok"
     return True, full_zh, info
