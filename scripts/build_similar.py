@@ -51,7 +51,7 @@ def main() -> int:
     # Pre-extract
     tagged = [
         {
-            "id": e["id"],
+            "id": e.get("id") or e.get("path_en", "").rsplit(".md", 1)[0],
             "title": e.get("title", ""),
             "tags": set(tags_map.get(e.get("path_en", ""), [])),
             "category": e.get("category", ""),
