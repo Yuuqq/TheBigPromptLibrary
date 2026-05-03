@@ -1,0 +1,929 @@
+{
+  "timestamp": "2026-05-03T02:35:53.656749+00:00",
+  "total_scored": 1844,
+  "average_score": 68.1,
+  "distribution": {
+    "excellent_90_plus": 511,
+    "good_70_89": 175,
+    "poor_50_69": 911,
+    "bad_below_50": 247
+  },
+  "worst_50": [
+    {
+      "path": "CustomInstructions/ChatGPT/knowledge/Action Showcase/Actions-in-GPTs_zh.md",
+      "score": 0,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch",
+        "heading_mismatch",
+        "link_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/knowledge/P0tS3c/AttackingWebApplicationsWithFFUF_zh.md",
+      "score": 0,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch",
+        "heading_mismatch",
+        "link_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/knowledge/P0tS3c/InformationGatheringWebEdition_zh.md",
+      "score": 0,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch",
+        "heading_mismatch",
+        "link_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/knowledge/P0tS3c/NetworkEnumerationWithNmap_zh.md",
+      "score": 0,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch",
+        "heading_mismatch",
+        "link_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/knowledge/P0tS3c/SQL_InjectionFundamentals_zh.md",
+      "score": 0,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch",
+        "heading_mismatch",
+        "link_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/knowledge/P0tS3c/SqlMap_zh.md",
+      "score": 0,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch",
+        "heading_mismatch",
+        "link_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/knowledge/P0tS3c/WebRequests_zh.md",
+      "score": 0,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch",
+        "heading_mismatch",
+        "link_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/Gab.ai/Charlie Conspiracy_zh.md",
+      "score": 0,
+      "issues": [
+        "empty_or_truncated"
+      ]
+    },
+    {
+      "path": "CustomInstructions/Gab.ai/DJT_zh.md",
+      "score": 0,
+      "issues": [
+        "empty_or_truncated"
+      ]
+    },
+    {
+      "path": "CustomInstructions/Gab.ai/Elon Musk_zh.md",
+      "score": 0,
+      "issues": [
+        "empty_or_truncated"
+      ]
+    },
+    {
+      "path": "CustomInstructions/Gab.ai/Gigachad_zh.md",
+      "score": 0,
+      "issues": [
+        "empty_or_truncated"
+      ]
+    },
+    {
+      "path": "CustomInstructions/Gab.ai/Mr Beast_zh.md",
+      "score": 0,
+      "issues": [
+        "empty_or_truncated"
+      ]
+    },
+    {
+      "path": "CustomInstructions/Gab.ai/Tay_zh.md",
+      "score": 0,
+      "issues": [
+        "empty_or_truncated"
+      ]
+    },
+    {
+      "path": "CustomInstructions/Gemini/Gem-Brainstormer_zh.md",
+      "score": 0,
+      "issues": [
+        "empty_or_truncated"
+      ]
+    },
+    {
+      "path": "CustomInstructions/Gemini/Gem-Career Guide_zh.md",
+      "score": 0,
+      "issues": [
+        "empty_or_truncated"
+      ]
+    },
+    {
+      "path": "CustomInstructions/Gemini/Gem-Coding Partner_zh.md",
+      "score": 0,
+      "issues": [
+        "empty_or_truncated"
+      ]
+    },
+    {
+      "path": "CustomInstructions/Gemini/Gem-Learning Coach_zh.md",
+      "score": 0,
+      "issues": [
+        "empty_or_truncated"
+      ]
+    },
+    {
+      "path": "CustomInstructions/Gemini/Gem-Writing Editor_zh.md",
+      "score": 0,
+      "issues": [
+        "empty_or_truncated"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/DpGlZrobT_Writing Assistant_zh.md",
+      "score": 3,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch",
+        "heading_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/GhEwyi2R1_Evolution Chamber_zh.md",
+      "score": 3,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch",
+        "heading_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/IcZbvOaf4_FramerGPT_zh.md",
+      "score": 3,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch",
+        "heading_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/MH6MrCapB_Absolute Barrier_zh.md",
+      "score": 3,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch",
+        "heading_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/MUJ3zHjvn_MidJourney Prompt Generator_zh.md",
+      "score": 3,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch",
+        "heading_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/ThfYYYz5m_完蛋！我爱上了姐姐_zh.md",
+      "score": 3,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch",
+        "heading_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/Xt0xteYE8_YT transcriber_zh.md",
+      "score": 3,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch",
+        "heading_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/knowledge/Professor Synapse/Constitution Lite_zh.md",
+      "score": 3,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch",
+        "heading_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/n7Rs0IK86_Grimoire[1.16.1]_zh.md",
+      "score": 3,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch",
+        "heading_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/n7Rs0IK86_Grimoire[1.16.3]_zh.md",
+      "score": 3,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch",
+        "heading_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/t9wNBKnKO_Lei_zh.md",
+      "score": 3,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch",
+        "heading_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/yKDul3yPH_Take Code Captures_zh.md",
+      "score": 3,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch",
+        "heading_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/UMzfCVA9Z_World Class Prompt Engineer_zh.md",
+      "score": 5,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch",
+        "link_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/V2KIUZSj0_Ai PDF_zh.md",
+      "score": 8,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "heading_mismatch",
+        "link_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/knowledge/P0tS3c/testing for command injection (RCE)_zh.md",
+      "score": 8,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "heading_mismatch",
+        "link_mismatch"
+      ]
+    },
+    {
+      "path": "SystemPrompts/Hume.ai/05052024-system-prompt_zh.md",
+      "score": 15,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/02zmxuXd5_Node.js GPT - Project Builder_zh.md",
+      "score": 15,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/0GxNbgD2H_Toronto City Council_zh.md",
+      "score": 15,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/0Lsw9zT25_Synthia_zh.md",
+      "score": 15,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/0XxT0SGIS_Mr. Ranedeer Config Wizard_zh.md",
+      "score": 15,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/26jvBBVTr_Radical Selfishness_zh.md",
+      "score": 15,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/2Xi2xYPa3_TaxGPT_zh.md",
+      "score": 15,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/2dBCALcDz_Unbreakable GPT_zh.md",
+      "score": 15,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/2dBCALcDz_Unbreakable_GPT[v0]_zh.md",
+      "score": 15,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/3VrgJ1GpH_sous_chef_zh.md",
+      "score": 15,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/4CktagQWR_X Optimizer GPT_zh.md",
+      "score": 15,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/5qFFjp0bP_Code Copilot_zh.md",
+      "score": 15,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/6EPxrMA8m_LeetCode Problem Solver_zh.md",
+      "score": 15,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/84tjozO5q_Santa_zh.md",
+      "score": 15,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/9qWC0oyBd_Super Describe_zh.md",
+      "score": 15,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/BfmuJziwz_SEObot_zh.md",
+      "score": 15,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/C635cEk6K_Story Spock_zh.md",
+      "score": 15,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch"
+      ]
+    }
+  ],
+  "worst": [
+    {
+      "path": "CustomInstructions/ChatGPT/knowledge/Action Showcase/Actions-in-GPTs_zh.md",
+      "score": 0,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch",
+        "heading_mismatch",
+        "link_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/knowledge/P0tS3c/AttackingWebApplicationsWithFFUF_zh.md",
+      "score": 0,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch",
+        "heading_mismatch",
+        "link_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/knowledge/P0tS3c/InformationGatheringWebEdition_zh.md",
+      "score": 0,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch",
+        "heading_mismatch",
+        "link_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/knowledge/P0tS3c/NetworkEnumerationWithNmap_zh.md",
+      "score": 0,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch",
+        "heading_mismatch",
+        "link_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/knowledge/P0tS3c/SQL_InjectionFundamentals_zh.md",
+      "score": 0,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch",
+        "heading_mismatch",
+        "link_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/knowledge/P0tS3c/SqlMap_zh.md",
+      "score": 0,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch",
+        "heading_mismatch",
+        "link_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/knowledge/P0tS3c/WebRequests_zh.md",
+      "score": 0,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch",
+        "heading_mismatch",
+        "link_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/Gab.ai/Charlie Conspiracy_zh.md",
+      "score": 0,
+      "issues": [
+        "empty_or_truncated"
+      ]
+    },
+    {
+      "path": "CustomInstructions/Gab.ai/DJT_zh.md",
+      "score": 0,
+      "issues": [
+        "empty_or_truncated"
+      ]
+    },
+    {
+      "path": "CustomInstructions/Gab.ai/Elon Musk_zh.md",
+      "score": 0,
+      "issues": [
+        "empty_or_truncated"
+      ]
+    },
+    {
+      "path": "CustomInstructions/Gab.ai/Gigachad_zh.md",
+      "score": 0,
+      "issues": [
+        "empty_or_truncated"
+      ]
+    },
+    {
+      "path": "CustomInstructions/Gab.ai/Mr Beast_zh.md",
+      "score": 0,
+      "issues": [
+        "empty_or_truncated"
+      ]
+    },
+    {
+      "path": "CustomInstructions/Gab.ai/Tay_zh.md",
+      "score": 0,
+      "issues": [
+        "empty_or_truncated"
+      ]
+    },
+    {
+      "path": "CustomInstructions/Gemini/Gem-Brainstormer_zh.md",
+      "score": 0,
+      "issues": [
+        "empty_or_truncated"
+      ]
+    },
+    {
+      "path": "CustomInstructions/Gemini/Gem-Career Guide_zh.md",
+      "score": 0,
+      "issues": [
+        "empty_or_truncated"
+      ]
+    },
+    {
+      "path": "CustomInstructions/Gemini/Gem-Coding Partner_zh.md",
+      "score": 0,
+      "issues": [
+        "empty_or_truncated"
+      ]
+    },
+    {
+      "path": "CustomInstructions/Gemini/Gem-Learning Coach_zh.md",
+      "score": 0,
+      "issues": [
+        "empty_or_truncated"
+      ]
+    },
+    {
+      "path": "CustomInstructions/Gemini/Gem-Writing Editor_zh.md",
+      "score": 0,
+      "issues": [
+        "empty_or_truncated"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/DpGlZrobT_Writing Assistant_zh.md",
+      "score": 3,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch",
+        "heading_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/GhEwyi2R1_Evolution Chamber_zh.md",
+      "score": 3,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch",
+        "heading_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/IcZbvOaf4_FramerGPT_zh.md",
+      "score": 3,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch",
+        "heading_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/MH6MrCapB_Absolute Barrier_zh.md",
+      "score": 3,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch",
+        "heading_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/MUJ3zHjvn_MidJourney Prompt Generator_zh.md",
+      "score": 3,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch",
+        "heading_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/ThfYYYz5m_完蛋！我爱上了姐姐_zh.md",
+      "score": 3,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch",
+        "heading_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/Xt0xteYE8_YT transcriber_zh.md",
+      "score": 3,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch",
+        "heading_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/knowledge/Professor Synapse/Constitution Lite_zh.md",
+      "score": 3,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch",
+        "heading_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/n7Rs0IK86_Grimoire[1.16.1]_zh.md",
+      "score": 3,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch",
+        "heading_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/n7Rs0IK86_Grimoire[1.16.3]_zh.md",
+      "score": 3,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch",
+        "heading_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/t9wNBKnKO_Lei_zh.md",
+      "score": 3,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch",
+        "heading_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/yKDul3yPH_Take Code Captures_zh.md",
+      "score": 3,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch",
+        "heading_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/UMzfCVA9Z_World Class Prompt Engineer_zh.md",
+      "score": 5,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch",
+        "link_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/V2KIUZSj0_Ai PDF_zh.md",
+      "score": 8,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "heading_mismatch",
+        "link_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/knowledge/P0tS3c/testing for command injection (RCE)_zh.md",
+      "score": 8,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "heading_mismatch",
+        "link_mismatch"
+      ]
+    },
+    {
+      "path": "SystemPrompts/Hume.ai/05052024-system-prompt_zh.md",
+      "score": 15,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/02zmxuXd5_Node.js GPT - Project Builder_zh.md",
+      "score": 15,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/0GxNbgD2H_Toronto City Council_zh.md",
+      "score": 15,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/0Lsw9zT25_Synthia_zh.md",
+      "score": 15,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/0XxT0SGIS_Mr. Ranedeer Config Wizard_zh.md",
+      "score": 15,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/26jvBBVTr_Radical Selfishness_zh.md",
+      "score": 15,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/2Xi2xYPa3_TaxGPT_zh.md",
+      "score": 15,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/2dBCALcDz_Unbreakable GPT_zh.md",
+      "score": 15,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/2dBCALcDz_Unbreakable_GPT[v0]_zh.md",
+      "score": 15,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/3VrgJ1GpH_sous_chef_zh.md",
+      "score": 15,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/4CktagQWR_X Optimizer GPT_zh.md",
+      "score": 15,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/5qFFjp0bP_Code Copilot_zh.md",
+      "score": 15,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/6EPxrMA8m_LeetCode Problem Solver_zh.md",
+      "score": 15,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/84tjozO5q_Santa_zh.md",
+      "score": 15,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/9qWC0oyBd_Super Describe_zh.md",
+      "score": 15,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/BfmuJziwz_SEObot_zh.md",
+      "score": 15,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch"
+      ]
+    },
+    {
+      "path": "CustomInstructions/ChatGPT/C635cEk6K_Story Spock_zh.md",
+      "score": 15,
+      "issues": [
+        "length_anomaly",
+        "mostly_english",
+        "code_block_mismatch"
+      ]
+    }
+  ]
+}
