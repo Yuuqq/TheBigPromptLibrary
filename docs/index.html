@@ -2730,6 +2730,27 @@
         if (e.target && e.target.id === 'headerSearch') ensureSearchIndex();
     });
 
+    // ===== Q4.2 lazy-loaded tags sidecar (joined into entries on demand) =====
+    // Format: { "<path_en>": { "tags": [...], "mode": "heuristic"|"llm", ... } }
+    var tagsIndex = null;
+    var tagsLoading = null;
+    function ensureTags() {
+        if (tagsIndex !== null) return Promise.resolve(tagsIndex);
+        if (tagsLoading) return tagsLoading;
+        tagsLoading = fetch(RAW + '/stats/tags.json')
+            .then(function(r) { return r.ok ? r.json() : {}; })
+            .then(function(j) { tagsIndex = j || {}; return tagsIndex; })
+            .catch(function() { tagsIndex = {}; return {}; });
+        return tagsLoading;
+    }
+    function tagsFor(entry) {
+        if (!entry || !tagsIndex) return [];
+        var rec = tagsIndex[entry.path_en];
+        return (rec && rec.tags) || [];
+    }
+    // Eager-load tags so card chips appear without waiting for viewer open.
+    ensureTags();
+
     // ===== Q4.3 lazy-loaded similar-prompts index =====
     var similarIndex = null;
     var similarLoading = null;
@@ -2816,11 +2837,12 @@
             var entry = findEntry({title: titleEl.textContent});
             var b = badgeFor(entry);
             if (b) titleEl.insertAdjacentHTML('afterbegin', b);
-            // Tag chips appended to meta
-            if (entry && entry.tags && entry.tags.length) {
+            // Tag chips appended to meta (joined from stats/tags.json sidecar)
+            var entryTags = tagsFor(entry);
+            if (entryTags.length) {
                 var meta = card.querySelector('.recent-card-meta');
                 if (meta && !meta.querySelector('.q4-tag-mini')) {
-                    var chips = entry.tags.slice(0, 3).map(function(t) {
+                    var chips = entryTags.slice(0, 3).map(function(t) {
                         return '<span class="q4-tag-mini" style="margin-left:0.4rem;color:var(--accent-purple);font-size:0.7rem;">#' + escHtml(t) + '</span>';
                     }).join('');
                     meta.insertAdjacentHTML('beforeend', chips);
@@ -2868,10 +2890,11 @@
                 btn.innerHTML = '📑 与另一个对比';
                 meta.appendChild(btn);
             }
-            // Q4.2 tag chips
-            if (meta && entry.tags && entry.tags.length) {
-                for (var i = 0; i < Math.min(entry.tags.length, 8); i++) {
-                    var t = entry.tags[i];
+            // Q4.2 tag chips (joined from stats/tags.json sidecar)
+            var vTags = tagsFor(entry);
+            if (meta && vTags.length) {
+                for (var i = 0; i < Math.min(vTags.length, 8); i++) {
+                    var t = vTags[i];
                     if (meta.querySelector('[data-q4tag="' + CSS.escape(t) + '"]')) continue;
                     var chip = document.createElement('span');
                     chip.className = 'prompt-tag q4-tag-chip';
