@@ -251,8 +251,11 @@ def main() -> int:
             git_date_en = git_dates.get(en_path_str, "")
             git_date_zh = git_dates.get(zh_path_str, "") if has_zh else ""
 
+            # id and updatedAt intentionally omitted — frontend backfills:
+            #   id        ← path_en.replace(/\.md$/, '')
+            #   updatedAt ← last_modified
+            # Saves ~125KB to keep prompts_index.json under the 1MB transfer ceiling.
             entry = {
-                "id": id_,
                 "title": derive_title(content_en, en_path.name),
                 "category": category,
                 "path_en": en_path_str,
@@ -260,8 +263,7 @@ def main() -> int:
                 # tags intentionally NOT inlined — frontend joins via stats/tags.json
                 # to keep prompts_index.json under the 1MB transfer ceiling.
                 "summary": derive_summary(content_en),
-                "updatedAt": file_date or git_date_en,
-                # Q4.4: separate fields for "新/更新" badge logic in frontend
+                # Q4.4: per-side mtimes for "新/更新" badge logic in frontend.
                 "last_modified": git_date_en,
                 "last_modified_zh": git_date_zh,
             }
