@@ -19,7 +19,7 @@ from pathlib import Path
 
 INDEX = Path("prompts_index.json")
 OUT = Path("stats/similar.json")
-TOP_K = 5
+TOP_K = 4
 MIN_SCORE = 0.05  # don't include barely-similar items
 MIN_TAGS = 2      # entries with fewer tags get no recommendations
 
@@ -40,12 +40,20 @@ def main() -> int:
     entries = json.loads(INDEX.read_text(encoding="utf-8"))
     print(f"Computing similar prompts for {len(entries)} entries (K={TOP_K})")
 
+    # Tags now live in the sidecar (not inlined in prompts_index) — load them.
+    TAGS = Path("stats/tags.json")
+    tags_map: dict[str, list[str]] = {}
+    if TAGS.exists():
+        raw = json.loads(TAGS.read_text(encoding="utf-8"))
+        tags_map = {p: (v.get("tags") or []) for p, v in raw.items() if isinstance(v, dict)}
+        print(f"  loaded tags for {len(tags_map)} files (from {TAGS})")
+
     # Pre-extract
     tagged = [
         {
             "id": e["id"],
             "title": e.get("title", ""),
-            "tags": set(e.get("tags") or []),
+            "tags": set(tags_map.get(e.get("path_en", ""), [])),
             "category": e.get("category", ""),
             "top_cat": (e.get("category") or "").split("/")[0],
             "path_zh": e.get("path_zh", ""),
@@ -80,7 +88,7 @@ def main() -> int:
             continue
         # Compact format: only id + score. Frontend looks up title/category/paths
         # by id from prompts_index.json (already loaded).
-        out[a["id"]] = [{"id": b["id"], "score": round(s, 3)} for s, b in top]
+        out[a["id"]] = [{"id": b["id"], "score": round(s, 2)} for s, b in top]
 
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(
