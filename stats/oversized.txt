@@ -1,6 +1,2 @@
-SystemPrompts/Anthropic/20250805-Claude-Opus4.1.md	33248
-SystemPrompts/Anthropic/20251028-Claude-Sonnet4.5.md	87211
-SystemPrompts/Anthropic/20251202-Claude-Opus4.5-Soul-Document.md	71288
-SystemPrompts/Copilot/github_copilot_cli_20260221.md	32201
 SystemPrompts/Google/20251118-Antigravity.md	46176
 SystemPrompts/Misc/20250309-Manus.md	43444
