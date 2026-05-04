@@ -5,7 +5,7 @@
 **最全面的 AI 提示词库 — 中文翻译 · 每日自动同步**
 
 [![翻译覆盖率](https://img.shields.io/badge/翻译覆盖率-99.9%25-brightgreen?style=flat-square&logo=googletranslate)](https://github.com/Yuuqq/TheBigPromptLibrary)
-[![提示词总数](https://img.shields.io/badge/提示词-1849%2B-blue?style=flat-square&logo=openai)](https://thebigpromptlibrary.aisbest.eu.cc)
+[![提示词总数](https://img.shields.io/badge/提示词-1851%2B-blue?style=flat-square&logo=openai)](https://thebigpromptlibrary.aisbest.eu.cc)
 [![LLM 提供商](https://img.shields.io/badge/LLM_提供商-25%2B-purple?style=flat-square)](./SystemPrompts/)
 [![每日同步](https://img.shields.io/badge/每日自动同步-✓-orange?style=flat-square&logo=githubactions)](https://github.com/Yuuqq/TheBigPromptLibrary/actions)
 [![License](https://img.shields.io/github/license/0xeb/TheBigPromptLibrary?style=flat-square)](./LICENSE)
@@ -53,6 +53,8 @@
 ---
 
 ## 📊 内容统计
+
+> 📅 以下数据由 GitHub Actions 每日自动更新，详见 [`stats/coverage.json`](./stats/coverage.json)
 
 <div align="center">
 
