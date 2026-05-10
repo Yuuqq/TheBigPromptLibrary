@@ -46,7 +46,7 @@
 
 **主页 — 英雄区 + 统计数据 + 最近条目卡片**
 
-[![主页截图](https://github.com/user-attachments/assets/314698ce-6669-4c5c-b5b0-9d1065b01882)](https://thebigpromptlibrary.aisbest.eu.cc)
+[![主页截图](./docs/readme-homepage-zh.png)](https://thebigpromptlibrary.aisbest.eu.cc)
 
 > 💡 **提示**：所有数据静态托管在 GitHub Pages，无需后端，加载速度极快。点击上图直接访问。
 
