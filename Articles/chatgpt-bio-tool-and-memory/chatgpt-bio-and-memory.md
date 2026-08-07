@@ -1,5 +1,7 @@
 # ChatGPT: Memory and how it works
 
+*By **Elias Bachaalany** — [@0xeb](https://github.com/0xeb) on GitHub · [Binary Wizards](https://www.youtube.com/@binary-wizards) on YouTube · [@eliasbchlny](https://x.com/eliasbchlny) on X*
+
 OpenAI announced the general availability of the [memories](https://x.com/OpenAI/status/1784992796669096181) feature today!
 
 The memory functionality is backed by a new tool called `bio` (read the newly updated [system prompt here](../../SystemPrompts/ChatGPT/gpt4_bio_04262024.md)).

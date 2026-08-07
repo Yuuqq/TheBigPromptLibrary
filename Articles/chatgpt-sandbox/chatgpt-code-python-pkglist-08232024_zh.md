@@ -1,20 +1,21 @@
-# ChatGPT 代码解释器沙箱中安装的 Python 包列表
+# ChatGPT代码解释器沙盒中已安装的Python包列表
 
-我使用以下提示词让代码解释器给出所有已安装 Python 包的列表：
+*由 **Elias Bachaalany** — [@0xeb](https://github.com/0xeb) 在 GitHub · [Binary Wizards](https://www.youtube.com/@binary-wizards) 在 YouTube · [@eliasbchlny](https://x.com/eliasbchlny) 在 X*
 
+我使用以下提示词让代码解释器生成所有已安装的Python包列表：
 
-    Use the following snippet with the code tool:
+    使用以下代码片段与代码工具结合：
 
     ```python
     import pkg_resources
 
-    # Prepare the list of installed packages with their location
+    # 准备包含包名称和位置的安装列表
     installed_packages = [
         f"{dist.project_name}=={dist.version} ({dist.location})"
         for dist in pkg_resources.working_set
     ]
 
-    # Write the full list to a text file
+    # 将完整列表写入文本文件
     file_path = '/mnt/data/list.txt'
     with open(file_path, 'w') as file:
         for package in installed_packages:
@@ -23,12 +24,11 @@
     file_path
     ```
 
-    ...and give the result as such:
-    - No brevity, include everything
-    - The code should generate the full list in /mnt/data/list.txt and give a download link
+    ...并按照以下格式返回结果：
+    - 不省略，包含所有内容
+    - 代码应生成完整列表至/mnt/data/list.txt并提供下载链接
 
-
-## 截至 2024/08/23 已安装的 Python 包列表
+## 2024年8月23日已安装的Python包列表
 
 ```txt
 pdfminer.six==20220319 (/home/sandbox/.local/lib/python3.11/site-packages)
@@ -401,3 +401,4 @@ pip==24.0 (/usr/local/lib/python3.11/site-packages)
 wheel==0.43.0 (/usr/local/lib/python3.11/site-packages)
 ```
 
+（注：Markdown格式、代码块、变量名、URL等均保留原样，仅翻译非代码内容）

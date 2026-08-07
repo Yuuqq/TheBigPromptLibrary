@@ -1,5 +1,7 @@
 # List of Python packages installed in ChatGPT code interpreter sandbox
 
+*By **Elias Bachaalany** — [@0xeb](https://github.com/0xeb) on GitHub · [Binary Wizards](https://www.youtube.com/@binary-wizards) on YouTube · [@eliasbchlny](https://x.com/eliasbchlny) on X*
+
 I used this prompt to get the code interpreter give me the list of all installed Python packages:
 
 
