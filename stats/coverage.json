@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-08-09T04:16:48.243650+00:00",
-  "total": 1851,
-  "with_zh": 1851,
+  "timestamp": "2026-08-10T04:32:38.753256+00:00",
+  "total": 1853,
+  "with_zh": 1853,
   "coverage_pct": 100.0,
   "by_category": {
     "SystemPrompts": {
@@ -13,8 +13,8 @@
       "with_zh": 1679
     },
     "Articles": {
-      "total": 3,
-      "with_zh": 3
+      "total": 5,
+      "with_zh": 5
     },
     "Jailbreak": {
       "total": 6,
