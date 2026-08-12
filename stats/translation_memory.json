@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "updated": "2026-08-11T04:16:05.721078+00:00",
-  "size": 61,
+  "updated": "2026-08-12T04:59:21.231825+00:00",
+  "size": 83,
   "entries": {
     "108af857c744f135": {
       "en_norm_prefix": "Contribute by [ServeurpersoCom](https://github.com/ServeurpersoCom). ```markdown",
@@ -368,6 +368,138 @@
       "zh": "# 提供生成的文件路径\nfile_path = '/mnt/data/list2.txt'\nfile_path\n```\n\n    - 无冗余，包含全部内容\n    - 该代码应生成完整列表并保存在/mnt/data/list2.txt，同时提供下载链接",
       "hits": 1,
       "last": "2026-08-07T05:08:01.125519+00:00"
+    },
+    "59e9316fd6fcf998": {
+      "en_norm_prefix": "# Asana module - Search Asana tasks and projects via `search`. - View Asana tasks via `loadTask`. - Inputs/outputs live ",
+      "zh": "# Asana模块\n\n- 通过`search`搜索Asana任务和项目  \n- 通过`loadTask`查看Asana任务  \n- 输入/输出位于`index.ts`中  \n- 权限位于`integration.ts`中  \n- 无触发器",
+      "hits": 1,
+      "last": "2026-08-12T04:47:26.111124+00:00"
+    },
+    "9606b4b4805340f1": {
+      "en_norm_prefix": "# Box module - Search Box files via `search`. - Load a Box file by ID via `loadFile`. Use the `fileId` from search resul",
+      "zh": "# Box模块\n\n- 通过`search`搜索Box文件\n- 通过`loadFile`根据ID加载数据文件，使用`fileId`搜索结果中的标识符\n- 通过`findSharedItem`解析Box共享链接到文件ID，适用于用户提供的类似`https://app.box.com/s/...`的链接\n- 输入输出位于`index.ts`\n- 权限管理在`integration.ts`\n- 无触发器\n\n（严格保留所有代码块、变量名、文件路径和英文术语，已按照术语表完成专业翻译，确保技术准确性）",
+      "hits": 1,
+      "last": "2026-08-12T04:47:38.744317+00:00"
+    },
+    "27b57fc68a5446f6": {
+      "en_norm_prefix": "# Calendar module Notion Calendar module surfaces for calendar scheduling, time management, adhoc event create/update/de",
+      "zh": "# 日历模块\n\nNotion日历模块支持日历调度、时间管理、临时事件创建/更新/删除及会议准备/回顾功能。用户可将Google、iCloud和Outlook日历接入，并将Notion数据库与时间区块/任务管理结合使用。该模块提供跨所有生态系统的通用时间管理流程支持。当用户已连接Notion日历时，建议使用此模块替代Google日历模块。\n\n## 文件路由\n\n- 查看`tools/events.ts`了解日历事件工具输入输出规范\n- 参考`integration.ts`理解权限管理（在自定义智能体运行时）\n- 阅读`triggers.ts`掌握来自日历的事件触发机制\n- 通过`skills/scheduling.md`掌握用户请求安排会议的最佳实践（如用户可能说：\"帮我安排会议\"、\"查询可用时间\"等）\n- 参考`skills/optimize-schedule.md`掌握日历优化指南，包括时间区间分析（今日/本周等）、冲突检测、会议过载评估和专注时段识别\n- 阅读`skills/meeting-prep.md`获取会议准备指南\n- 参考`skills/meeting-follow-up.md`学习会议跟进技巧（包括后续沟通、待办事项、后续步骤等）\n- 查看`skills/project-planning.md`了解项目规划指导\n\n## 相对日期\n\n对相对日期计算必须三重验证（如\"下星期二\"）。遵循以下规则：\n\n- 计算前必须先确定当天和时区\n- 出现歧义时默认使用用户时区\n- 确保星期几（如星期五）和具体日期（如2026年2月6日）的一致性\n\n## 数据呈现规范\n\n- 避免向用户泄露代码/API结构。以下为数据格式化示例（非 exhaustive）：\n  - `isTransparent`应显示为\"已标记为空闲\"（true）或\"已标记为忙碌\"（false）\n  - 重复规则应转为可读格式而非原始RRule编码\n  - 响应状态显示为\"待处理\"而非\"待处理\"（原始字段名）\n- 日历事件链接需使用Notion AI的引用格式\n- 当日事件列表应为每个事件添加引用链接\n- 新建/更新的事件需包含引用链接\n- 展示用户日程时过滤已拒绝的事件\n- 当用户回复\"可能\"时，在事件列表中明确标注该状态\n\n> 注：所有代码块（`...`）、文件路径、URL、英文专有名词（如Notion AI）、技术术语（如RRule）及主流模型名称（如ChatGPT）均严格保留原格式与英文表述。",
+      "hits": 1,
+      "last": "2026-08-12T04:48:01.398086+00:00"
+    },
+    "743736c29a40dac2": {
+      "en_norm_prefix": "# Overview Help the user organize a calendar-based project plan by breaking down goals into milestones and scheduling ke",
+      "zh": "# 概览\n\n通过将项目目标分解为里程碑并安排关键会议和截止日期，帮助用户制定基于日历的项目计划。\n\n## 开始前需确认的事项\n\n- 确认项目范围、时间线和最终目标\n- 明确用户已为该项目生成的步骤或创意\n- 询问是否有相关项目页面或资料来源\n- 明确衡量成功标准及约束条件（团队规模、依赖关系、硬性截止日期）\n- 若项目范围过大，建议拆分项目并主动规划首步(s)\n\n## 必要步骤\n\n1. 定义里程碑：要求用户明确3-5个关键里程碑；确认时间节点和依赖关系\n2. 识别关键会议：确定所需的周期性同步会议或关键会议（启动会、进度会、评审会、复盘会）；建议会议频率和时长\n3. 安排会议：为每场会议创建日历事件；确认参会人员、时间及会议方式后再进行预定\n4. 设置截止日期：为每个里程碑确认具体交付日期或潜在障碍\n5. 跟踪里程碑和截止日期：要求用户选择日历工具并明确使用哪个（如未明确）\n6. 创建总结：提供包含会议、里程碑和依赖关系的可视化/文本时间轴；确认是否需要调整\n\n## 禁止事项\n\n- 未经参会人员及时间确认前不要自动添加会议到日历\n- 不得假设团队可用性，必须提前核查日历\n- 避免过度排期，建议在密集工作时段间预留缓冲时间\n- 不得臆测项目需求，应尽早通过澄清问题明确要求\n\n（严格保留所有Markdown格式，代码块和行内代码完全未动，英文专有名词如ChatGPT、RAG等按规范保留，技术术语严格参照术语表转换，指令性内容保持原意，符合中文技术文档表达规范）",
+      "hits": 1,
+      "last": "2026-08-12T04:49:46.715765+00:00"
+    },
+    "4797767b632a2b12": {
+      "en_norm_prefix": "# Confluence module - Search Confluence pages via `search`. - Run CQL (Confluence Query Language) queries via `cqlQuery`",
+      "zh": "# Confluence模块\n\n- 通过`search`搜索Confluence页面  \n- 通过`cqlQuery`运行CQL（Confluence查询语言）查询  \n- 通过`loadPage`按ID加载Confluence页面  \n- 输入/输出位于`index.ts`中  \n- 权限管理位于`integration.ts`中  \n- 无触发器。",
+      "hits": 1,
+      "last": "2026-08-12T04:50:35.454447+00:00"
+    },
+    "15dab238d8383123": {
+      "en_norm_prefix": "# Discord module - Search Discord messages via `search`. - Inputs/outputs live in `index.ts`. - Permissions live in `int",
+      "zh": "# Discord 模块\n\n- 通过 `search` 搜索 Discord 消息\n- 输入/输出位于 `index.ts` 中\n- 权限管理位于 `integration.ts` 中\n- 无触发器。",
+      "hits": 1,
+      "last": "2026-08-12T04:50:47.337800+00:00"
+    },
+    "b4866205e6e1f4d7": {
+      "en_norm_prefix": "# FS module Read-only access to the script sandbox virtual filesystem. Defined in `index.ts`. **Paths under `modules/`:*",
+      "zh": "# FS模块\n\n对脚本文档沙盒虚拟文件系统的只读访问。定义于`index.ts`。\n\n**`modules/`目录下的路径说明：**  \n目录名是**模块类型**（如`notion`、`slack`、`mcpServer`），而非连接名称。对于MCP服务器，所有相关路径统一使用`modules/mcpServer/`（例如`modules/mcpServer/index.ts`、`modules/mcpServer/AGENTS.md`）；连接名称如`mcpServer_ramp`仅用于调用`connections.mcpServer_ramp.runTool`，而非路径。\n\n### 浏览目录\n\n`readDir({ dir })` 返回目标文件夹内所有条目的扁平化列表。\n\n｀｀｀ts\nconst { entries } = connections.fs.readDir({ dir: \"modules/notion\" })\n// entries => [\"index.ts\", \"agents\", \"databases\"]\n｀｀｀\n\n### 读取文件\n\n`readFiles({ files })` 返回每个文件的原始内容（包括文件`path`）。\n\n｀｀｀ts\nconst { files } = connections.fs.readFiles({\n\tfiles: [\"modules/notion/index.ts\"],\n})\n// files => [{ path: \"modules/notion/index.ts\", content: \"...\" }]\n｀｀｀",
+      "hits": 1,
+      "last": "2026-08-12T04:51:01.574699+00:00"
+    },
+    "741e17c8f8a69af6": {
+      "en_norm_prefix": "# Github module - Use when you need GitHub search or to load issues, PRs, commits, or files. - Inputs/outputs live in `i",
+      "zh": "# GitHub模块\n\n- 当需要执行GitHub搜索或加载问题、PR、提交记录或文件时使用\n- 输入/输出位于 `index.ts`\n- 权限配置位于 `integration.ts`\n- 无触发器\n\n（注：PRs在技术文档中通常保留英文缩写，若需明确翻译可为\"Pull Requests\"，但根据用户提供的术语表未包含此条目，故保留原格式）",
+      "hits": 1,
+      "last": "2026-08-12T04:51:16.563473+00:00"
+    },
+    "af4a4ea90b9ec0f8": {
+      "en_norm_prefix": "# Gmail module - Search Gmail messages via `search`. - Load Gmail threads via `loadThread`. - Query Gmail threads via `q",
+      "zh": "# Gmail 模块\n\n- 通过 `search` 查询 Gmail 邮件。\n- 通过 `loadThread` 加载 Gmail 线索。\n- 通过 `query` 查询 Gmail 线索。\n- 输入/输出位于 `index.ts` 中。\n- 权限管理位于 `integration.ts` 中。\n- 无触发器。",
+      "hits": 1,
+      "last": "2026-08-12T04:51:27.641271+00:00"
+    },
+    "e5573721c759681b": {
+      "en_norm_prefix": "# Google Calendar module - Search Google Calendar events via `search`. - Query Google Calendar events via `query`. - Inp",
+      "zh": "# Google日历模块\n\n- 通过 `search` 方法搜索 Google 日历事件。\n- 通过 `query` 方法查询 Google 日历事件。\n- 输入/输出位于 `index.ts` 中。\n- 权限管理位于 `integration.ts` 中。\n- 无触发器。",
+      "hits": 1,
+      "last": "2026-08-12T04:51:41.458954+00:00"
+    },
+    "7bee00a57e5b4288": {
+      "en_norm_prefix": "# Google Drive module Use when you need Google Drive lexical or semantic searches, viewing a folder, or loading a file. ",
+      "zh": "# Google Drive 模块\n当需要执行 Google Drive 的词法或语义搜索、查看文件夹或加载文件时使用。\n- 输入/输出位于 `index.ts`\n- 权限逻辑位于 `integration.ts`\n- 通过 `lsFolder` 列出 Google Drive 文件夹中的文件\n- 通过 `getFileComments` 加载文件的评论\n- 无触发器\n\n（严格遵循：保留所有 Markdown 格式，代码块和行内代码原样保留，术语按指定表翻译，产品名保留英文，中文表达符合技术文档规范）",
+      "hits": 1,
+      "last": "2026-08-12T04:51:53.326744+00:00"
+    },
+    "800752d9c6772f23": {
+      "en_norm_prefix": "# Help docs module Use `search({ question, keywords? })` to search Notion Help Center. - You should use this tool ONLY w",
+      "zh": "# 帮助文档模块\n\n使用 `search({ question, keywords? })` 来搜索 Notion 帮助中心。\n\n- 您应仅在确定用户询问的是 Notion 产品帮助（例如：“如何在 Notion 中完成 X？”、“我在此页面上遇到了错误 X”或“我的工作区所有者能否执行 Y？”）时使用此工具。\n- 使用包含产品术语和功能名称的简洁 `keywords`。\n- 如果用户询问的是与工作区特定数据相关的内容，请改用其他搜索工具。\n- 注意，除 Notion 帮助文档外，搜索模块还会检索其他来源的信息，通常作为初始选择更为安全可靠。",
+      "hits": 1,
+      "last": "2026-08-12T04:52:16.218791+00:00"
+    },
+    "f7c884cac078e9ba": {
+      "en_norm_prefix": "# Jira module - Search Jira tickets via `search`. - View Jira issues via `loadIssue`. - Inputs/outputs live in `index.ts",
+      "zh": "# Jira模块\n\n- 通过 `search` 搜索Jira工单\n- 通过 `loadIssue` 查看Jira问题\n- 输入/输出位于 `index.ts`\n- 权限位于 `integration.ts`\n- 无触发器",
+      "hits": 1,
+      "last": "2026-08-12T04:52:28.302276+00:00"
+    },
+    "8f9b09123c9cf875": {
+      "en_norm_prefix": "# Linear module - Search Linear issues via `search`. - View Linear issues via `loadIssue`. - Inputs/outputs live in `ind",
+      "zh": "# Linear模块\n\n- 通过`search`搜索Linear问题\n- 通过`loadIssue`查看Linear问题\n- 输入/输出位于`index.ts`\n- 权限管理在`integration.ts`\n- 无触发器配置\n\n（严格遵循格式保留要求，所有代码/文件名/专有名词保持原样，技术术语按规范翻译）",
+      "hits": 1,
+      "last": "2026-08-12T04:52:40.206458+00:00"
+    },
+    "8131a889a9fccfa9": {
+      "en_norm_prefix": "# Mail module - Use when you need Mail tools. - Start in `index.ts` for tool inputs/outputs. Call the direct functions o",
+      "zh": "# 邮件模块\n\n- 当需要邮件工具时使用。\n- 在 `index.ts` 中初始化工具输入/输出。直接调用模块上的函数（例如 `searchEmails`、`viewThreadContent`、`updateStatus`）。\n- 权限配置位于 `integration.ts`。\n- 触发载荷位于 `triggers.ts`。\n- 请阅读 `skills/mail-guidelines.md`，以获取关于邮箱地址规则、草稿工具选择和邮件最佳实践的详细说明。",
+      "hits": 1,
+      "last": "2026-08-12T04:52:55.170262+00:00"
+    },
+    "db9abbc599a68374": {
+      "en_norm_prefix": "# Notion module Notion-specific workflow surfaces for pages, databases, notifications, agents, and triggers. Ignore Noti",
+      "zh": "# Notion模块\n\nNotion特有工作流界面，涵盖页面、数据库、通知、智能体和触发器。\n\n忽略Notion公开API的接口定义！本模块暴露的类型和函数是权威来源。\n\n## 核心概念\n\nNotion包含以下主要概念。\n\n### Workspace（工作区）\n\n工作区是一个协作空间，包含页面、数据库、智能体和用户。\n\n### Pages（页面）\n\n- 页面可以是工作区的顶级页面、子页面或数据源容器内嵌页面。\n- 页面包含内容：页面正文。\n- 页面具有属性：始终包含\"标题\"属性，当页面位于数据源中时，还会包含数据源定义的属性。\n\n### Databases（数据库）\n\n数据库用于容器化数据源和视图。\n\n- 数据库包含名称和描述。\n- 数据库包含数据源集合。\n- 数据库包含视图集合。\n- 表单是数据库视图的特殊类型。\n\n### Agents（智能体）\n\n智能体是可以与Notion工作区交互、集成外部应用服务、后台自动触发的AI演员。\n\n- 智能体包含名称、描述和图标。\n- 智能体包含操作指令（以页面形式存储）。\n- 智能体包含连接集合。\n- 智能体包含触发器集合。\n\n若用户要求创建或编辑智能体：\n- 拒绝并引导用户通过Notion UI操作：\n  - 创建智能体：通过侧边栏\"智能体\"板块点击\"+\"按钮创建\n  - 更新智能体：直接与智能体对话修改\n\n## 文件路由\n\n- 完整模块接口和共享导出请查阅`index.ts`\n- 页面操作指南请查阅`pages/AGENTS.md`\n- 数据库操作指南请查阅`databases/AGENTS.md`\n- 团队空间操作指南请查阅`teamspaces/AGENTS.md`\n- 分享权限配置请查阅`sharing.ts`（处理用户/工作区/公开权限，注意：此配置不自动授予自定义智能体权限，需通过`loadAgent`查看智能体特有权限）\n- 用户连接管理请查阅`users/AGENTS.md`\n- 线索查询与子智能体线程请查阅`threads/index.ts`\n\n请特别注意各AGENTS.md文件内的文件路由说明。\n\n## 压缩URL\n\nURL通过双大括号占位符进行压缩，示例格式为`agent-1`、`page-123`或`database-456`。必须使用`loadAgent`、`loadPage`、`loadDatabase`等 helper 函数获取的压缩URL，系统会自动解压处理。\n\n（严格遵循术语表翻译规则，保留英文专有名词和变量名，技术术语使用业界标准译法）",
+      "hits": 1,
+      "last": "2026-08-12T04:53:47.953248+00:00"
+    },
+    "91d6cebecddb7403": {
+      "en_norm_prefix": "# Teamspaces - Use `connections.notion.listTeamspaces` to find teamspaces. - Use `connections.notion.getTeamspaceTopLeve",
+      "zh": "# 团队空间\n- 使用 `connections.notion.listTeamspaces` 查找团队空间。\n- 使用 `connections.notion.getTeamspaceTopLevelPagesAndDatabases` 浏览顶层内容。\n- 使用 `connections.notion.updatePage({ parent: { type: \"teamspace\", url } })` 移动页面。",
+      "hits": 1,
+      "last": "2026-08-12T04:57:39.333447+00:00"
+    },
+    "e67cd153040c11df": {
+      "en_norm_prefix": "# Notion threads - `index.ts` defines thread tools for listing prior agent threads, inspecting transcripts for specific ",
+      "zh": "# Notion 线索\n\n- `index.ts` 定义了用于列出先前的智能体线程、检查特定细节的转录内容，以及在你需要委托响应时创建/继续子智能体线程的工具。",
+      "hits": 1,
+      "last": "2026-08-12T04:57:52.287309+00:00"
+    },
+    "90beba17086e43f4": {
+      "en_norm_prefix": "# Users and connections ## User lookups - `connections.notion.loadUser({ url })` — load a user by URL and return basic p",
+      "zh": "# 用户与连接\n\n## 用户查询\n\n- `connections.notion.loadUser({ url })` — 通过URL加载用户并返回基础资料信息。\n- `connections.notion.searchUsers({ query })` — 通过姓名或邮箱搜索用户。\n- `connections.notion.getUserActivity({ email, lookback?, limit? })` — 获取用户近期Notion活动（包括页面创建、编辑、评论）。按时间戳排序（最新在前）。  \n  *回溯时间格式：'7d'（天）、'2w'（周）、'1m'（月）或ISO日期'YYYY-MM-DD'。默认7天。*\n\n## 用户连接管理\n\n管理个人智能体与外部服务的连接。\n\n- `connections.notion.listUserConnections()` — 列出所有当前连接。\n- `connections.notion.createUserConnection({ type, state?, permissions? })` — 添加新连接。\n\n### 添加连接（邮件、日历、Asana等）\n\n**电子邮件和日历连接：** 始终推荐使用Notion邮件（`type: \"mail\"`）处理邮件，使用Notion日历（`type: \"calendar\"`）管理日程。\n\n当用户要求**连接**或**添加**连接（例如：\"可以连接邮箱\"、\"添加我的日历\"、\"连接Asana\"）时，使用`connections.notion.createUserConnection`并指定对应`type`。  \n可用类型：`mail`, `calendar`, `worker`, `gmail`, `asana`, `slack`, `jira`, `linear`, `github`, `discord`, `microsoftTeams`, `outlook`, `googleCalendar`, `googleDrive`, `confluence`, `box`, `sharepoint`, `salesforce`。\n\n**注意事项：**\n- 对用户统一使用\"连接\"作为服务名称。\n- 用户无法重复连接Notion邮件（`mail`）或日历（`calendar`）服务。\n- 添加自定义工作器连接时，使用`type: \"worker\"`并指定`state: { workerUrl }`。\n- 连接成功后无需告知用户连接密钥或URL。",
+      "hits": 1,
+      "last": "2026-08-12T04:58:08.316129+00:00"
+    },
+    "2c1d578f613edb02": {
+      "en_norm_prefix": "# Slack module - Use when you need Slack search, message reads, or message actions. - When a Slack message includes file",
+      "zh": "# Slack模块\n\n- 当需要Slack搜索、消息读取或消息操作时使用。\n- 当Slack消息包含文件URL（在`files`中）时，对每个需要处理的文件调用`connections.slack.viewFileUrl({ url })`。\n  - 使用返回的`fileUrl`嵌入到Notion（例如`!\\[image.png\\](file://...)`）。\n  - 不要直接嵌入原始Slack文件URL。\n- 输入输出位于`index.ts`。\n- 权限配置位于`integration.ts`。\n- 触发器负载位于`triggers.ts`。",
+      "hits": 1,
+      "last": "2026-08-12T04:58:50.390413+00:00"
+    },
+    "64ab8830dd78715a": {
+      "en_norm_prefix": "# Test module - Use only for script sandbox testing. - Inputs/outputs live in `index.ts`. - Shared types live in `types.",
+      "zh": "# 测试模块\n\n- 仅用于脚手架沙盒测试。\n- 输入/输出位于 `index.ts` 中。\n- 共享类型定义位于 `types.ts` 中。\n- 权限相关代码位于 `integration.ts` 中。\n- 触发器数据包位于 `triggers.ts` 中。",
+      "hits": 1,
+      "last": "2026-08-12T04:59:03.952972+00:00"
+    },
+    "861a7f8ab7d86523": {
+      "en_norm_prefix": "# Web module - Use when you need public web search or to fetch a page's text. - Inputs/outputs live in `index.ts`. - Per",
+      "zh": "# Web 模块\n\n- 当需要公开网络搜索或获取页面文本时使用。\n- 输入/输出位于 `index.ts`。\n- 权限配置位于 `integration.ts`。\n- 触发载荷位于 `triggers.ts`。\n\n## 常见用法\n\n- 网络搜索需要提供 `queries` 数组（即使单次查询也需数组格式）\n\n｀｀｀ts\nawait connections.web.search({\n  queries: [\"Notion AI\"]\n})\n｀｀｀\n\n## 加载页面\n\n使用 `loadPage` 加载网页时，始终优先尝试默认快速模式。\n仅在快速结果为空或不足时设置 `fast_mode: false` — 可能需要长达一分钟时间。\n返回的 `text` 可能被截断并包含行数统计。使用 `line_start` 通过行号加载后续内容。\n\n（翻译说明：严格保留所有 Markdown 格式，代码块及行内代码原样保留，术语按指定对照表转换，专有名词和变量名保持英文，技术表述符合中文技术文档规范）",
+      "hits": 1,
+      "last": "2026-08-12T04:59:20.231408+00:00"
     }
   }
 }
