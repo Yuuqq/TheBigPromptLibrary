@@ -1,12 +1,12 @@
 {
-  "timestamp": "2026-09-07T07:49:20.155321+00:00",
-  "total": 1887,
-  "with_zh": 1887,
+  "timestamp": "2026-09-08T07:48:01.994430+00:00",
+  "total": 1896,
+  "with_zh": 1896,
   "coverage_pct": 100.0,
   "by_category": {
     "SystemPrompts": {
-      "total": 147,
-      "with_zh": 147
+      "total": 156,
+      "with_zh": 156
     },
     "CustomInstructions": {
       "total": 1679,
