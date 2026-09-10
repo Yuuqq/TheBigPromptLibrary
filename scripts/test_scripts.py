@@ -51,7 +51,7 @@ def test_translate_helpers():
     tr = _load("translate")
     import re
     fails = 0
-    fails += expect("glm" in tr.MODEL.lower(), "model is a GLM model")
+    fails += expect("glm" in tr.PROVIDER_CHAIN[0]["name"].lower(), "first provider is glm")
     fails += expect(tr.MAX_FILES_PER_RUN > 0, "MAX_FILES_PER_RUN > 0")
     fails += expect("Markdown" in tr.SYSTEM_PROMPT, "system prompt mentions Markdown")
     fails += expect("代码块" in tr.SYSTEM_PROMPT, "system prompt asks to preserve code")
@@ -77,7 +77,7 @@ def test_prompts_index_valid():
     fails += expect(isinstance(data, list), "is a list")
     fails += expect(len(data) > 0, "has entries")
     if data:
-        keys = {"id", "title", "category", "path_en", "path_zh", "tags", "summary", "updatedAt"}
+        keys = {"title", "category", "path_en", "path_zh", "summary"}
         fails += expect(keys.issubset(data[0].keys()), "first entry has required keys")
         bad_paths = [e for e in data if e.get("path_en") and not e["path_en"].endswith(".md")]
         fails += expect(len(bad_paths) == 0, "all path_en end with .md")

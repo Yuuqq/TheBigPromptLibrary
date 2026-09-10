@@ -2036,9 +2036,9 @@
         const category = path.split('/')[0];
         const provider = path.split('/')[1] || '';
         document.getElementById('promptMeta').innerHTML = `
-            ${date ? `<span class="prompt-tag">📅 ${date}</span>` : ''}
-            <span class="prompt-tag">🏷️ ${category}</span>
-            ${provider && provider !== category ? `<span class="prompt-tag">🔧 ${provider}</span>` : ''}
+            ${date ? `<span class="prompt-tag">📅 ${escHtml(date)}</span>` : ''}
+            <span class="prompt-tag">🏷️ ${escHtml(category)}</span>
+            ${provider && provider !== category ? `<span class="prompt-tag">🔧 ${escHtml(provider)}</span>` : ''}
             ${isChineseVersion ? '<span class="prompt-tag" style="background:rgba(63,185,80,0.15);color:var(--accent-green);">中文版</span>' : '<span class="prompt-tag" style="background:rgba(88,166,255,0.1);color:var(--accent-blue);">英文原版</span>'}
         `;
 
@@ -2059,7 +2059,8 @@
                         FORBID_ATTR: ['onerror','onload','onclick','onmouseover','onfocus','onblur','onchange','onsubmit','style'],
                     });
                 } else {
-                    el.innerHTML = html;
+                    el.innerHTML = '<div class="error" style="color:var(--accent-red);padding:1rem;border:1px solid var(--accent-red);border-radius:6px;">安全模块(DOMPurify)加载失败，为防止XSS攻击，已阻止渲染。请刷新页面重试。</div>';
+                    console.error("DOMPurify not loaded, preventing raw HTML rendering.");
                 }
                 el.parentElement.classList.add('markdown-body');
             } else {

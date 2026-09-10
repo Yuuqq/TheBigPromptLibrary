@@ -790,6 +790,8 @@ def main() -> int:
         f"providers: {stats['provider_breakdown']}; "
         f"{stats['duration_seconds']}s"
     )
+    if stats["translated"] == 0 and (stats["failed"] > 0 or stats["oversized_failed"] > 0):
+        return 1
     return 0
 
 
