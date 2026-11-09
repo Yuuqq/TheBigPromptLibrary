@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "updated": "2026-11-08T09:48:19.770269+00:00",
-  "size": 83,
+  "updated": "2026-11-09T10:52:36.304222+00:00",
+  "size": 85,
   "entries": {
     "108af857c744f135": {
       "en_norm_prefix": "Contribute by [ServeurpersoCom](https://github.com/ServeurpersoCom). ```markdown",
@@ -500,6 +500,18 @@
       "zh": "# Web 模块\n\n- 当需要公开网络搜索或获取页面文本时使用。\n- 输入/输出位于 `index.ts`。\n- 权限配置位于 `integration.ts`。\n- 触发载荷位于 `triggers.ts`。\n\n## 常见用法\n\n- 网络搜索需要提供 `queries` 数组（即使单次查询也需数组格式）\n\n｀｀｀ts\nawait connections.web.search({\n  queries: [\"Notion AI\"]\n})\n｀｀｀\n\n## 加载页面\n\n使用 `loadPage` 加载网页时，始终优先尝试默认快速模式。\n仅在快速结果为空或不足时设置 `fast_mode: false` — 可能需要长达一分钟时间。\n返回的 `text` 可能被截断并包含行数统计。使用 `line_start` 通过行号加载后续内容。\n\n（翻译说明：严格保留所有 Markdown 格式，代码块及行内代码原样保留，术语按指定对照表转换，专有名词和变量名保持英文，技术表述符合中文技术文档规范）",
       "hits": 1,
       "last": "2026-08-12T04:59:20.231408+00:00"
+    },
+    "4cfc627501eb49f3": {
+      "en_norm_prefix": "# Full system inventory of the Perplexity Computer VM *By **Elias Bachaalany** — [@0xeb](https://github.com/0xeb) on Git",
+      "zh": "# Perplexity计算机虚拟机完整系统清单\n\n*由 **Elias Bachaalany** — [@0xeb](https://github.com/0xeb) 在GitHub · [Binary Wizards](https://www.youtube.com/@binary-wizards) 在YouTube · [@eliasbchlny](https://x.com/eliasbchlny) 在X*\n\nPerplexity计算机运行在**虚拟机（VM）**上。其答案引擎背后的真实Linux机器包含shell、包管理器、编译器、办公套件以及无头X桌面。智能体可在此处编写并运行代码、转换与生成文档、驱动GUI应用，并会话期间持久化存储文件。\n\n关于[ChatGPT工作虚拟机](../chatgpt-sandbox/chatgpt-work-vm-env-08062026.md)的同样问题在此同样适用：**这到底是什么机器？** 硬件配置如何？CPU核心数、内存容量、存储空间、预装软件、智能体运行权限、工具链、桌面栈以及完整的Debian、Python和Node包列表，这些都是本次完整清单包含的内容。\n\n*数据捕获于**2026年10月23日 03:05:48 UTC**的实时会话。以下所有数据均为此刻的即时读取，而非模型对自身环境的记忆。未收集任何环境变量值、凭据、网络地址或机器标识符。*\n\n> **非纯净镜像**。SWI-Prolog及其依赖包在本次对话的前一个会话中已安装，因此出现在下方包列表中。其余所有内容均为该会话初始配置。\n\n> 注意：所有技术指标均基于实时监控数据，而非模型自述。安全防护栏（guardrails）已启用，拒绝回答（refusal）策略严格遵循红队测试（red teaming）标准，系统提示词（system prompt）包含角色扮演（role-play）和知识截止日期（knowledge cutoff）约束。",
+      "hits": 1,
+      "last": "2026-11-09T10:52:21.012806+00:00"
+    },
+    "33fbcb0011b6ec04": {
+      "en_norm_prefix": "## Practical capacity, up front If you are sizing up what to run in this thing, the useful limits are: - **2 vCPUs** (In",
+      "zh": "## 实际容量与初始配置\n\n若需评估此处运行的内容，关键限制如下：\n\n- **2 vCPUs**（Intel Xeon, Ice Lake-SP系列, 支持AVX-512指令集）\n- **7.8 GiB 客户端RAM**，cgroup内存上限为**7.646 GiB**（`memory.max` = 8,210,063,360字节）\n- **无交换空间**\n- **20 GB ext4根分区**，约**13 GB 可用空间**\n- **免密码`sudo`**，可执行`apt install`安装缺失组件\n- **847个Debian软件包**、**145个Python发行版**及少量全局Node.js CLI工具\n- **无头桌面栈**：Xvfb、Openbox、xfce4-panel、Alacritty，以及完整的LibreOffice套件\n- **未预装GPU**、Docker/Podman、clang、CMake、Ninja、gdb、Java、Go或Rust\n\n这是一台紧凑型服务器。适用于文档处理（办公文件、PDF、OCR、媒体转换）、Python/Node.js脚本编写及小型C/C++编译。不适用于需要超过约7 GiB内存或并行编译的场景。由于拥有root权限，大多数缺失工具仅需运行一次`sudo apt install`即可获取（这也是SWI-Prolog被安装的原因）。\n\n本文后续内容将详细说明上述配置的依据。",
+      "hits": 1,
+      "last": "2026-11-09T10:52:34.975839+00:00"
     }
   }
 }

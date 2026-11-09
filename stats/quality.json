@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-11-08T09:48:20.505224+00:00",
-  "total_scored": 1896,
+  "timestamp": "2026-11-09T10:52:37.056673+00:00",
+  "total_scored": 1899,
   "average_score": 68.6,
   "distribution": {
-    "excellent_90_plus": 538,
-    "good_70_89": 196,
-    "poor_50_69": 913,
+    "excellent_90_plus": 537,
+    "good_70_89": 198,
+    "poor_50_69": 915,
     "bad_below_50": 249
   },
   "worst_50": [
