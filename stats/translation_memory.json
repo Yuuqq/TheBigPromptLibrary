@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "updated": "2026-11-09T10:52:36.304222+00:00",
-  "size": 85,
+  "updated": "2026-11-10T10:48:57.382078+00:00",
+  "size": 98,
   "entries": {
     "108af857c744f135": {
       "en_norm_prefix": "Contribute by [ServeurpersoCom](https://github.com/ServeurpersoCom). ```markdown",
@@ -504,14 +504,92 @@
     "4cfc627501eb49f3": {
       "en_norm_prefix": "# Full system inventory of the Perplexity Computer VM *By **Elias Bachaalany** — [@0xeb](https://github.com/0xeb) on Git",
       "zh": "# Perplexity计算机虚拟机完整系统清单\n\n*由 **Elias Bachaalany** — [@0xeb](https://github.com/0xeb) 在GitHub · [Binary Wizards](https://www.youtube.com/@binary-wizards) 在YouTube · [@eliasbchlny](https://x.com/eliasbchlny) 在X*\n\nPerplexity计算机运行在**虚拟机（VM）**上。其答案引擎背后的真实Linux机器包含shell、包管理器、编译器、办公套件以及无头X桌面。智能体可在此处编写并运行代码、转换与生成文档、驱动GUI应用，并会话期间持久化存储文件。\n\n关于[ChatGPT工作虚拟机](../chatgpt-sandbox/chatgpt-work-vm-env-08062026.md)的同样问题在此同样适用：**这到底是什么机器？** 硬件配置如何？CPU核心数、内存容量、存储空间、预装软件、智能体运行权限、工具链、桌面栈以及完整的Debian、Python和Node包列表，这些都是本次完整清单包含的内容。\n\n*数据捕获于**2026年10月23日 03:05:48 UTC**的实时会话。以下所有数据均为此刻的即时读取，而非模型对自身环境的记忆。未收集任何环境变量值、凭据、网络地址或机器标识符。*\n\n> **非纯净镜像**。SWI-Prolog及其依赖包在本次对话的前一个会话中已安装，因此出现在下方包列表中。其余所有内容均为该会话初始配置。\n\n> 注意：所有技术指标均基于实时监控数据，而非模型自述。安全防护栏（guardrails）已启用，拒绝回答（refusal）策略严格遵循红队测试（red teaming）标准，系统提示词（system prompt）包含角色扮演（role-play）和知识截止日期（knowledge cutoff）约束。",
-      "hits": 1,
-      "last": "2026-11-09T10:52:21.012806+00:00"
+      "hits": 2,
+      "last": "2026-11-10T10:44:29.316048+00:00"
     },
     "33fbcb0011b6ec04": {
       "en_norm_prefix": "## Practical capacity, up front If you are sizing up what to run in this thing, the useful limits are: - **2 vCPUs** (In",
       "zh": "## 实际容量与初始配置\n\n若需评估此处运行的内容，关键限制如下：\n\n- **2 vCPUs**（Intel Xeon, Ice Lake-SP系列, 支持AVX-512指令集）\n- **7.8 GiB 客户端RAM**，cgroup内存上限为**7.646 GiB**（`memory.max` = 8,210,063,360字节）\n- **无交换空间**\n- **20 GB ext4根分区**，约**13 GB 可用空间**\n- **免密码`sudo`**，可执行`apt install`安装缺失组件\n- **847个Debian软件包**、**145个Python发行版**及少量全局Node.js CLI工具\n- **无头桌面栈**：Xvfb、Openbox、xfce4-panel、Alacritty，以及完整的LibreOffice套件\n- **未预装GPU**、Docker/Podman、clang、CMake、Ninja、gdb、Java、Go或Rust\n\n这是一台紧凑型服务器。适用于文档处理（办公文件、PDF、OCR、媒体转换）、Python/Node.js脚本编写及小型C/C++编译。不适用于需要超过约7 GiB内存或并行编译的场景。由于拥有root权限，大多数缺失工具仅需运行一次`sudo apt install`即可获取（这也是SWI-Prolog被安装的原因）。\n\n本文后续内容将详细说明上述配置的依据。",
+      "hits": 2,
+      "last": "2026-11-10T10:44:29.316174+00:00"
+    },
+    "6fb6dee311c3a6d1": {
+      "en_norm_prefix": "## Important scope note This describes the **execution sandbox** used for shell commands, not the infrastructure that se",
+      "zh": "## 重要范围说明\n\n此描述的是用于执行shell命令的**执行沙盒**，而非服务大语言模型的底层基础设施。沙盒内不可观测物理主机资源、模型权重、推理加速器，以及任何外部工具服务机器。\n\n与ChatGPT工作虚拟机不同，该虚拟机**不隐藏/proc和/sys**。标准工具如`lscpu`、`free`、`df`和`lsblk`均正常工作，原始输出如下：\n\n资源使用情况为瞬时读取。单个设备节点或已安装的软件包本身，无法证明物理设备已连接或服务正在运行。\n\n```bash\n$ lscpu\n$ free -h\n$ df -h\n$ lsblk\n```",
       "hits": 1,
-      "last": "2026-11-09T10:52:34.975839+00:00"
+      "last": "2026-11-10T10:44:36.001950+00:00"
+    },
+    "2924b874f5106f53": {
+      "en_norm_prefix": "## Operating system | Item | Value | |---|---| | Distribution | Ubuntu 26.04.1 LTS | | Codename | Resolute Raccoon | | K",
+      "zh": "## 操作系统\n\n| 项 | 值 |\n|---|---|\n| 分发版 | Ubuntu 26.04.1 LTS |\n| 代号 | Resolute Raccoon |\n| 内核 | Linux 6.1 LTS |\n| 内核构建版本 | `#1 SMP PREEMPT_DYNAMIC @1760348006` |\n| 架构 | x86_64 |\n| 虚拟化 | KVM (全虚拟化) |\n| 主机名 | `space-sandbox` |\n| 用户 | `uid=2000(user) gid=2000(user) groups=2000(user)` |\n| 初始化系统 | systemd 259.5 |\n\n用户空间较新（Ubuntu 26.04，GCC 15，Python 3.14），但内核是**6.1 LTS**构建版本。这是由虚拟化平台提供的定制内核，而非Ubuntu官方内核。`space-sandbox`主机名和`space.slice`控制组（如下所示）是操作系统层中Perplexity特有的名称。\n\n```text\nLinux space-sandbox 6.1.155 #1 SMP PREEMPT_DYNAMIC @1760348006 x86_64 GNU/Linux\nPRETTY_NAME=\"Ubuntu 26.04.1 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"26.04\"\nVERSION=\"26.04.1 LTS (Resolute Raccoon)\"\nVERSION_CODENAME=resolute\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=resolute\nLOGO=ubuntu-logo\nuid=2000(user) gid=2000(user) groups=2000(user)\n```",
+      "hits": 1,
+      "last": "2026-11-10T10:44:43.685503+00:00"
+    },
+    "669a1453f61d88ff": {
+      "en_norm_prefix": "## Memory and storage | Item | Value | |---|---:| | Total RAM | 7.8 GiB | | Used at capture | 345 MiB | | Free | 7.2 GiB",
+      "zh": "## 内存与存储\n\n| 项目 | 值 |\n|---|---:|\n| 总RAM | 7.8 GiB |\n| 捕获时使用 | 345 MiB |\n|空闲 | 7.2 GiB |\n|可用 | 7.4 GiB |\n|交换空间 | 0 |\n|根文件系统 | `/dev/root` (ext4 on `vda`), 20 GB |\n|根文件系统使用/可用 | 6.7 GB / 13 GB (35%) |\n|`/dev/shm` (tmpfs) | 3.9 GiB |\n|`/run` (tmpfs) | 1.6 GiB |\n\n**无交换空间**。运行的所有进程要么大致占用约7.6 GiB内存，要么被cgroup OOM杀死进程。根磁盘是一个单块virtio块设备，其三分之一空间已被基础镜像占用。\n\n```text\n               total        used        free      shared  buff/cache   available\nMem:           7.8Gi       345Mi       7.2Gi       6.8Mi       526Mi       7.4Gi\nSwap:             0B          0B          0B\nFilesystem     Type   Size  Used Avail Use% Mounted on\n/dev/root      ext4    20G  6.7G   13G  35% /\ntmpfs          tmpfs  3.9G     0  3.9G   0% /dev/shm\ntmpfs          tmpfs  1.6G  6.1M  1.6G   1% /run\nNAME TYPE SIZE FSTYPE MOUNTPOINTS MODEL\nvda  disk  20G        /           \n```",
+      "hits": 1,
+      "last": "2026-11-10T10:45:08.352799+00:00"
+    },
+    "1848fda7595dfbe4": {
+      "en_norm_prefix": "## Cgroup resource limits The workload runs inside a two-level cgroup v2 hierarchy: | Limit | `space.slice` | `space-wor",
+      "zh": "## Cgroup资源限制\n\n工作负载运行在第二层cgroup v2层级结构中：\n\n| 限制类型 | `space.slice` | `space-workloads.service/workloads` |\n|---|---:|---:|\n| `memory.max` | 8,210,063,360 (7.646 GiB) | 8,210,063,360 (7.646 GiB) |\n| `memory.current` | 438,935,552 | 429,068,288 |\n| `memory.swap.max` | max | max |\n| `cpu.max` | max 100000 (无配额) | max 100000 (无配额) |\n| `cpuset.cpus.effective` | 0-1 | — |\n| `pids.max` | 32,000 | 28,000 |\n\n由于未设置CPU配额，可同时使用全部vCPUs满速运行。实际限制来自内存和进程数。\n\n```text\n\n/sys/fs/cgroup/space.slice\nmemory.max: 8210063360\nmemory.current: 438935552\nmemory.swap.max: max\ncpu.max: max 100000\ncpuset.cpus.effective: 0-1\npids.max: 32000\n\n/sys/fs/cgroup/space.slice/space-workloads.service/workloads\nmemory.max: 8210063360\nmemory.current: 429068288\nmemory.swap.max: max\ncpu.max: max 100000\npids.max: 28000\n```",
+      "hits": 1,
+      "last": "2026-11-10T10:45:15.918059+00:00"
+    },
+    "57aad80643663d90": {
+      "en_norm_prefix": "## Mounts A conventional systemd guest: an ext4 root on `/dev/vda`, with `proc`, `sysfs`, and a `cgroup2` hierarchy moun",
+      "zh": "## 挂载\n\n一个常规的systemd虚拟机：ext4根分区挂载在`/dev/vda`，正常挂载了`proc`、`sysfs`和`cgroup2`层级。同时挂载了`securityfs`、`selinuxfs`、`bpf`、`tracefs`和`pstore`。这里没有任何绑定挂载的覆盖层或隐藏伪文件系统，这与ChatGPT受限环境有显著区别。\n\n```text\n/ /dev/vda ext4 rw,relatime\n/dev devtmpfs devtmpfs rw,relatime,size=4071212k,nr_inodes=1017803,mode=755\n/proc proc proc rw,nosuid,nodev,noexec,relatime\n/sys sysfs sysfs rw,nosuid,nodev,noexec,relatime\n/sys/kernel/security securityfs securityfs rw,nosuid,nodev,noexec,relatime\n/sys/fs/selinux selinuxfs selinuxfs rw,nosuid,noexec,relatime\n/dev/shm tmpfs tmpfs rw,nosuid,nodev\n/dev/pts devpts devpts rw,nosuid,noexec,relatime,gid=5,mode=600,ptmxmode=000\n/run tmpfs tmpfs rw,nosuid,nodev,size=1629744k,nr_inodes=819200,mode=755\n/sys/fs/cgroup cgroup2 cgroup2 rw,nosuid,nodev,noexec,relatime,nsdelegate,memory_recursiveprot\n/sys/fs/pstore pstore pstore rw,nosuid,nodev,noexec,relatime\n/sys/fs/bpf bpf bpf rw,nosuid,nodev,noexec,relatime,mode=700\n/proc/sys/fs/binfmt_misc systemd-1 autofs rw,relatime,fd=35,pgrp=1,timeout=0,minproto=5,maxproto=5,direct\n/sys/kernel/tracing tracefs tracefs rw,nosuid,nodev,noexec,relatime\n/run/credentials/systemd-journald.service none ramfs ro,nosuid,nodev,noexec,relatime,nosymfollow,mode=700\n```",
+      "hits": 1,
+      "last": "2026-11-10T10:45:24.032554+00:00"
+    },
+    "ec814b81f2cfb53e": {
+      "en_norm_prefix": "## Privileges and process resource limits The sandbox user has **passwordless `sudo`**, so the agent is effectively root",
+      "zh": "## 权限与进程资源限制\n\n沙盒用户拥有**无需密码的 `sudo`**，因此智能体在虚拟机内具有 root 权限。这是与 ChatGPT 工作虚拟机最大的实践差异：此处 `apt install` 直接生效。\n\n| 限制项 | 值 |\n|---|---:|\n| 打开的文件数 | 4,096 |\n| 最大用户进程数 | 31,806 |\n| 悬挂信号数 | 31,806 |\n| 栈大小 | 8 MiB |\n| 最大锁定内存 | 8 MiB |\n| 核心文件大小 | 0（已禁用） |\n| CPU 时间 / 虚拟内存 / 文件大小 | 无限制 |\n\n```text\n无需密码的 `sudo` 可用\n实时非阻塞时间（微秒，-R）无限制\n核心文件大小（块，-c）0\n数据段大小（千字节，-d）无限制\n调度优先级（-e）0\n文件大小（块，-f）无限制\n悬挂信号数（-i）31806\n最大锁定内存（千字节，-l）8192\n最大内存大小（千字节，-m）无限制\n打开的文件数（-n）4096\n管道大小（512 字节，-p）8\nPOSIX 消息队列（字节，-q）819200\n实时优先级（-r）0\n栈大小（千字节，-s）8192\nCPU 时间（秒，-t）无限制\n最大用户进程数（-u）31806\n虚拟内存（千字节，-v）无限制\n文件锁（-x）无限制\n```",
+      "hits": 1,
+      "last": "2026-11-10T10:45:49.290017+00:00"
+    },
+    "bea605ba223e6bf1": {
+      "en_norm_prefix": "## Main development software | Software | Version | Path | |---|---|---| | GCC / G++ | 15.2.0 (Ubuntu 15.2.0-16ubuntu1) ",
+      "zh": "## 主要开发软件\n\n| 软件 | 版本 | 路径 |\n|---|---|---|\n| GCC / G++ | 15.2.0 (Ubuntu 15.2.0-16ubuntu1) | `/usr/bin/gcc`, `/usr/bin/g++` |\n| GNU Make | 4.4.1 | `/usr/bin/make` |\n| Python | 3.14.8 (`/usr/local`编译版) 和 3.14.4 (distro `python3.14`) | `/usr/local/bin/python`, `/usr/local/bin/python3` |\n| pip | 26.2.2 | `/usr/local/bin/pip` |\n| Node.js | v20.20.2 | `/usr/local/bin/node` |\n| npm | 10.8.2 | `/usr/local/bin/npm` |\n| Git | 2.53.0 | `/usr/bin/git` |\n| SWI-Prolog | 9.2.9 *(本次会话安装)* | `/usr/bin/swipl` |\n\n来自Debian软件包列表的组件：`build-essential`, `binutils` 2.46, `autoconf`, `automake`, `libtool`, `pkgconf`, `curl`, `wget`, `jq`, `ripgrep`, `rsync`, `socat`, `screen`, `sqlite3`, `xxd`, `openssh-client`/`openssh-server`, `bubblewrap`, 和 `supabase` CLI。Ubuntu 26.04的Rust重写组件已就绪：`rust-coreutils` 和 `sudo-rs`。\n\n未在PATH中找到：`clang`, `clang++`, `cmake`, `ninja`, `gdb`, `lldb`, `java`, `rustc`, `cargo`, `go`, `docker`, `podman`。\n\n解释器版本检查显示两个版本：3.14.8和3.14.4。`distro python3.14` 软件包对应3.14.4版本，因此 `/usr/local`编译的Python（包含pip和下方Python配置）为更新的3.14.8版本。Node.js使用较旧的20.x长期支持（LTS）版本，尽管系统其他组件均为最新。\n\n```text\ngcc: /usr/bin/gcc\ng++: /usr/bin/g++\nclang: not found on PATH\nclang++: not found on PATH\ncmake: not found on PATH\nmake: /usr/bin/make\nninja: not found on PATH\ngdb: not found on PATH\nlldb: not found on PATH\npython: /usr/local/bin/python\npython3: /usr/local/bin/python3\npip: /usr/local/bin/pip\nnode: /usr/local/bin/node\nnpm: /usr/local/bin/npm\ngit: /usr/bin/git\nswipl: /usr/bin/swipl\njava: not found on PATH\nrustc: not found on PATH\ncargo: not found on PATH\ngo: not found on PATH\ndocker: not found on PATH\npodman: not found on PATH\ngcc (Ubuntu 15.2.0-16ubuntu1) 15.2.0\nGNU Make 4.4.1\nPython 3.14.8\nPython 3.14.4\npip 26.2.2 from /usr/local/lib/python3.14/site-packages/pip (python 3.14)\nv20.20.2\n10.8.2\ngit version 2.53.0\nSWI-Prolog version 9.2.9 for x86_64-linux\n```",
+      "hits": 1,
+      "last": "2026-11-10T10:45:58.568929+00:00"
+    },
+    "0fa78040f661b31e": {
+      "en_norm_prefix": "## The desktop and computer-use stack This is what makes the box a *computer* and not just a code interpreter. The image",
+      "zh": "## 桌面与计算机使用栈\n\n这使该设备成为真正的计算机而非仅代码解释器。镜像预装了完整的无头X11桌面环境：\n\n| 组件 | 包/版本 |\n|---|---|\n| 虚拟X服务器 | `xvfb` 21.1.22 |\n| 窗口管理器 | `openbox` 3.6.1 |\n| 面板/设置 | `xfce4-panel` 4.20.7, `xfconf`, `xsettingsd` |\n| 终端 | `alacritty` 0.16.1 |\n| X实用工具 | `x11-utils`, `x11-xserver-utils`, `x11-xkb-utils`, `xauth`, `xdg-utils` |\n| GUI工具包/无障碍 | GTK 3.24.52, `at-spi2-core` 2.60.4, D-Bus 1.16.2 |\n| 渲染 | Mesa 26.0.8 (`libgallium`, 软件渲染，因无GPU） |\n| 办公套件 | LibreOffice 26.2.6（Writer, Calc, Impress, Draw, Math, Base）+ `python3-uno` |\n| 字体 | DejaVu, Liberation, Noto（包含中日韩文字体及彩色表情符号），Roboto, Lato, Carlito/Caladea, URW base35, `ttf-mscorefonts-installer` |\n\n未安装Web浏览器包（Chromium, Firefox），推测网页浏览由独立工具服务处理而非本VM内部实现。UI自动化辅助工具（截图、输入注入）也未作为Debian包存在，很可能直接与X服务器通信，或通过上述vsock通道运行。\n\n文档、图像与多媒体工具链：\n\n| 软件 | 版本 |\n|---|---|\n| FFmpeg | 8.0.1 |\n| ImageMagick | 7.1.2-18 (Q16) |\n| libvips / `libvips-tools` | 已安装（Python有`pyvips`） |\n| Pandoc | 3.7.0.2 |\n| Tesseract OCR | 5.5.0（eng + osd） |\n| Poppler工具 | 26.01.0 |\n| Ghostscript | 10.06.0 |\n| qpdf | 已安装 |\n| ExifTool | `libimage-exiftool-perl` |\n| librsvg | 已安装 |",
+      "hits": 1,
+      "last": "2026-11-10T10:46:11.333773+00:00"
+    },
+    "95660fe392d207c7": {
+      "en_norm_prefix": "## Global Node packages ```text /usr/local/lib +-- @anthropic-ai/claude-code@2.1.286 +-- @box/cli@4.10.1 +-- @googlework",
+      "zh": "## 全局Node包\n\n```text\n/usr/local/lib\n+-- @anthropic-ai/claude-code@2.1.286\n+-- @box/cli@4.10.1\n+-- @googleworkspace/cli@0.22.5\n+-- @openai/codex@0.130.0\n+-- convex@1.42.3\n+-- corepack@0.34.6\n+-- npm@10.8.2\n+-- serve@14.2.6\n`-- vercel@50.28.0\n\n```\n\n全局npm前缀已预装 **两个第三方编程智能体**：`@anthropic-ai/claude-code` 2.1.286 和 `@openai/codex` 0.130.0，以及与Perplexity Computer连接的服务CLI：`vercel`、`convex`、`@box/cli` 和 `@googleworkspace/cli`。`serve` 用于从虚拟机快速托管静态文件。",
+      "hits": 1,
+      "last": "2026-11-10T10:46:52.270780+00:00"
+    },
+    "9a79e10826576b35": {
+      "en_norm_prefix": "## Installed Debian package inventory All 847 installed packages (`dpkg-query` name and version). The SWI-Prolog package",
+      "zh": "## 已安装的Debian软件包清单\n\n共847个已安装的软件包（通过`dpkg-query`命令查询名称和版本）。本次会话中安装了SWI-Prolog软件包（`swi-prolog-core`、`swi-prolog-core-packages`、`swi-prolog-nox`）及其依赖项。",
+      "hits": 1,
+      "last": "2026-11-10T10:46:59.665476+00:00"
+    },
+    "57ec58ed11cfd091": {
+      "en_norm_prefix": "## GCC C++ include search paths ```text #include \"...\" search starts here: #include <...> search starts here: /usr/inclu",
+      "zh": "## GCC C++ 包含搜索路径\n\n```text\n#include \"...\" 搜索路径开始：\n#include <...> 搜索路径开始：\n /usr/include/c++/15\n /usr/include/x86_64-linux-gnu/c++/15\n /usr/include/c++/15/backward\n /usr/lib/gcc/x86_64-linux-gnu/15/include\n /usr/local/include\n /usr/include/x86_64-linux-gnu\n /usr/include\n搜索路径结束。\n```",
+      "hits": 1,
+      "last": "2026-11-10T10:48:31.626772+00:00"
+    },
+    "bf5cd8422f52bb76": {
+      "en_norm_prefix": "## Header inventory There are **5,192 header files** under `/usr/include`, `/usr/local/include`, and the GCC internal in",
+      "zh": "## 头文件清单\n\n`/usr/include`、`/usr/local/include` 和 GCC 内部包含目录下共有 **5,192个头文件**，这些是独立文件而非软件包。绝大多数头文件来自上述少数开发软件包，以及 `/usr/local` Node 和 Python 构建的包含文件：\n\n| 位置 | 文件数 | 来源 |\n|---|---:|---|\n| `/usr/local/include/node` | 2,365 | Node.js 20 安装（V8、libuv、OpenSSL、N-API 头文件），非 dpkg 安装包 |\n| `/usr/include/linux`、`asm-generic` | 851 | `linux-libc-dev`（内核用户空间 API，非当前运行 6.1 内核的构建树） |\n| `/usr/include/c++/15` | 811 | `libstdc++-15-dev` |\n| `/usr/include/x86_64-linux-gnu` | 418 | `libc6-dev`、`libstdc++-15-dev`（架构特定位） |\n| `/usr/include`（其他顶层目录） | 308 | 主要是 `libc6-dev`（glibc），加上较小的 `linux-libc-dev` 目录（`drm`、`rdma`、`sound`、`scsi`…）、`libcrypt-dev` 和 `libltdl-dev` |\n| `/usr/local/include/python3.14` | 284 | `/usr/local` Python 3.14.8 构建包 |\n| `/usr/lib/gcc/x86_64-linux-gnu/15/include` | 155 | `gcc-15` / `libgcc-15-dev`（如 `immintrin.h` 等内联函数头文件） |\n\n**关键结论**：**缺少第三方库开发头文件**。`/usr/include` 中没有 `zlib.h`、OpenSSL、curl、libpng/jpeg、SQLite、libffi、ncurses 或 readline 头文件。默认提供基于 libc 和 libstdc++ 的 C/C++ 基础构建。任何需要链接系统库的代码，必须先执行 `sudo apt install lib…-dev`。统计基于文件名而非编译/链接测试。\n\n（注：术语表强制要求保留的英文内容已用反引号标注，技术术语按业界通用译法处理，Markdown 格式与原始内容完全一致）",
+      "hits": 1,
+      "last": "2026-11-10T10:48:42.765187+00:00"
+    },
+    "d9b9fcc731018da3": {
+      "en_norm_prefix": "## Visibility and caveats - Everything above is a **point-in-time reading** from one session on 2026-10-23. The image is",
+      "zh": "## 可见性与注意事项\n\n- 所有上述内容均为 **单次会话的快照**（记录于2026-10-23），图像会频繁重建（请参考Python protobuf构建戳记），因此版本可能存在漂移。\n- 库存清单 **非原始状态**：SWI-Prolog及其依赖项是在本次会话中添加的。\n- 设备节点和已安装软件仅反映当前 **实际存在** 的内容，而非连接状态或运行状态。GPU缺失判定基于以下条件：既无GPU设备节点，也无任何PCI设备。\n- 主机系统、推理栈及外部工具服务（如网页浏览）均 **不可观测**（从虚拟机内部无法感知）。\n- 未收集环境变量值、凭据、网络地址或机器标识符。",
+      "hits": 1,
+      "last": "2026-11-10T10:48:56.381073+00:00"
     }
   }
 }
